@@ -1,1 +1,189 @@
-/home/kbmonkey/coding/7drl2012/dev/game-spec
+================================[[ 7-Day Roguelike 2012 Game Specification ]]
+
+TopDog is a Roguelike style game. The Puppy has been kidnapped by the 
+Fat Cat Mafioso. You travel from yard to yard, searching for the 
+crafty Cats holding her hostage. Along the way you meet other animals, 
+and perhaps a bone or two on the way.
+
+url: http://7drl.darknet.co.za/2012/
+
+===================================================================[[ TODO ]]
+
+
+
+===============================================================[[ Timeline ]]
+
+Day 1: Game spec
+
+Day 2: Flesh out classes, helper functions, and the game's state machine
+
+Day 3: Map generation, item & NPC stats + descriptions, Object interactions and inventory
+
+Day 4: Combat and flee system, NPC AI
+
+Day 5: Quest system
+
+Day 6: Bug testing, UI polish and balancing
+
+Day 7: Saved for Murphey's Law
+
+=========================================================[[ Technical Spec ]]
+
+Minimalism and fun, is the primary goal. Replayability is a given, with a 
+low learning curve. To achive this, some classic RL mechanics are simplified, 
+and complimentary Role Playing elements are introduced:
+
+- A coffee-break Roguelike that can be played in no time
+
+- walk into things to act on them: friends will start dialogue, 
+foes will be attacked, items will be picked up. 
+ranged attacks are moot (unless fido grows opposable thumbs)
+
+- simplified inventory: carry one item in your mouth. 
+stepping over a second item will swap them out (prompt to swap?)
+
+- no HP / life system, instead we opt for a flee mechanism. 
+The defeated will then refuse to approach the victor, at least until after a 
+rest period. If you do get cornered while in defeat mode, your life may just end.
+
+- You get thirsty every x moves, and quench your thirst with water. 
+Has the side-effect that you need to piddle too, 
+to your advantage this gives bonus points ;)
+
+- Some NPC's can have quest items linked to them, 
+these give us rewards and points.
+
+- drop food near hostiles to lure them away (strategic cartesian space puzzles)
+
+- each level fits on one screen, no scrolling minimap
+
+- you move from one yard to another through holes in the fence
+
+- dialogue is shown in a nice little window
+
+- biscuits are yummy
+
+===========================================================[[ Animal NPC's ]]
+
+the friendliness of a character is measure on a scale from dead to breathing:
+
+- skittish: runs when approached
+- neutral: 50/50 friendly or hostile
+- friendly: approachable, may offer quests
+- cheeky: 70/30 chance hostility
+- hostile: these want your blood
+
+(s)quirrel: skittish
+(c)at: cheeky
+fat (C)at: hostile. sticks near where the food is.
+(h)uman kid: friendly
+(H)uman: neutral
+(b)ird: skittish. can fly off the map.
+(d)uck: neutral. appears near water.
+(p)eacock: cheeky
+(r)ooster: cheeky. targets seeds
+(m)onkey: cheeky. appears in trees. targets most food.
+
+=================================================================[[ Quests ]]
+
+- linked to a NPC on a level, these items can be placed randomly or near
+    another NPC of a certain type (for keeping to RPG stories)
+
+- only friendly NPC's carry quests
+
+List some quest stories here:
+
++ ...
+
+===================================================================[[ Maps ]]
+
+To match our theme, we opt for pre-built map templates, upon which we layer 
+water, bushes, NPC's and exit-holes. 
+Level persistence is moot: we can't enter the hole we last used 
+(we can't go back, a Puppy needs rescuing!)
+
+- for variance, we can transform maps by flipping them on the cartesian plane.
+
+- map placement order: base, plants, animals, humans, quest items
+
+
+###################O#########
+#^^^////     ~~     %  %%%%%#
+#^^^////    ~~       %   %%%#
+#^^^////             %%    %#
+####////                    #
+####////         #          #
+####////         #          #
+#                #      %%  O
+#   @            #       %  #
+#############################
+
+
+Legend:
+    @ you
+    # fence
+    O hole in the fence
+    / tar
+    ~ water
+    % plant
+    * food
+
+- plants don't block you, but reduces your vision
+- a die roll chance you get stuck and don't move through the brush
+
+
+=========================================================[[ Your Abilities ]]
+
+[s]niff: 
+    you can detect items by scent, passing closeby it with a chance
+    die roll. get close enough and a scent trail might appear to to. 
+    offset the trail dest point by +-1/1 to encourage hunting.
+
+[d]rink: 
+    stand next to water to quaff your thirst
+
+[p]iddle: 
+    you can do this most times, and anywhere. bonus for creative targets!
+    
+[e]at: 
+    what food you are holding. relieves flee mode.
+
+
+========================================================[[ Functional Spec ]]
+
+# intro screen
+
+fade the radeocity logo onto a black screen. a doggie yelp sounds, and a
+stylized dog logo zooms from behind our view to the front, a bone follows
+the dog logo shortly after. the screen fades to the main game screen.
+
+# menu screen
+
+the first state shows the main game screen, where the map should be we see
+a stylized game summary and control instructions. on the sidebar is the score
+list, showing player name, points, time played. pressing space bar starts the
+game. pressing escape during the game returns to this startscreen.
+
+# game screen
+
+first level starts with a predetermined map, but laced with scent hints 
+to provide a quick-start tutorial. you are welcomed, and told how to move 
+around. scent hints lead you through your abilities: you 
+you near another dog and are told to interact. she tells you the
+Fat Cat Mafioso kidnapped the Puppy, and to head towards the fence hole.
+your quest begins.
+
+
+==========================================================[[ Game Messages ]]
+
+
+- the human smells friendly
+- the human pets you
+- the human gives you a treat! [you wag your tail, woof]
+- the human smells hostile
+- the human runs away
+- the human 
+- you crawl into the shrub
+- you find a buried bone! 
+- you pick the bone up with your mouth
+
