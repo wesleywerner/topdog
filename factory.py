@@ -10,10 +10,10 @@ import classes as cls
 
 # all our colors are define here for easy changing
 
-TREE_FG = libtcod.black
-TREE_BG = libtcod.dark_green
-BUSH_FG = libtcod.black
-BUSH_BG = libtcod.dark_green
+TREE_FG = libtcod.darker_green
+TREE_BG = libtcod.black
+BUSH_FG = libtcod.darkest_green
+BUSH_BG = libtcod.black
 POOL_BG = libtcod.darker_sky
 POOL_FG = libtcod.sky
 PUDDLE_FG = libtcod.blue
@@ -29,14 +29,24 @@ HOLE_FG = libtcod.lightest_grey
 #===============================================================[[ Foliage ]]
 
 def tree():
-    return cls.Foliage(char="&", name="a Tree",
-                      fgcolor=TREE_FG, 
-                      bgcolor=TREE_BG)
+    names = ('Tree', 'Oak Tree', 'Bark Tree', 'Big Tree')
+    fol = cls.Foliage()
+    fol.char = chr(6)
+    fol.name = random.choice(names)
+    fol.fgcolor=TREE_FG
+    fol.bgcolor=TREE_BG
+    fol.blocking = True
+    return fol
 
 def bush():
-    return cls.Foliage(char="%", name="a Shrubbery",
-                      fgcolor=BUSH_FG, 
-                      bgcolor=BUSH_BG)
+    names = ('Shrubbery', 'Thicket', 'Thornbush', 'Rosebush')
+    fol = cls.Foliage()
+    fol.char = chr(5)
+    fol.name = random.choice(names)
+    fol.fgcolor=BUSH_FG
+    fol.bgcolor=BUSH_BG
+    fol.blocking = False
+    return fol
     
 def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
     """
@@ -46,9 +56,9 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
         
         adjust the <thicket_size> and <density> parameters accordingly.
     """
-    plant_choices = [tree()
-                    ,bush()
-                    ]
+    plant_choices = (tree
+                    ,bush
+                    )
 
     for loop in range(amount):
         while True:
@@ -59,7 +69,7 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
                     tx = x + random.randint(1, thicket_size)
                     ty = y +random.randint(1, thicket_size)
                     if currentmap[tx][ty].isblank():
-                        currentmap[tx][ty] = random.choice(plant_choices)
+                        currentmap[tx][ty] = random.choice(plant_choices)()
                 break
 
 #=================================================================[[ Water ]]
@@ -86,7 +96,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                             wetness.fgcolor = POOL_FG
                             wetness.bgcolor = POOL_BG
                             wetness.blocking = True
-                            wetness.name = "a Pool"
+                            wetness.name = "Pool"
                             currentmap[x + tx][y + ty] = wetness
                 break
             else:
@@ -98,6 +108,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                         # transfer the current cell bgcolor
                         bgcolor = currentmap[tx][ty].bgcolor
                         puddle = cls.Water()
+                        puddle.name = "Puddle"
                         puddle.fgcolor = PUDDLE_FG
                         puddle.bgcolor = bgcolor
                         currentmap[tx][ty] = puddle
@@ -223,11 +234,21 @@ def init_libtcod():
     print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
     # set color control codes for inline string formatting
-    libtcod.console_set_color_control(libtcod.COLCTRL_1, libtcod.black, libtcod.white)
-    libtcod.console_set_color_control(libtcod.COLCTRL_2, libtcod.white, libtcod.black)
-#    libtcod.console_set_color_control(libtcod.COLCTRL_3, libtcod., libtcod.)
-#    libtcod.console_set_color_control(libtcod.COLCTRL_4, libtcod., libtcod.)
-#    libtcod.console_set_color_control(libtcod.COLCTRL_5, libtcod., libtcod.)
+    libtcod.console_set_color_control(libtcod.COLCTRL_1
+                                        ,libtcod.black
+                                        ,libtcod.black)
+    libtcod.console_set_color_control(libtcod.COLCTRL_2
+                                        ,libtcod.white
+                                        ,libtcod.black)
+    libtcod.console_set_color_control(libtcod.COLCTRL_3
+                                        ,libtcod.grey
+                                        ,libtcod.black)
+    libtcod.console_set_color_control(libtcod.COLCTRL_4
+                                        ,libtcod.gold
+                                        ,libtcod.black)
+    libtcod.console_set_color_control(libtcod.COLCTRL_5
+                                        ,libtcod.flame
+                                        ,libtcod.black)
     return libtcod.console_new(C.MAP_WIDTH, C.MAP_HEIGHT)
 
 #=============================================================[[ Unit Test ]]

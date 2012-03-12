@@ -30,9 +30,8 @@ class Object(object):
     
 
 class Foliage(Object):
-    def __init__(self, **kwargs):
-        super(Foliage, self).__init__(**kwargs)
-        self.blocking = False
+    def __init__(self):
+        super(Foliage, self).__init__()
 
 class Player(Object):
     """
@@ -54,7 +53,22 @@ class Player(Object):
         self.hostiles = []
         self.quests = []
         self.automove_target = None
-
+        self.messages = []
+    
+    def add_message(self, message):
+        if not self.messages: 
+            self.messages.append(message)
+        else:
+            if self.messages[-1] != message:
+                self.messages.append(message)
+        self.messages = self.messages[-4:]
+    
+    def trim_message(self):
+        if self.messages:
+            self.messages.reverse()
+            self.messages.pop()
+            self.messages.reverse()
+    
     def fleeing(self):
         return self.bravery < 0
     
@@ -81,9 +95,19 @@ class Player(Object):
         x = self.x + xoffset
         y = self.y + yoffset
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
-            if not gamemap[x][y].blocking:
+            if gamemap[x][y].blocking:
+                self.add_message("%cthe%c %c%s%c %cstops you%c" % 
+                                 (libtcod.COLCTRL_3, libtcod.COLCTRL_STOP
+                                 ,libtcod.COLCTRL_2
+                                 ,gamemap[x][y].name
+                                 ,libtcod.COLCTRL_STOP
+                                 ,libtcod.COLCTRL_3, libtcod.COLCTRL_STOP))
+            else:
                 self.x = x
                 self.y = y
+                self.moves = self.moves + 1
+                if self.moves % 15 == 0:
+                    self.trim_message()
 
 class GameState():
     """

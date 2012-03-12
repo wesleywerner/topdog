@@ -68,19 +68,19 @@ def draw_panel_stats():
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
                                 libtcod.BKGND_NONE, libtcod.CENTER, 
-                                "%c%s%c" % (libtcod.COLCTRL_1, 
+                                "%ca %s%c" % (libtcod.COLCTRL_2, 
                                 tile.name, libtcod.COLCTRL_STOP))
     
-#    texts.append("%c%s\n%s%c" % (libtcod.COLCTRL_1
-#                            , "moves: ", player.moves
-#                            ,libtcod.COLCTRL_STOP))
-                            
-#    libtcod.console_print_rect_ex(0, C.PANEL_LEFT, C.PANEL_TOP, 
-#                                    C.PANEL_WIDTH, C.MAP_HEIGHT, 
-#                                    libtcod.BKGND_NONE,
-#                                    libtcod.LEFT,
-#                                    "\n".join(texts))
-
+def draw_messages():
+    messages = list(player.messages)
+    messages.reverse()
+#    messages.append("%c...%c" % (libtcod.COLCTRL_3, libtcod.COLCTRL_STOP))
+    if messages:
+        libtcod.console_print_ex(0
+                                ,C.MESSAGES_LEFT
+                                ,C.MESSAGES_TOP
+                                ,libtcod.BKGND_NONE, libtcod.LEFT
+                                ,"\n".join(messages))
 
 if __name__ == "__main__":
     """
@@ -108,6 +108,7 @@ if __name__ == "__main__":
             libtcod.console_clear(canvas)
             drawmap()
             drawobjects()
+            draw_messages()
             draw_panel_stats()
             blitscreens()
         if gamestate.is_empty():
