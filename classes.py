@@ -67,7 +67,11 @@ class Player(Object):
         elif self.y == C.MAP_HEIGHT - 1:
             self.y = 1
         if self.level > 1:
-            self.messages = ['You enter a yard.']
+            self.messages = [
+                        "%cYou %center%c the yard." % 
+                        (libtcod.COLCTRL_5
+                        ,libtcod.COLCTRL_4
+                        ,libtcod.COLCTRL_5)]
 
     def add_message(self, message):
         if not self.messages: 
@@ -111,11 +115,11 @@ class Player(Object):
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             if gamemap[x][y].blocking:
                 self.add_message("%cthe%c %c%s%c %cstops you%c" % 
-                                 (libtcod.COLCTRL_3, libtcod.COLCTRL_STOP
-                                 ,libtcod.COLCTRL_2
+                                 (libtcod.COLCTRL_5, libtcod.COLCTRL_STOP
+                                 ,libtcod.COLCTRL_4
                                  ,gamemap[x][y].name
                                  ,libtcod.COLCTRL_STOP
-                                 ,libtcod.COLCTRL_3, libtcod.COLCTRL_STOP))
+                                 ,libtcod.COLCTRL_5, libtcod.COLCTRL_STOP))
             else:
                 self.x = x
                 self.y = y

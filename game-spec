@@ -19,6 +19,10 @@ calling a random function:
 myfuncs = (foo, bar, cat)   # note: no call brackets()
 random.choice(myfuncs)()    # note: call brackets()
 
+setting a global variable inside a function is tricky:
+http://www.saltycrane.com/blog/2008/01/python-variable-scope-notes/
+
+
 ===============================================================[[ Timeline ]]
 
 Day 1: Game spec

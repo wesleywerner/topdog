@@ -79,8 +79,8 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
     """
     for loop in range(amount):
         while True:
-            x = random.randint(pond_size, C.MAP_WIDTH - pond_size - 1)
-            y = random.randint(pond_size, C.MAP_HEIGHT - pond_size - 1)
+            x = random.randint(pond_size + 3, C.MAP_WIDTH - pond_size - 3)
+            y = random.randint(pond_size + 3, C.MAP_HEIGHT - pond_size - 3)
             
             if density == 0:
                 # fill the entire range
@@ -233,20 +233,26 @@ def init_libtcod():
     print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
     # set color control codes for inline string formatting
+    # listed by priority: think defcon levels
+    # high alert, priority one
     libtcod.console_set_color_control(libtcod.COLCTRL_1
-                                        ,libtcod.black
+                                        ,libtcod.light_red
                                         ,libtcod.black)
+    # warning, danger will robinson
     libtcod.console_set_color_control(libtcod.COLCTRL_2
-                                        ,libtcod.white
+                                        ,libtcod.light_yellow
                                         ,libtcod.black)
+    # informational, you got a quest item
     libtcod.console_set_color_control(libtcod.COLCTRL_3
-                                        ,libtcod.grey
+                                        ,libtcod.dark_chartreuse
                                         ,libtcod.black)
+    # tile and npc names
     libtcod.console_set_color_control(libtcod.COLCTRL_4
-                                        ,libtcod.gold
+                                        ,libtcod.light_azure
                                         ,libtcod.black)
+    # all other words
     libtcod.console_set_color_control(libtcod.COLCTRL_5
-                                        ,libtcod.flame
+                                        ,libtcod.light_grey
                                         ,libtcod.black)
     return libtcod.console_new(C.MAP_WIDTH, C.MAP_HEIGHT)
 
