@@ -11,7 +11,7 @@ class Object(object):
     """
         base Object for any other class that is placed on the map
     """
-    BLANK_CHAR = " "
+    BLANK_CHAR = "."
     def __init__(self, char=BLANK_CHAR, name="",
                 fgcolor=libtcod.white, bgcolor=libtcod.black):
         self.x = 0

@@ -9,7 +9,9 @@ url: http://7drl.darknet.co.za/2012/
 
 ===================================================================[[ TODO ]]
 
-
+NPC generators
+hint gens
+scent gens
 
 ===============================================================[[ Timeline ]]
 
@@ -17,7 +19,7 @@ Day 1: Game spec
 
 Day 2: Flesh out classes, helper functions, and the game's state machine
 
-Day 3: Map generation, item & NPC stats + descriptions, Object interactions and inventory
+Day 3: Map generation, fov, item & NPC stats + descriptions, Object interactions and inventory
 
 Day 4: Combat and flee system, NPC AI
 

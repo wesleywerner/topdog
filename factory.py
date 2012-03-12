@@ -109,7 +109,9 @@ def new_map():
     """
         Return a new, blank map array.
     """
-    newmap = [[ cls.Object(char=" ", bgcolor=libtcod.darker_green) 
+    newmap = [[ cls.Object(
+                fgcolor=libtcod.darker_green
+                ,bgcolor=libtcod.black) 
     for y in range(C.MAP_HEIGHT)]
         for x in range(C.MAP_WIDTH)]
     return newmap
@@ -212,9 +214,9 @@ def generate_map():
 
 def init_libtcod():
     print('loading font.')
-    libtcod.console_set_custom_font('data/fonts/arial12x12.png', 
+    libtcod.console_set_custom_font('data/fonts/terminal12x12_gs_ro.png', 
                                     libtcod.FONT_TYPE_GREYSCALE |
-                                    libtcod.FONT_LAYOUT_TCOD)
+                                    libtcod.FONT_LAYOUT_ASCII_INROW)
     print('creating screen.')
     libtcod.console_init_root(C.SCREEN_WIDTH, C.SCREEN_HEIGHT, 
                               'TopDog -- v%s' % (C.VERSION), C.FULLSCREEN)
