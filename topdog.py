@@ -29,6 +29,7 @@ def setup_keyhandler():
                             ,libtcod.KEY_KP7: "player.move(gamemap, -1, -1)"
                             ,libtcod.KEY_KP8: "player.move(gamemap, 0, -1)"
                             ,libtcod.KEY_KP9: "player.move(gamemap, 1, -1)"
+                            ,libtcod.KEY_SPACE: "warp_level()"
                             })
     return handler
 
@@ -61,20 +62,22 @@ def draw_panel_stats():
     """
         Print player info and stats in the side panel.
     """
+    prefix = "a "
     texts = []
     tile = gamemap[player.x][player.y]
-    
+    if isinstance(tile, cls.Hole):
+        prefix = ""
     if not tile.isblank():
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
                                 libtcod.BKGND_NONE, libtcod.CENTER, 
-                                "%ca %s%c" % (libtcod.COLCTRL_2, 
-                                tile.name, libtcod.COLCTRL_STOP))
+                                "%c%s%s%c" % (libtcod.COLCTRL_2
+                                            ,prefix, tile.name
+                                            ,libtcod.COLCTRL_STOP))
     
 def draw_messages():
     messages = list(player.messages)
     messages.reverse()
-#    messages.append("%c...%c" % (libtcod.COLCTRL_3, libtcod.COLCTRL_STOP))
     if messages:
         libtcod.console_print_ex(0
                                 ,C.MESSAGES_LEFT
@@ -82,12 +85,34 @@ def draw_messages():
                                 ,libtcod.BKGND_NONE, libtcod.LEFT
                                 ,"\n".join(messages))
 
+def warp_level():
+    """
+        Warp to the next game level.
+    """
+    global gamemap
+    global gameobjects
+    global player
+    warp = False
+    if not gamemap:
+        warp = True
+    else:
+        if isinstance(gamemap[player.x][player.y], cls.Hole):
+            warp = True
+    if warp:
+        player.warp_prep()
+        gamemap = factory.generate_map()
+        #TODO: add game objects here
+        gameobjects = [player]
+
+
 if __name__ == "__main__":
     """
         Entry point.
     """
     canvas = factory.init_libtcod()
-    mullions = libtcod.image_load(os.path.join('data', 'images', 'background.png'))
+    mullions = libtcod.image_load(
+                                os.path.join('data', 'images'
+                                ,'background.png'))
     kb_handler = setup_keyhandler()
     gamestate = cls.GameState()
     gamemap = None
@@ -101,9 +126,10 @@ if __name__ == "__main__":
         if state == C.STATE_PLAYING:
             if not player:
                 player = cls.Player()
-                gameobjects = [player]
-                #TODO: add game objects here
-                gamemap = factory.generate_map()
+#                gameobjects = [player]
+#                #TODO: add game objects here
+#                gamemap = factory.generate_map()
+                warp_level()
             libtcod.console_clear(0)
             libtcod.console_clear(canvas)
             drawmap()

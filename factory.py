@@ -17,10 +17,9 @@ BUSH_BG = libtcod.black
 POOL_BG = libtcod.darker_sky
 POOL_FG = libtcod.sky
 PUDDLE_FG = libtcod.blue
-FENCE_BG = libtcod.dark_grey
-FENCE_FG = libtcod.grey
-HOLE_BG = libtcod.dark_grey
-HOLE_FG = libtcod.lightest_grey
+FENCE_BG = libtcod.darkest_grey
+FENCE_FG = libtcod.darker_sepia
+HOLE_FG = libtcod.sepia
 
 
 #def dice(num, sides):
@@ -138,9 +137,9 @@ def fence_segment():
 
 def fence_hole():
     hole = cls.Hole()
-    hole.name = "Hole in the Fence"
+    hole.name = "[SPACEBAR crawls through the Hole]"
     hole.fgcolor = HOLE_FG
-    hole.bgcolor = HOLE_BG
+    hole.bgcolor = FENCE_BG
     return hole
 
 def make_fence_holes(gamemap):

@@ -55,6 +55,20 @@ class Player(Object):
         self.automove_target = None
         self.messages = []
     
+    def warp_prep(self):
+        self.level = self.level + 1
+        self.moves = self.moves + 1
+        if self.x == 0:
+            self.x = C.MAP_WIDTH - 2
+        elif self.x == C.MAP_WIDTH - 1:
+            self.x = 1
+        if self.y == 0:
+            self.y = C.MAP_HEIGHT - 2
+        elif self.y == C.MAP_HEIGHT - 1:
+            self.y = 1
+        if self.level > 1:
+            self.messages = ['You enter a yard.']
+
     def add_message(self, message):
         if not self.messages: 
             self.messages.append(message)
