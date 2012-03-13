@@ -62,7 +62,6 @@ def draw_player_stats():
     """
         Print player info and stats in the side panel.
     """
-    prefix = "a "
     tile = gamemap[player.x][player.y]
     if isinstance(tile, cls.Hole):
         prefix = ""
@@ -70,8 +69,8 @@ def draw_player_stats():
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
                                 libtcod.BKGND_NONE, libtcod.CENTER, 
-                                "%c%s%s%c" % (libtcod.COLCTRL_5
-                                            ,prefix, tile.name
+                                "%c%s%c" % (libtcod.COLCTRL_5
+                                            ,tile.name
                                             ,libtcod.COLCTRL_STOP))
     # player stats
     texts = [
