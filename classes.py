@@ -29,6 +29,7 @@ class Object(object):
         self.edible = False
         self.carryable = False
         self.limitfov = False
+        self.message = None
 
 class Player(Object):
     """
@@ -111,10 +112,11 @@ class Player(Object):
         x = self.x + xoffset
         y = self.y + yoffset
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
-            if gamemap[x][y].blocking:
+            tile = gamemap[x][y]
+            if tile.blocking:
                 self.add_message("*bumps* %c%s%c" % 
                                  (libtcod.COLCTRL_4
-                                 ,gamemap[x][y].name
+                                 ,tile.name
                                  ,libtcod.COLCTRL_STOP))
             else:
                 self.x = x
@@ -126,6 +128,8 @@ class Player(Object):
                     if self.thirsty:
                         self.weak = True
                     self.thirsty = True
+                if tile.message:
+                    self.add_message(tile.message)
 
 class GameState():
     """

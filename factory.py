@@ -84,6 +84,8 @@ def get_puddle():
     puddle.char = CHAR_WATER
     puddle.name = "water puddle"
     puddle.fgcolor = PUDDLE_FG
+    puddle.message = "%c*splash*%c" % (libtcod.COLCTRL_4
+                                    ,libtcod.COLCTRL_STOP)
     return puddle
 
 def spawn_pond(currentmap, amount, pond_size=4, density=6):
@@ -103,12 +105,10 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                     for tx in range(pond_size):
                         tile = currentmap[x + tx][y + ty]
                         if tile.blanktile:
-                            wetness = cls.Object()
-                            wetness.drinkable = True
+                            wetness = get_puddle()
                             wetness.char = CHAR_WATER
                             wetness.fgcolor = POOL_FG
                             wetness.bgcolor = POOL_BG
-                            wetness.blocking = False
                             wetness.name = "Pool"
                             currentmap[x + tx][y + ty] = wetness
                 break
@@ -252,12 +252,10 @@ def transform_map(gamemap):
     # mirror x
     if random.randint(0, 1) == 0:
         gamemap.reverse()
-        print("mirrored X")
     # mirror y
     if random.randint(0, 1) == 0:
         for e in gamemap:
             e.reverse()
-        print("mirrored Y")
     
     
 def map_from_ascii(gamemap):
