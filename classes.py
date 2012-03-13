@@ -55,7 +55,23 @@ class Player(Object):
         self.quests = []
         self.automove_target = None
         self.messages = []
+        self.carrying = None
     
+    def pickup_item(self, objects):
+        for obj in objects:
+            if obj.x == self.x and obj.y == self.y:
+                if obj.carryable and obj is not self.carrying:
+                    if self.carrying:
+                        self.carrying.x = obj.x
+                        self.carrying.y = obj.y
+                        self.add_message("*drops* the %c%s%c" % \
+                                (libtcod.COLCTRL_3, self.carrying.name
+                                ,libtcod.COLCTRL_STOP))
+                    self.carrying = obj
+                    self.add_message("*picks up* the %c%s%c" % \
+                                (libtcod.COLCTRL_3, self.carrying.name
+                                ,libtcod.COLCTRL_STOP))
+        
     def can_warp(self, gamemap):
         return isinstance(gamemap[self.x][self.y], Hole)
     
@@ -113,7 +129,7 @@ class Player(Object):
         if self.mustpiddle:
             pass
 
-    def move(self, gamemap, xoffset, yoffset):
+    def move(self, gamemap, game_objects, xoffset, yoffset):
         x = self.x + xoffset
         y = self.y + yoffset
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
@@ -127,6 +143,7 @@ class Player(Object):
                 self.x = x
                 self.y = y
                 self.moves = self.moves + 1
+                self.pickup_item(game_objects)
                 if self.moves % 15 == 0:
                     self.trim_message()
                 if self.moves % THIRST_INDEX == 0:

@@ -17,22 +17,22 @@ def setup_keyhandler():
                             ,libtcod.KEY_ESCAPE: "gamestate.pop()"
                             })
     handler.add_actions(C.STATE_PLAYING,
-                            {
-                            "q": "gamestate.pop()"
-                            ,libtcod.KEY_ESCAPE: "gamestate.pop()"
-                            ,libtcod.KEY_KP1: "player.move(gamemap, -1, 1)"
-                            ,libtcod.KEY_KP2: "player.move(gamemap, 0, 1)"
-                            ,libtcod.KEY_KP3: "player.move(gamemap, 1, 1)"
-                            ,libtcod.KEY_KP4: "player.move(gamemap, -1, 0)"
-                            ,libtcod.KEY_KP5: "pass"
-                            ,libtcod.KEY_KP6: "player.move(gamemap, 1, 0)"
-                            ,libtcod.KEY_KP7: "player.move(gamemap, -1, -1)"
-                            ,libtcod.KEY_KP8: "player.move(gamemap, 0, -1)"
-                            ,libtcod.KEY_KP9: "player.move(gamemap, 1, -1)"
-                            ,libtcod.KEY_SPACE: \
-                                "if player.can_warp(gamemap): warp_level()"
-                            ,"d": "player.quench_thirst(gamemap)"
-                            })
+                {
+                "q": "gamestate.pop()"
+                ,libtcod.KEY_ESCAPE: "gamestate.pop()"
+                ,libtcod.KEY_KP1: "player.move(game_map, game_objects, -1, 1)"
+                ,libtcod.KEY_KP2: "player.move(game_map, game_objects, 0, 1)"
+                ,libtcod.KEY_KP3: "player.move(game_map, game_objects, 1, 1)"
+                ,libtcod.KEY_KP4: "player.move(game_map, game_objects, -1, 0)"
+                ,libtcod.KEY_KP5: "pass"
+                ,libtcod.KEY_KP6: "player.move(game_map, game_objects, 1, 0)"
+                ,libtcod.KEY_KP7: "player.move(game_map, game_objects, -1, -1)"
+                ,libtcod.KEY_KP8: "player.move(game_map, game_objects, 0, -1)"
+                ,libtcod.KEY_KP9: "player.move(game_map, game_objects, 1, -1)"
+                ,libtcod.KEY_SPACE: \
+                    "if player.can_warp(game_map): warp_level()"
+                ,"d": "player.quench_thirst(game_map)"
+                })
     return handler
 
 def blitscreens():
@@ -47,29 +47,32 @@ def draw_map():
     
     for y in range(C.MAP_HEIGHT):
         for x in range(C.MAP_WIDTH):
-            tile = gamemap[x][y]
-            if libtcod.map_is_in_fov(fovmap, x, y):
+            tile = game_map[x][y]
+            if libtcod.map_is_in_fov(fov_map, x, y):
                 tile.seen = True
                 libtcod.console_put_char_ex(canvas, x, y, 
                                             tile.char, tile.fgcolor, tile.bgcolor)
             elif tile.seen:
-                libtcod.console_put_char_ex(canvas, x, y, 
-                                            tile.char, libtcod.darker_grey, libtcod.black)
+                libtcod.console_put_char_ex(canvas, x, y, tile.char
+                                        ,libtcod.darker_grey, libtcod.black)
 
-def drawobjects():
+def draw_objects():
     """
         Place all map objects on the canvas.
     """
-    for obj in gameobjects:
-        if libtcod.map_is_in_fov(fovmap, obj.x, obj.y):
-            libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
+    for obj in game_objects:
+        if not obj is player.carrying:
+            if libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
+                libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
                                         obj.char, obj.fgcolor, None)
+    libtcod.console_put_char_ex(canvas, player.x, player.y, 
+                                player.char, player.fgcolor, None)
 
 def draw_player_stats():
     """
         Print player info and stats in the side panel.
     """
-    tile = gamemap[player.x][player.y]
+    tile = game_map[player.x][player.y]
     if not tile.blanktile:
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
@@ -85,9 +88,10 @@ def draw_player_stats():
                                 ,player.score, libtcod.COLCTRL_STOP)
             ,"moves: %c%s%c" % (libtcod.COLCTRL_5
                                 ,player.moves, libtcod.COLCTRL_STOP)
-            ,"You are carrying a %c%s%c" % (libtcod.COLCTRL_3
-                                ,"kitten", libtcod.COLCTRL_STOP)
             ]
+    if player.carrying:
+        texts.append("carry: %c%s%c" % (libtcod.COLCTRL_3
+                    ,player.carrying.name, libtcod.COLCTRL_STOP))
     if player.thirsty:
         texts.append("You are %c%s%c. You need water." % (libtcod.COLCTRL_2
                                 ,"thirsty", libtcod.COLCTRL_STOP))
@@ -113,15 +117,24 @@ def warp_level():
     """
         Warp to the next game level.
     """
-    global gamemap
-    global fovmap
-    global gameobjects
+    global game_map
+    global fov_map
+    global game_objects
     global player
     player.warp_prep()
-    gamemap, fovmap = factory.generate_map()
+    game_map, fov_map = factory.generate_map()
     #TODO: add game objects here
-    gameobjects = [player]
+    game_objects = [player]
     libtcod.console_set_default_foreground(0, libtcod.light_grey)
+    
+    o = cls.Object()
+    o.carryable = True
+    o.name = "ball"
+    o.char = "o"
+    o.fgcolor = libtcod.green
+    o.x = 1
+    o.y = 5
+    game_objects.append(o)
 
 
 if __name__ == "__main__":
@@ -134,9 +147,9 @@ if __name__ == "__main__":
                                 ,'background.png'))
     kb_handler = setup_keyhandler()
     gamestate = cls.GameState()
-    gamemap = None
-    fovmap = None
-    gameobjects = None
+    game_map = None
+    fov_map = None
+    game_objects = None
     player = None
     
     while not libtcod.console_is_window_closed():
@@ -149,11 +162,11 @@ if __name__ == "__main__":
                 warp_level()
             libtcod.console_clear(0)
             libtcod.console_clear(canvas)
-            libtcod.map_compute_fov(fovmap, player.x, player.y
+            libtcod.map_compute_fov(fov_map, player.x, player.y
                                     ,player.fov_radius
                                     ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
             draw_map()
-            drawobjects()
+            draw_objects()
             draw_messages()
             draw_player_stats()
             blitscreens()
