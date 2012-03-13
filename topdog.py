@@ -30,6 +30,7 @@ def setup_keyhandler():
                             ,libtcod.KEY_KP8: "player.move(gamemap, 0, -1)"
                             ,libtcod.KEY_KP9: "player.move(gamemap, 1, -1)"
                             ,libtcod.KEY_SPACE: "warp_level()"
+                            ,"d": "player.quench_thirst(gamemap)"
                             })
     return handler
 
@@ -63,7 +64,6 @@ def draw_panel_stats():
         Print player info and stats in the side panel.
     """
     prefix = "a "
-    texts = []
     tile = gamemap[player.x][player.y]
     if isinstance(tile, cls.Hole):
         prefix = ""
@@ -71,9 +71,31 @@ def draw_panel_stats():
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
                                 libtcod.BKGND_NONE, libtcod.CENTER, 
-                                "%c%s%s%c" % (libtcod.COLCTRL_2
+                                "%c%s%s%c" % (libtcod.COLCTRL_5
                                             ,prefix, tile.name
                                             ,libtcod.COLCTRL_STOP))
+    # player stats
+    texts = [
+             "level: %c%s%c" % (libtcod.COLCTRL_5
+                                ,player.level,libtcod.COLCTRL_STOP)
+            ,"score: %c%s%c" % (libtcod.COLCTRL_5
+                                ,player.score, libtcod.COLCTRL_STOP)
+            ,"moves: %c%s%c" % (libtcod.COLCTRL_5
+                                ,player.moves, libtcod.COLCTRL_STOP)
+            ,"You are carrying a %c%s%c" % (libtcod.COLCTRL_3
+                                ,"kitten", libtcod.COLCTRL_STOP)
+            ]
+    if player.thirsty:
+        texts.append("You are %c%s%c. You need water." % (libtcod.COLCTRL_2
+                                ,"thirsty", libtcod.COLCTRL_STOP))
+    if player.weak:
+        texts.append("You feel %cvery weak%c." % (libtcod.COLCTRL_1
+                                , libtcod.COLCTRL_STOP))
+    libtcod.console_set_default_foreground(0, libtcod.dark_grey)
+    libtcod.console_print_ex(0, C.MESSAGES_LEFT
+                            ,C.STATS_TOP
+                            ,libtcod.BKGND_NONE, libtcod.LEFT
+                            ,"\n".join(texts))
     
 def draw_messages():
     messages = list(player.messages)

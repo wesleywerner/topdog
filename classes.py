@@ -1,10 +1,9 @@
 #from constants import *
-import constants as C
 import lib.libtcodpy as libtcod
+import constants as C
 
-DEFAULT_BRAVERY = 100
-THIRST_INDEX = 100
-DEFAULT_PIDDLE = 100
+THIRST_INDEX = 10
+PIDDLE_INDEX = 3
 
 
 class Object(object):
@@ -43,9 +42,10 @@ class Player(Object):
         self.y = 2
         self.char = "@"
         self.fgcolor = libtcod.white
-        self.bravery = DEFAULT_BRAVERY
-        self.piddleindex = DEFAULT_PIDDLE
+        self.weak = False
         self.thirsty = False
+        self.mustpiddle = False
+        self.quenches = 0
         self.moves = 0
         self.level = 0
         self.score = 0
@@ -79,7 +79,7 @@ class Player(Object):
         else:
             if self.messages[-1] != message:
                 self.messages.append(message)
-        self.messages = self.messages[-4:]
+        self.messages = self.messages[-5:]
     
     def trim_message(self):
         if self.messages:
@@ -96,36 +96,38 @@ class Player(Object):
     def recover_bravery(self):
         self.bravery = DEFAULT_BRAVERY
 
-    def thirsty(self):
-        if self.moves % THIRST_INDEX == 0:
-            self.thirsty = True
-        return self.thirsty
+    def quench_thirst(self, gamemap):
+        if isinstance(gamemap[self.x][self.y], Water):
+            self.quenches = self.quenches + 1
+            self.thirsty = False
+            self.add_message("You %cquenced%c your thirst." % (libtcod.COLCTRL_3
+                                                        ,libtcod.COLCTRL_STOP))
+            if self.quenches % PIDDLE_INDEX == 0:
+                self.mustpiddle = True
 
-    def piddle(self):
-        return self.piddleindex == 0
-
-    def piddle_step(self):
-        self.piddleindex = self.piddleindex - 1
-        if self.piddleindex < 0:
-            self.piddleindex = 0
+    def do_piddle(self):
+        if self.mustpiddle:
+            pass
 
     def move(self, gamemap, xoffset, yoffset):
         x = self.x + xoffset
         y = self.y + yoffset
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             if gamemap[x][y].blocking:
-                self.add_message("%cthe%c %c%s%c %cstops you%c" % 
-                                 (libtcod.COLCTRL_5, libtcod.COLCTRL_STOP
-                                 ,libtcod.COLCTRL_4
+                self.add_message("*bumps* the %c%s%c" % 
+                                 (libtcod.COLCTRL_3
                                  ,gamemap[x][y].name
-                                 ,libtcod.COLCTRL_STOP
-                                 ,libtcod.COLCTRL_5, libtcod.COLCTRL_STOP))
+                                 ,libtcod.COLCTRL_STOP))
             else:
                 self.x = x
                 self.y = y
                 self.moves = self.moves + 1
                 if self.moves % 15 == 0:
                     self.trim_message()
+                if self.moves % THIRST_INDEX == 0:
+                    if self.thirsty:
+                        self.weak = True
+                    self.thirsty = True
 
 class GameState():
     """
