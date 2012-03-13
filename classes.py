@@ -10,11 +10,14 @@ class Object(object):
     """
         base Object for any other class that is placed on the map
     """
-    BLANK_CHAR = "."
-    def __init__(self, char=BLANK_CHAR, name="",
-                fgcolor=libtcod.white, bgcolor=libtcod.black):
+    def __init__(self
+                ,blanktile=False
+                ,char=".", name=""
+                ,fgcolor=libtcod.white
+                ,bgcolor=libtcod.black):
         self.x = 0
         self.y = 0
+        self.blanktile = blanktile
         self.char = char
         self.name = name
         self.fgcolor = fgcolor
@@ -26,11 +29,6 @@ class Object(object):
         self.edible = False
         self.carryable = False
         self.limitfov = False
-    
-    def isblank(self):
-        """ test if the tile is blank to be used for placing an object. """
-        return self.char == Object.BLANK_CHAR
-    
 
 class Player(Object):
     """
@@ -115,7 +113,7 @@ class Player(Object):
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             if gamemap[x][y].blocking:
                 self.add_message("*bumps* %c%s%c" % 
-                                 (libtcod.COLCTRL_3
+                                 (libtcod.COLCTRL_4
                                  ,gamemap[x][y].name
                                  ,libtcod.COLCTRL_STOP))
             else:

@@ -63,9 +63,7 @@ def draw_player_stats():
         Print player info and stats in the side panel.
     """
     tile = gamemap[player.x][player.y]
-    if isinstance(tile, cls.Hole):
-        prefix = ""
-    if not tile.isblank():
+    if not tile.blanktile:
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
                                 libtcod.BKGND_NONE, libtcod.CENTER, 

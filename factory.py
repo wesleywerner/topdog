@@ -11,7 +11,7 @@ import asciimaps
 
 # all our colors are define here for easy changing
 
-TREE_FG = libtcod.darker_green
+TREE_FG = libtcod.darker_amber
 TREE_BG = libtcod.black
 BUSH_FG = libtcod.darker_chartreuse
 BUSH_BG = libtcod.black
@@ -26,7 +26,7 @@ HOLE_FG = libtcod.sepia
 CHAR_FENCE = "#"
 CHAR_TAR = ":"
 CHAR_WATER = "~"
-CHAR_BRICK = "#" #chr(177)
+CHAR_BRICK = chr(177)
 CHAR_TREE = chr(6)
 CHAR_BUSH = chr(5)
 
@@ -68,11 +68,11 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
         while True:
             x = random.randint(0, C.MAP_WIDTH - thicket_size - 1)
             y = random.randint(0, C.MAP_HEIGHT - thicket_size - 1)
-            if currentmap[x][y].isblank():
+            if currentmap[x][y].blanktile:
                 for thicket in range(density):
                     tx = x + random.randint(1, thicket_size)
                     ty = y +random.randint(1, thicket_size)
-                    if currentmap[tx][ty].isblank():
+                    if currentmap[tx][ty].blanktile:
                         currentmap[tx][ty] = random.choice(plant_choices)()
                 break
 
@@ -102,7 +102,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                 for ty in range(pond_size):
                     for tx in range(pond_size):
                         tile = currentmap[x + tx][y + ty]
-                        if tile.isblank():
+                        if tile.blanktile:
                             wetness = cls.Object()
                             wetness.drinkable = True
                             wetness.char = CHAR_WATER
@@ -117,7 +117,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                 for litres in range(density):
                     tx = x + random.randint(1, pond_size)
                     ty = y +random.randint(1, pond_size)
-                    if currentmap[tx][ty].isblank():
+                    if currentmap[tx][ty].blanktile:
                         # transfer the current cell bgcolor
                         bgcolor = currentmap[tx][ty].bgcolor
                         puddle = get_puddle()
@@ -131,7 +131,8 @@ def blank_map():
         Return a new, blank map array.
     """
     newmap = [[ cls.Object(
-                fgcolor=libtcod.darker_green
+                blanktile=True
+                ,fgcolor=libtcod.darker_green
                 ,bgcolor=libtcod.black) 
     for y in range(C.MAP_HEIGHT)]
         for x in range(C.MAP_WIDTH)]
@@ -188,7 +189,7 @@ def make_fence_holes(gamemap):
                     yo = y - 1
                     xo = x
             # test there is a space or foliage alongside
-            if gamemap[xo][yo].isblank():
+            if gamemap[xo][yo].blanktile:
                 gamemap[x][y] = fence_hole()
                 break
     
@@ -239,7 +240,7 @@ def get_tar():
     tar = cls.Object()
     tar.blocking = False
     tar.seethrough = True
-    tar.fgcolor = libtcod.light_grey
+    tar.fgcolor = libtcod.darkest_grey
     tar.char = CHAR_TAR
     tar.name = "tarmac"
     return tar
@@ -249,7 +250,7 @@ def map_from_ascii(gamemap):
         load map tiles from an ascii representation.
     """
     tile_lookup = {
-                    CHAR_BRICK: get_brick
+                    "#": get_brick
                     ,CHAR_TAR: get_tar
                     ,CHAR_WATER: get_puddle
                 }
