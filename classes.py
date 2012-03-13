@@ -2,7 +2,7 @@
 import lib.libtcodpy as libtcod
 import constants as C
 
-THIRST_INDEX = 10
+THIRST_INDEX = 100
 PIDDLE_INDEX = 3
 
 
@@ -114,7 +114,7 @@ class Player(Object):
         y = self.y + yoffset
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             if gamemap[x][y].blocking:
-                self.add_message("*bumps* the %c%s%c" % 
+                self.add_message("*bumps* %c%s%c" % 
                                  (libtcod.COLCTRL_3
                                  ,gamemap[x][y].name
                                  ,libtcod.COLCTRL_STOP))
