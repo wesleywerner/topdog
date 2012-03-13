@@ -39,7 +39,7 @@ def get_tree():
     fol.name = random.choice(names)
     fol.fgcolor=TREE_FG
     fol.bgcolor=TREE_BG
-    fol.blocking = True
+    fol.blocking = False
     return fol
 
 def get_bush():
@@ -108,7 +108,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                             wetness.char = CHAR_WATER
                             wetness.fgcolor = POOL_FG
                             wetness.bgcolor = POOL_BG
-                            wetness.blocking = True
+                            wetness.blocking = False
                             wetness.name = "Pool"
                             currentmap[x + tx][y + ty] = wetness
                 break
@@ -242,9 +242,24 @@ def get_tar():
     tar.seethrough = True
     tar.fgcolor = libtcod.darkest_grey
     tar.char = CHAR_TAR
-    tar.name = "tarmac"
+    tar.name = ""
     return tar
 
+def transform_map(gamemap):
+    """
+        Transform the map by mirroring it on X/Y.
+    """
+    # mirror x
+    if random.randint(0, 1) == 0:
+        gamemap.reverse()
+        print("mirrored X")
+    # mirror y
+    if random.randint(0, 1) == 0:
+        for e in gamemap:
+            e.reverse()
+        print("mirrored Y")
+    
+    
 def map_from_ascii(gamemap):
     """
         load map tiles from an ascii representation.
@@ -255,9 +270,6 @@ def map_from_ascii(gamemap):
                     ,CHAR_WATER: get_puddle
                 }
     amap = random.choice(asciimaps.ASCIIMaps.maps)
-    print(len(amap))
-    print(len(amap[0]))
-    print(amap)
     for y in range(C.MAP_HEIGHT - 1):
         for x in range(C.MAP_WIDTH - 1):
             asciic = amap[y][x]
@@ -270,6 +282,7 @@ def generate_map():
     """
     gamemap = blank_map()
     map_from_ascii(gamemap)
+    transform_map(gamemap)
     plant_foliage(gamemap)
     return gamemap
 
@@ -316,4 +329,5 @@ def init_libtcod():
 if __name__ == "__main__":
     gamemap = blank_map()
     map_from_ascii(gamemap)
+    transform_map(gamemap)
     pass
