@@ -7,6 +7,7 @@ import random
 import lib.libtcodpy as libtcod
 import constants as C
 import classes as cls
+import asciimaps
 
 # all our colors are define here for easy changing
 
@@ -16,22 +17,22 @@ BUSH_FG = libtcod.darker_chartreuse
 BUSH_BG = libtcod.black
 POOL_BG = libtcod.darker_sky
 POOL_FG = libtcod.sky
-PUDDLE_FG = libtcod.blue
+PUDDLE_FG = libtcod.sky
 FENCE_BG = libtcod.darkest_grey
 FENCE_FG = libtcod.darker_sepia
 HOLE_FG = libtcod.sepia
 
 # define our tile characters here so we can do easy ascii to map lookups
 CHAR_FENCE = "#"
-CHAR_TAR = "/"
+CHAR_TAR = ":"
 CHAR_WATER = "~"
-CHAR_BRICK = chr(177)
+CHAR_BRICK = "#" #chr(177)
 CHAR_TREE = chr(6)
 CHAR_BUSH = chr(5)
 
 #===============================================================[[ Foliage ]]
 
-def tree():
+def get_tree():
     names = ('Tree', 'Oak Tree', 'Bark Tree', 'Big Tree')
     fol = cls.Object()
     fol.char = CHAR_TREE
@@ -41,7 +42,7 @@ def tree():
     fol.blocking = True
     return fol
 
-def bush():
+def get_bush():
     names = ('Shrubbery', 'Thicket', 'Thornbush', 'Rosebush')
     fol = cls.Object()
     fol.char = CHAR_BUSH
@@ -59,8 +60,8 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
         
         adjust the <thicket_size> and <density> parameters accordingly.
     """
-    plant_choices = (tree
-                    ,bush
+    plant_choices = (get_tree
+                    ,get_bush
                     )
 
     for loop in range(amount):
@@ -76,6 +77,14 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
                 break
 
 #=================================================================[[ Water ]]
+
+def get_puddle():
+    puddle = cls.Object()
+    puddle.drinkable = True
+    puddle.char = CHAR_WATER
+    puddle.name = "water puddle"
+    puddle.fgcolor = PUDDLE_FG
+    return puddle
 
 def spawn_pond(currentmap, amount, pond_size=4, density=6):
     """
@@ -93,8 +102,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                 for ty in range(pond_size):
                     for tx in range(pond_size):
                         tile = currentmap[x + tx][y + ty]
-                        if tile.isblank() or \
-                        isinstance(tile, cls.Object):
+                        if tile.isblank():
                             wetness = cls.Object()
                             wetness.drinkable = True
                             wetness.char = CHAR_WATER
@@ -112,12 +120,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                     if currentmap[tx][ty].isblank():
                         # transfer the current cell bgcolor
                         bgcolor = currentmap[tx][ty].bgcolor
-                        puddle = cls.Object()
-                        puddle.drinkable = True
-                        puddle.char = CHAR_WATER
-                        puddle.name = "Puddle"
-                        puddle.fgcolor = PUDDLE_FG
-                        puddle.bgcolor = bgcolor
+                        puddle = get_puddle()
                         currentmap[tx][ty] = puddle
             break
 
@@ -218,7 +221,7 @@ def plant_foliage(gamemap):
     # build the fence
     build_fence(gamemap)
 
-def brick():
+def get_brick():
     """
         Make a brick tile.
     """
@@ -229,7 +232,7 @@ def brick():
     brick.fgcolor = libtcod.dark_grey
     return brick
 
-def tar():
+def get_tar():
     """
         Make a tar tile.
     """
@@ -241,17 +244,31 @@ def tar():
     tar.name = "tarmac"
     return tar
 
-def map_from_ascii():
+def map_from_ascii(gamemap):
     """
         load map tiles from an ascii representation.
     """
-    
+    tile_lookup = {
+                    CHAR_BRICK: get_brick
+                    ,CHAR_TAR: get_tar
+                    ,CHAR_WATER: get_puddle
+                }
+    amap = random.choice(asciimaps.ASCIIMaps.maps)
+    print(len(amap))
+    print(len(amap[0]))
+    print(amap)
+    for y in range(C.MAP_HEIGHT - 1):
+        for x in range(C.MAP_WIDTH - 1):
+            asciic = amap[y][x]
+            if asciic in tile_lookup:
+                gamemap[x][y] = tile_lookup[asciic]()
     
 def generate_map():
     """
         Generate a level map, plant trees and objects and NPC's.
     """
     gamemap = blank_map()
+    map_from_ascii(gamemap)
     plant_foliage(gamemap)
     return gamemap
 
@@ -296,5 +313,6 @@ def init_libtcod():
 
 #=============================================================[[ Unit Test ]]
 if __name__ == "__main__":
-    # unit test
+    gamemap = blank_map()
+    map_from_ascii(gamemap)
     pass
