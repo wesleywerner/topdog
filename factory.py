@@ -12,7 +12,7 @@ import classes as cls
 
 TREE_FG = libtcod.darker_green
 TREE_BG = libtcod.black
-BUSH_FG = libtcod.darkest_green
+BUSH_FG = libtcod.darker_chartreuse
 BUSH_BG = libtcod.black
 POOL_BG = libtcod.darker_sky
 POOL_FG = libtcod.sky
@@ -21,16 +21,19 @@ FENCE_BG = libtcod.darkest_grey
 FENCE_FG = libtcod.darker_sepia
 HOLE_FG = libtcod.sepia
 
-
-#def dice(num, sides):
-#    return sum(random.randrange(sides)+1 for die in range(num))
+# define our tile characters here so we can do easy ascii to map lookups
+CHAR_FENCE = "#"
+CHAR_TAR = "/"
+CHAR_BRICK = chr(177)
+CHAR_TREE = chr(6)
+CHAR_BUSH = chr(5)
 
 #===============================================================[[ Foliage ]]
 
 def tree():
     names = ('Tree', 'Oak Tree', 'Bark Tree', 'Big Tree')
     fol = cls.Foliage()
-    fol.char = chr(6)
+    fol.char = CHAR_TREE
     fol.name = random.choice(names)
     fol.fgcolor=TREE_FG
     fol.bgcolor=TREE_BG
@@ -40,7 +43,7 @@ def tree():
 def bush():
     names = ('Shrubbery', 'Thicket', 'Thornbush', 'Rosebush')
     fol = cls.Foliage()
-    fol.char = chr(5)
+    fol.char = CHAR_BUSH
     fol.name = random.choice(names)
     fol.fgcolor=BUSH_FG
     fol.bgcolor=BUSH_BG
@@ -115,7 +118,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
 
 #===================================================================[[ Map ]]
 
-def new_map():
+def blank_map():
     """
         Return a new, blank map array.
     """
@@ -129,7 +132,7 @@ def new_map():
 def fence_segment():
     panel = cls.Object()
     panel.name = "Fence"
-    panel.char = "#"
+    panel.char = CHAR_FENCE
     panel.bgcolor = FENCE_BG
     panel.fgcolor = FENCE_FG
     panel.blocking = True
@@ -209,13 +212,41 @@ def plant_foliage(gamemap):
     spawn_pond(gamemap, amount=4, pond_size=10, density=2)
     # build the fence
     build_fence(gamemap)
-    
 
+def brick():
+    """
+        Make a brick tile.
+    """
+    brick = cls.Object()
+    brick.blocking = True
+    brick.name = "wall"
+    brick.char = CHAR_BRICK
+    brick.fgcolor = libtcod.dark_grey
+    return brick
+
+def tar():
+    """
+        Make a tar tile.
+    """
+    tar = cls.Object()
+    tar.blocking = False
+    tar.seethrough = True
+    tar.fgcolor = libtcod.light_grey
+    tar.char = CHAR_TAR
+    tar.name = "tarmac"
+    return tar
+
+def map_from_ascii():
+    """
+        load map tiles from an ascii representation.
+    """
+    
+    
 def generate_map():
     """
         Generate a level map, plant trees and objects and NPC's.
     """
-    gamemap = new_map()
+    gamemap = blank_map()
     plant_foliage(gamemap)
     return gamemap
 
@@ -232,6 +263,8 @@ def init_libtcod():
                               'TopDog -- v%s' % (C.VERSION), C.FULLSCREEN)
     print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
+    # default font color
+    libtcod.console_set_default_foreground(0, libtcod.light_grey)
     # set color control codes for inline string formatting
     # listed by priority: think defcon levels
     # high alert, priority one
@@ -252,7 +285,7 @@ def init_libtcod():
                                         ,libtcod.black)
     # all other words
     libtcod.console_set_color_control(libtcod.COLCTRL_5
-                                        ,libtcod.light_grey
+                                        ,libtcod.white
                                         ,libtcod.black)
     return libtcod.console_new(C.MAP_WIDTH, C.MAP_HEIGHT)
 
