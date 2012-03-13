@@ -44,9 +44,8 @@ def draw_map():
     """
         Draw the map tiles onto the canvas.
     """
-    
-    for y in range(C.MAP_HEIGHT):
-        for x in range(C.MAP_WIDTH):
+    for y in range(C.MAP_HEIGHT - 1):
+        for x in range(C.MAP_WIDTH - 1):
             tile = game_map[x][y]
             if libtcod.map_is_in_fov(fov_map, x, y):
                 tile.seen = True
@@ -60,20 +59,34 @@ def draw_objects():
     """
         Place all map objects on the canvas.
     """
+    seen_objects = []
     for obj in game_objects:
         if not obj is player.carrying:
             if libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
-                player.add_message("*sees* a %c%s%c" % (C.COL3, obj.name, C.COLS))
+                seen_objects.append("%c%s%c" % (C.COL3, obj.name, C.COLS))
                 libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
                                         obj.char, obj.fgcolor, None)
+    # draw player
     libtcod.console_put_char_ex(canvas, player.x, player.y, 
                                 player.char, player.fgcolor, None)
+    # seen objects
+    if len(seen_objects) > 0:
+        x = 2
+        align = libtcod.LEFT
+        if player.x < (C.MAP_WIDTH / 2):
+            x = C.MAP_WIDTH - 2
+            align = libtcod.RIGHT
+        libtcod.console_print_ex(canvas
+                            ,x, C.SEENLIST_TOP
+                            ,libtcod.BKGND_NONE, align
+                            ,"%c*sees*%c\n"  % (C.COL3, C.COLS) + "\n".join(seen_objects))
 
 def draw_player_stats():
     """
         Print player info and stats in the side panel.
     """
     tile = game_map[player.x][player.y]
+    # player sees
     if not tile.blanktile:
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
@@ -91,7 +104,7 @@ def draw_player_stats():
         texts.append("You are %c%s%c. You need water." % \
                     (C.COL2, "thirsty", C.COLS))
     if player.weak:
-        texts.append("You feel %cvery weak%c." % (C.COL1, C.COLS))
+        texts.append("You feel %cweak%c" % (C.COL1, C.COLS))
     libtcod.console_print_ex(0, C.MESSAGES_LEFT
                             ,C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.LEFT
@@ -116,9 +129,8 @@ def warp_level():
     global game_objects
     global player
     player.warp_prep()
-    game_map, fov_map = factory.generate_map()
+    game_map, fov_map, game_objects = factory.generate_map()
     #TODO: add game objects here
-    game_objects = []
     libtcod.console_set_default_foreground(0, libtcod.light_grey)
 
 if __name__ == "__main__":
@@ -150,9 +162,9 @@ if __name__ == "__main__":
                                     ,player.fov_radius
                                     ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
             draw_map()
+            draw_player_stats()
             draw_objects()
             draw_messages()
-            draw_player_stats()
             blitscreens()
         if gamestate.is_empty():
             break

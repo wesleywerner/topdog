@@ -129,6 +129,34 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                         currentmap[tx][ty] = puddle
             break
 
+#===============================================================[[ Objects ]]
+
+def generate_toys(game_map, game_objects):
+    """
+        Make some toys for fido.
+    """
+    how_many = random.randint(0, 3)
+    toy_names = ("tennis ball!", "bouncy ball", "rubber bone", "knotted rope"
+                ,"rubber chicken", "rubber ducky")
+    toy_colors = (libtcod.lighter_green, libtcod.lighter_red
+                , libtcod.lighter_blue, libtcod.lighter_yellow
+                , libtcod.lighter_lime, libtcod.lighter_sea, libtcod.lighter_han
+                , libtcod.lighter_violet, libtcod.lighter_fuchsia)
+    
+    for item in range(how_many):
+        toy = cls.Object()
+        toy.name = random.choice(toy_names)
+        toy.char = chr(4)
+        toy.fgcolor = random.choice(toy_colors)
+        toy.carryable = True
+        while True:
+            x = random.randint(1, C.MAP_WIDTH - 2)
+            y = random.randint(1, C.MAP_HEIGHT - 2)
+            if game_map[x][y].blanktile:
+                toy.x, toy.y = (x, y)
+                game_objects.append(toy)
+                break
+
 #===================================================================[[ Map ]]
 
 def blank_map():
@@ -159,7 +187,7 @@ def fence_hole():
     hole.bgcolor = FENCE_BG
     return hole
 
-def make_fence_holes(gamemap):
+def make_fence_holes(game_map):
     """
         Make a few random fence holes. Test they are at least next to grass
         or foliage to crawl through.
@@ -194,38 +222,38 @@ def make_fence_holes(gamemap):
                     yo = y - 1
                     xo = x
             # test there is a space or foliage alongside
-            if gamemap[xo][yo].blanktile:
-                gamemap[x][y] = fence_hole()
+            if game_map[xo][yo].blanktile:
+                game_map[x][y] = fence_hole()
                 break
     
 
-def build_fence(gamemap):
+def build_fence(game_map):
     """
         Outline the yard with a fence like structure.
     """
     for y in range(C.MAP_HEIGHT):
-        gamemap[0][y] = fence_segment()
-        gamemap[C.MAP_WIDTH - 1][y] = fence_segment()
+        game_map[0][y] = fence_segment()
+        game_map[C.MAP_WIDTH - 1][y] = fence_segment()
     for x in range(C.MAP_WIDTH):
-        gamemap[x][0] = fence_segment()
-        gamemap[x][C.MAP_HEIGHT - 1] = fence_segment()
-    make_fence_holes(gamemap)
+        game_map[x][0] = fence_segment()
+        game_map[x][C.MAP_HEIGHT - 1] = fence_segment()
+    make_fence_holes(game_map)
 
 
-def plant_foliage(gamemap):
+def plant_foliage(game_map):
     """
         Plant some trees and things onto the map.
     """
     # make a few large thickets
-    spawn_foliage(gamemap, amount=4, thicket_size=6, density=24)
+    spawn_foliage(game_map, amount=4, thicket_size=6, density=24)
     # spread some single greens around the map
-    spawn_foliage(gamemap, amount=10, thicket_size=1, density=1)
+    spawn_foliage(game_map, amount=10, thicket_size=1, density=1)
     # make some pools
-    spawn_pond(gamemap, amount=1, pond_size=random.randint(4, 10), density=0)
+    spawn_pond(game_map, amount=1, pond_size=random.randint(4, 10), density=0)
     # make some wet spots
-    spawn_pond(gamemap, amount=4, pond_size=10, density=2)
+    spawn_pond(game_map, amount=4, pond_size=10, density=2)
     # build the fence
-    build_fence(gamemap)
+    build_fence(game_map)
 
 def get_brick():
     """
@@ -251,20 +279,20 @@ def get_tar():
     tar.name = ""
     return tar
 
-def transform_map(gamemap):
+def transform_map(game_map):
     """
         Transform the map by mirroring it on X/Y.
     """
     # mirror x
     if random.randint(0, 1) == 0:
-        gamemap.reverse()
+        game_map.reverse()
     # mirror y
     if random.randint(0, 1) == 0:
-        for e in gamemap:
+        for e in game_map:
             e.reverse()
     
     
-def map_from_ascii(gamemap):
+def map_from_ascii(game_map):
     """
         load map tiles from an ascii representation.
     """
@@ -278,24 +306,26 @@ def map_from_ascii(gamemap):
         for x in range(C.MAP_WIDTH - 1):
             asciic = amap[y][x]
             if asciic in tile_lookup:
-                gamemap[x][y] = tile_lookup[asciic]()
-    
+                game_map[x][y] = tile_lookup[asciic]()
+
+
 def generate_map():
     """
         Generate a level map, plant trees and objects and NPC's.
     """
-    gamemap = blank_map()
-    map_from_ascii(gamemap)
-    transform_map(gamemap)
-    plant_foliage(gamemap)
+    game_map = blank_map()
+    game_objects = []
+    map_from_ascii(game_map)
+    transform_map(game_map)
+    plant_foliage(game_map)
+    generate_toys(game_map, game_objects)
     fov_map = libtcod.map_new(C.MAP_WIDTH, C.MAP_HEIGHT)
-    for y in range(C.MAP_HEIGHT):
-        for x in range(C.MAP_WIDTH):
-            libtcod.map_set_properties(
-                                        fov_map, x, y
-                                        ,gamemap[x][y].seethrough
-                                        ,not gamemap[x][y].blocking)
-    return gamemap, fov_map
+    for y in range(C.MAP_HEIGHT - 1):
+        for x in range(C.MAP_WIDTH - 1):
+            libtcod.map_set_properties(fov_map, x, y
+                                        ,game_map[x][y].seethrough
+                                        ,not game_map[x][y].blocking)
+    return game_map, fov_map, game_objects
 
 
 #===============================================================[[ Libtcod ]]
@@ -337,7 +367,7 @@ def init_libtcod():
 
 #=============================================================[[ Unit Test ]]
 if __name__ == "__main__":
-    gamemap = blank_map()
-    map_from_ascii(gamemap)
-    transform_map(gamemap)
+    game_map = blank_map()
+    map_from_ascii(game_map)
+    transform_map(game_map)
     pass

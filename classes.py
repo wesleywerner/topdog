@@ -55,16 +55,17 @@ class Player(Object):
     
     def pickup_item(self, objects):
         for obj in objects:
-            if obj.x == self.x and obj.y == self.y:
-                if obj.carryable and obj is not self.carrying:
+            if obj.x == self.x and obj.y == self.y and obj.carryable:
+                if not obj is self.carrying:
                     if self.carrying:
-                        self.carrying.x = obj.x
-                        self.carrying.y = obj.y
-                        self.add_message("*drops* the %c%s%c" % \
+                        self.carrying.x, self.carrying.y = (obj.x, obj.y)
+                        self.add_message("*drops* %c%s%c" % \
                                 (C.COL3, self.carrying.name, C.COLS))
                     self.carrying = obj
-                    self.add_message("*picks up* the %c%s%c" % \
+                    self.carrying.x = 0
+                    self.add_message("*pickup* %c%s%c" % \
                                 (C.COL3, self.carrying.name, C.COLS))
+                break
         
     def can_warp(self, gamemap):
         return isinstance(gamemap[self.x][self.y], Hole)
