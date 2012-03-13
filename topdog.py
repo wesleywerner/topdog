@@ -42,7 +42,7 @@ def blitscreens():
 
 def draw_map():
     """
-        Draw the map tiles onto the canvas.
+        Draw the map t2iles onto the canvas.
     """
     for y in range(C.MAP_HEIGHT - 0):
         for x in range(C.MAP_WIDTH - 0):
@@ -79,7 +79,7 @@ def draw_objects():
         libtcod.console_print_ex(canvas
                             ,x, C.SEENLIST_TOP
                             ,libtcod.BKGND_NONE, align
-                            ,"%c*sees*%c\n"  % (C.COL3, C.COLS) + "\n".join(seen_objects))
+                            ,"%c*sees*%c\n"  % (C.COL5, C.COLS) + "\n".join(seen_objects))
 
 def draw_player_stats():
     """

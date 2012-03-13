@@ -313,12 +313,11 @@ def generate_map():
     """
     game_map = blank_map()
     game_objects = []
-    map_from_ascii(game_map)
     transform_map(game_map)
     plant_foliage(game_map)
     generate_toys(game_map, game_objects)
     build_fence(game_map)
-    fov_map = libtcod.map_new(C.MAP_WIDTH - 1, C.MAP_HEIGHT - 1)
+    fov_map = libtcod.map_new(C.MAP_WIDTH, C.MAP_HEIGHT)
     for y in range(C.MAP_HEIGHT - 1):
         for x in range(C.MAP_WIDTH - 1):
             libtcod.map_set_properties(fov_map, x, y
