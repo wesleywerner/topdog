@@ -24,6 +24,7 @@ HOLE_FG = libtcod.sepia
 # define our tile characters here so we can do easy ascii to map lookups
 CHAR_FENCE = "#"
 CHAR_TAR = "/"
+CHAR_WATER = "~"
 CHAR_BRICK = chr(177)
 CHAR_TREE = chr(6)
 CHAR_BUSH = chr(5)
@@ -32,7 +33,7 @@ CHAR_BUSH = chr(5)
 
 def tree():
     names = ('Tree', 'Oak Tree', 'Bark Tree', 'Big Tree')
-    fol = cls.Foliage()
+    fol = cls.Object()
     fol.char = CHAR_TREE
     fol.name = random.choice(names)
     fol.fgcolor=TREE_FG
@@ -42,7 +43,7 @@ def tree():
 
 def bush():
     names = ('Shrubbery', 'Thicket', 'Thornbush', 'Rosebush')
-    fol = cls.Foliage()
+    fol = cls.Object()
     fol.char = CHAR_BUSH
     fol.name = random.choice(names)
     fol.fgcolor=BUSH_FG
@@ -93,8 +94,10 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                     for tx in range(pond_size):
                         tile = currentmap[x + tx][y + ty]
                         if tile.isblank() or \
-                        isinstance(tile, cls.Foliage):
-                            wetness = cls.Water()
+                        isinstance(tile, cls.Object):
+                            wetness = cls.Object()
+                            wetness.drinkable = True
+                            wetness.char = CHAR_WATER
                             wetness.fgcolor = POOL_FG
                             wetness.bgcolor = POOL_BG
                             wetness.blocking = True
@@ -109,7 +112,9 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                     if currentmap[tx][ty].isblank():
                         # transfer the current cell bgcolor
                         bgcolor = currentmap[tx][ty].bgcolor
-                        puddle = cls.Water()
+                        puddle = cls.Object()
+                        puddle.drinkable = True
+                        puddle.char = CHAR_WATER
                         puddle.name = "Puddle"
                         puddle.fgcolor = PUDDLE_FG
                         puddle.bgcolor = bgcolor

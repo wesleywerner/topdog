@@ -32,10 +32,6 @@ class Object(object):
         return self.char == Object.BLANK_CHAR
     
 
-class Foliage(Object):
-    def __init__(self):
-        super(Foliage, self).__init__()
-
 class Player(Object):
     """
         Tracks the player state and provides helper functions
@@ -101,7 +97,7 @@ class Player(Object):
         self.bravery = DEFAULT_BRAVERY
 
     def quench_thirst(self, gamemap):
-        if isinstance(gamemap[self.x][self.y], Water):
+        if gamemap[self.x][self.y].drinkable:
             self.quenches = self.quenches + 1
             self.thirsty = False
             self.add_message("You %cquenced%c your thirst." % (libtcod.COLCTRL_3
@@ -156,15 +152,6 @@ class GameState():
     
     def is_empty(self):
         return len(self.stack) == 0
-
-class Water(Object):
-    """
-        Represents a water tile.
-    """
-    def __init__(self):
-        super(Water, self).__init__()
-        self.char = "~"
-        self.name = "Water"
 
 class Hole(Object):
     """
