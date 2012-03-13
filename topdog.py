@@ -44,10 +44,10 @@ def draw_map():
     """
         Draw the map tiles onto the canvas.
     """
-    for y in range(C.MAP_HEIGHT - 1):
-        for x in range(C.MAP_WIDTH - 1):
+    for y in range(C.MAP_HEIGHT - 0):
+        for x in range(C.MAP_WIDTH - 0):
             tile = game_map[x][y]
-            if libtcod.map_is_in_fov(fov_map, x, y):
+            if libtcod.map_is_in_fov(fov_map, x, y) or player.wizard:
                 tile.seen = True
                 libtcod.console_put_char_ex(canvas, x, y, 
                                             tile.char, tile.fgcolor, tile.bgcolor)

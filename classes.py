@@ -52,6 +52,7 @@ class Player(Object):
         self.automove_target = None
         self.messages = []
         self.carrying = None
+        self.wizard = False
     
     def pickup_item(self, objects):
         for obj in objects:

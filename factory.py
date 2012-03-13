@@ -135,7 +135,7 @@ def generate_toys(game_map, game_objects):
     """
         Make some toys for fido.
     """
-    how_many = random.randint(0, 3)
+    how_many = random.randint(1, 4)
     toy_names = ("tennis ball!", "bouncy ball", "rubber bone", "knotted rope"
                 ,"rubber chicken", "rubber ducky")
     toy_colors = (libtcod.lighter_green, libtcod.lighter_red
@@ -146,7 +146,7 @@ def generate_toys(game_map, game_objects):
     for item in range(how_many):
         toy = cls.Object()
         toy.name = random.choice(toy_names)
-        toy.char = chr(4)
+        toy.char = chr(3)
         toy.fgcolor = random.choice(toy_colors)
         toy.carryable = True
         while True:
@@ -231,10 +231,10 @@ def build_fence(game_map):
     """
         Outline the yard with a fence like structure.
     """
-    for y in range(C.MAP_HEIGHT):
+    for y in range(C.MAP_HEIGHT - 0):
         game_map[0][y] = fence_segment()
         game_map[C.MAP_WIDTH - 1][y] = fence_segment()
-    for x in range(C.MAP_WIDTH):
+    for x in range(C.MAP_WIDTH - 0):
         game_map[x][0] = fence_segment()
         game_map[x][C.MAP_HEIGHT - 1] = fence_segment()
     make_fence_holes(game_map)
@@ -252,8 +252,6 @@ def plant_foliage(game_map):
     spawn_pond(game_map, amount=1, pond_size=random.randint(4, 10), density=0)
     # make some wet spots
     spawn_pond(game_map, amount=4, pond_size=10, density=2)
-    # build the fence
-    build_fence(game_map)
 
 def get_brick():
     """
@@ -319,7 +317,8 @@ def generate_map():
     transform_map(game_map)
     plant_foliage(game_map)
     generate_toys(game_map, game_objects)
-    fov_map = libtcod.map_new(C.MAP_WIDTH, C.MAP_HEIGHT)
+    build_fence(game_map)
+    fov_map = libtcod.map_new(C.MAP_WIDTH - 1, C.MAP_HEIGHT - 1)
     for y in range(C.MAP_HEIGHT - 1):
         for x in range(C.MAP_WIDTH - 1):
             libtcod.map_set_properties(fov_map, x, y
