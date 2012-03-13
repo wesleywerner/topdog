@@ -55,11 +55,10 @@ def drawobjects():
         Place all map objects on the canvas.
     """
     for obj in gameobjects:
-        libtcod.console_set_default_foreground(canvas, obj.fgcolor)
-        libtcod.console_put_char(canvas, obj.x, obj.y, 
-                                    obj.char, libtcod.BKGND_NONE)
+        libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
+                                    obj.char, obj.fgcolor, None)
 
-def draw_panel_stats():
+def draw_player_stats():
     """
         Print player info and stats in the side panel.
     """
@@ -91,7 +90,6 @@ def draw_panel_stats():
     if player.weak:
         texts.append("You feel %cvery weak%c." % (libtcod.COLCTRL_1
                                 , libtcod.COLCTRL_STOP))
-    libtcod.console_set_default_foreground(0, libtcod.dark_grey)
     libtcod.console_print_ex(0, C.MESSAGES_LEFT
                             ,C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.LEFT
@@ -148,16 +146,13 @@ if __name__ == "__main__":
         if state == C.STATE_PLAYING:
             if not player:
                 player = cls.Player()
-#                gameobjects = [player]
-#                #TODO: add game objects here
-#                gamemap = factory.generate_map()
                 warp_level()
             libtcod.console_clear(0)
             libtcod.console_clear(canvas)
             drawmap()
             drawobjects()
             draw_messages()
-            draw_panel_stats()
+            draw_player_stats()
             blitscreens()
         if gamestate.is_empty():
             break
