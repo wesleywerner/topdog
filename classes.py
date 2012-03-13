@@ -2,10 +2,6 @@
 import lib.libtcodpy as libtcod
 import constants as C
 
-THIRST_INDEX = 100
-PIDDLE_INDEX = 3
-
-
 class Object(object):
     """
         base Object for any other class that is placed on the map
@@ -65,12 +61,10 @@ class Player(Object):
                         self.carrying.x = obj.x
                         self.carrying.y = obj.y
                         self.add_message("*drops* the %c%s%c" % \
-                                (libtcod.COLCTRL_3, self.carrying.name
-                                ,libtcod.COLCTRL_STOP))
+                                (C.COL3, self.carrying.name, C.COLS))
                     self.carrying = obj
                     self.add_message("*picks up* the %c%s%c" % \
-                                (libtcod.COLCTRL_3, self.carrying.name
-                                ,libtcod.COLCTRL_STOP))
+                                (C.COL3, self.carrying.name, C.COLS))
         
     def can_warp(self, gamemap):
         return isinstance(gamemap[self.x][self.y], Hole)
@@ -88,10 +82,8 @@ class Player(Object):
             self.y = 1
         if self.level > 1:
             self.messages = [
-                        "%cYou %center%c the yard." % 
-                        (libtcod.COLCTRL_5
-                        ,libtcod.COLCTRL_4
-                        ,libtcod.COLCTRL_5)]
+                        "You %center%c the yard." % 
+                        (C.COL4, C.COLS)]
 
     def add_message(self, message):
         if not self.messages: 
@@ -120,9 +112,8 @@ class Player(Object):
         if gamemap[self.x][self.y].drinkable:
             self.quenches = self.quenches + 1
             self.thirsty = False
-            self.add_message("You %cquenced%c your thirst." % (libtcod.COLCTRL_3
-                                                        ,libtcod.COLCTRL_STOP))
-            if self.quenches % PIDDLE_INDEX == 0:
+            self.add_message("You %cquenced%c your thirst." % (C.COL3, C.COLS))
+            if self.quenches % C.PLAYER_PIDDLE_INDEX == 0:
                 self.mustpiddle = True
 
     def do_piddle(self):
@@ -136,9 +127,9 @@ class Player(Object):
             tile = gamemap[x][y]
             if tile.blocking:
                 self.add_message("*bumps* %c%s%c" % 
-                                 (libtcod.COLCTRL_4
+                                 (C.COL4
                                  ,tile.name
-                                 ,libtcod.COLCTRL_STOP))
+                                 ,C.COLS))
             else:
                 self.x = x
                 self.y = y
@@ -146,7 +137,7 @@ class Player(Object):
                 self.pickup_item(game_objects)
                 if self.moves % 15 == 0:
                     self.trim_message()
-                if self.moves % THIRST_INDEX == 0:
+                if self.moves % C.PLAYER_THIRST_INDEX == 0:
                     if self.thirsty:
                         self.weak = True
                     self.thirsty = True

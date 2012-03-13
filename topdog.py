@@ -30,7 +30,7 @@ def setup_keyhandler():
                 ,libtcod.KEY_KP8: "player.move(game_map, game_objects, 0, -1)"
                 ,libtcod.KEY_KP9: "player.move(game_map, game_objects, 1, -1)"
                 ,libtcod.KEY_SPACE: \
-                    "if player.can_warp(game_map): warp_level()"
+                                    "if player.can_warp(game_map): warp_level()"
                 ,"d": "player.quench_thirst(game_map)"
                 })
     return handler
@@ -63,6 +63,7 @@ def draw_objects():
     for obj in game_objects:
         if not obj is player.carrying:
             if libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
+                player.add_message("*sees* a %c%s%c" % (C.COL3, obj.name, C.COLS))
                 libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
                                         obj.char, obj.fgcolor, None)
     libtcod.console_put_char_ex(canvas, player.x, player.y, 
@@ -77,27 +78,20 @@ def draw_player_stats():
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                                 C.MAP_TILE_DESC_TOP, 
                                 libtcod.BKGND_NONE, libtcod.CENTER, 
-                                "%c%s%c" % (libtcod.COLCTRL_5
-                                            ,tile.name
-                                            ,libtcod.COLCTRL_STOP))
+                                "%c%s%c" % (C.COL5, tile.name, C.COLS))
     # player stats
     texts = [
-             "level: %c%s%c" % (libtcod.COLCTRL_5
-                                ,player.level,libtcod.COLCTRL_STOP)
-            ,"score: %c%s%c" % (libtcod.COLCTRL_5
-                                ,player.score, libtcod.COLCTRL_STOP)
-            ,"moves: %c%s%c" % (libtcod.COLCTRL_5
-                                ,player.moves, libtcod.COLCTRL_STOP)
+             "level: %c%s%c" % (C.COL5, player.level, C.COLS)
+            ,"score: %c%s%c" % (C.COL5, player.score, C.COLS)
+            ,"moves: %c%s%c" % (C.COL5, player.moves, C.COLS)
             ]
     if player.carrying:
-        texts.append("carry: %c%s%c" % (libtcod.COLCTRL_3
-                    ,player.carrying.name, libtcod.COLCTRL_STOP))
+        texts.append("carry: %c%s%c" % (C.COL3, player.carrying.name, C.COLS))
     if player.thirsty:
-        texts.append("You are %c%s%c. You need water." % (libtcod.COLCTRL_2
-                                ,"thirsty", libtcod.COLCTRL_STOP))
+        texts.append("You are %c%s%c. You need water." % \
+                    (C.COL2, "thirsty", C.COLS))
     if player.weak:
-        texts.append("You feel %cvery weak%c." % (libtcod.COLCTRL_1
-                                , libtcod.COLCTRL_STOP))
+        texts.append("You feel %cvery weak%c." % (C.COL1, C.COLS))
     libtcod.console_print_ex(0, C.MESSAGES_LEFT
                             ,C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.LEFT
@@ -124,18 +118,8 @@ def warp_level():
     player.warp_prep()
     game_map, fov_map = factory.generate_map()
     #TODO: add game objects here
-    game_objects = [player]
+    game_objects = []
     libtcod.console_set_default_foreground(0, libtcod.light_grey)
-    
-    o = cls.Object()
-    o.carryable = True
-    o.name = "ball"
-    o.char = "o"
-    o.fgcolor = libtcod.green
-    o.x = 1
-    o.y = 5
-    game_objects.append(o)
-
 
 if __name__ == "__main__":
     """
