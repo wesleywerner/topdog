@@ -40,6 +40,7 @@ def get_tree():
     fol.fgcolor=TREE_FG
     fol.bgcolor=TREE_BG
     fol.blocking = False
+    fol.seethrough = False
     return fol
 
 def get_bush():
@@ -50,6 +51,10 @@ def get_bush():
     fol.fgcolor=BUSH_FG
     fol.bgcolor=BUSH_BG
     fol.blocking = False
+#    fol.seethrough = False
+    fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
+    fol.message = "*crawls* under %c%s%c" % \
+                    (libtcod.COLCTRL_4, fol.name, libtcod.COLCTRL_STOP)
     return fol
     
 def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
@@ -228,6 +233,7 @@ def get_brick():
     """
     brick = cls.Object()
     brick.blocking = True
+    brick.seethrough = False
     brick.name = "wall"
     brick.char = CHAR_BRICK
     brick.fgcolor = libtcod.dark_grey
@@ -282,7 +288,14 @@ def generate_map():
     map_from_ascii(gamemap)
     transform_map(gamemap)
     plant_foliage(gamemap)
-    return gamemap
+    fov_map = libtcod.map_new(C.MAP_WIDTH, C.MAP_HEIGHT)
+    for y in range(C.MAP_HEIGHT):
+        for x in range(C.MAP_WIDTH):
+            libtcod.map_set_properties(
+                                        fov_map, x, y
+                                        ,gamemap[x][y].seethrough
+                                        ,not gamemap[x][y].blocking)
+    return gamemap, fov_map
 
 
 #===============================================================[[ Libtcod ]]
@@ -298,7 +311,6 @@ def init_libtcod():
     print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
     # default font color
-    libtcod.console_set_default_foreground(0, libtcod.light_grey)
     # set color control codes for inline string formatting
     # listed by priority: think defcon levels
     # high alert, priority one

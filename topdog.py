@@ -29,7 +29,8 @@ def setup_keyhandler():
                             ,libtcod.KEY_KP7: "player.move(gamemap, -1, -1)"
                             ,libtcod.KEY_KP8: "player.move(gamemap, 0, -1)"
                             ,libtcod.KEY_KP9: "player.move(gamemap, 1, -1)"
-                            ,libtcod.KEY_SPACE: "warp_level()"
+                            ,libtcod.KEY_SPACE: \
+                                "if player.can_warp(gamemap): warp_level()"
                             ,"d": "player.quench_thirst(gamemap)"
                             })
     return handler
@@ -39,7 +40,7 @@ def blitscreens():
     libtcod.console_blit(canvas, 0, 0, C.MAP_WIDTH, C.MAP_HEIGHT, 0, 2, 2)
     libtcod.console_flush()
 
-def drawmap():
+def draw_map():
     """
         Draw the map tiles onto the canvas.
     """
@@ -47,16 +48,22 @@ def drawmap():
     for y in range(C.MAP_HEIGHT):
         for x in range(C.MAP_WIDTH):
             tile = gamemap[x][y]
-            libtcod.console_put_char_ex(canvas, x, y, 
-                                        tile.char, tile.fgcolor, tile.bgcolor)
+            if libtcod.map_is_in_fov(fovmap, x, y):
+                tile.seen = True
+                libtcod.console_put_char_ex(canvas, x, y, 
+                                            tile.char, tile.fgcolor, tile.bgcolor)
+            elif tile.seen:
+                libtcod.console_put_char_ex(canvas, x, y, 
+                                            tile.char, libtcod.darker_grey, libtcod.black)
 
 def drawobjects():
     """
         Place all map objects on the canvas.
     """
     for obj in gameobjects:
-        libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
-                                    obj.char, obj.fgcolor, None)
+        if libtcod.map_is_in_fov(fovmap, obj.x, obj.y):
+            libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
+                                        obj.char, obj.fgcolor, None)
 
 def draw_player_stats():
     """
@@ -107,19 +114,14 @@ def warp_level():
         Warp to the next game level.
     """
     global gamemap
+    global fovmap
     global gameobjects
     global player
-    warp = False
-    if not gamemap:
-        warp = True
-    else:
-        if isinstance(gamemap[player.x][player.y], cls.Hole):
-            warp = True
-    if warp:
-        player.warp_prep()
-        gamemap = factory.generate_map()
-        #TODO: add game objects here
-        gameobjects = [player]
+    player.warp_prep()
+    gamemap, fovmap = factory.generate_map()
+    #TODO: add game objects here
+    gameobjects = [player]
+    libtcod.console_set_default_foreground(0, libtcod.light_grey)
 
 
 if __name__ == "__main__":
@@ -133,6 +135,7 @@ if __name__ == "__main__":
     kb_handler = setup_keyhandler()
     gamestate = cls.GameState()
     gamemap = None
+    fovmap = None
     gameobjects = None
     player = None
     
@@ -146,7 +149,10 @@ if __name__ == "__main__":
                 warp_level()
             libtcod.console_clear(0)
             libtcod.console_clear(canvas)
-            drawmap()
+            libtcod.map_compute_fov(fovmap, player.x, player.y
+                                    ,player.fov_radius
+                                    ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+            draw_map()
             drawobjects()
             draw_messages()
             draw_player_stats()

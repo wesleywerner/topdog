@@ -23,12 +23,13 @@ class Object(object):
         self.fgcolor = fgcolor
         self.bgcolor = bgcolor
         self.blocking = False
-        self.seethrough = False
+        self.seethrough = True
         self.visible = True
+        self.seen = False
         self.drinkable = False
         self.edible = False
         self.carryable = False
-        self.limitfov = False
+        self.fov_limit = None
         self.message = None
 
 class Player(Object):
@@ -48,11 +49,15 @@ class Player(Object):
         self.moves = 0
         self.level = 0
         self.score = 0
+        self.fov_radius = C.FOV_RADIUS_DEFAULT
         self.scents = []
         self.hostiles = []
         self.quests = []
         self.automove_target = None
         self.messages = []
+    
+    def can_warp(self, gamemap):
+        return isinstance(gamemap[self.x][self.y], Hole)
     
     def warp_prep(self):
         self.level = self.level + 1
@@ -130,6 +135,10 @@ class Player(Object):
                     self.thirsty = True
                 if tile.message:
                     self.add_message(tile.message)
+                if tile.fov_limit:
+                    self.fov_radius = tile.fov_limit
+                else:
+                    self.fov_radius = C.FOV_RADIUS_DEFAULT
 
 class GameState():
     """
@@ -244,5 +253,4 @@ class KeyHandler(object):
 
 #=========================================================[[ Unit Test ]]
 if __name__ == "__main__":
-    t = Object()
-    print(t.isblank())
+    pass
