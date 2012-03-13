@@ -34,8 +34,8 @@ class Player(Object):
     """
     def __init__(self):
         super(Player, self).__init__()
-        self.x = 2
-        self.y = 2
+        self.x = 1
+        self.y = 1
         self.char = "@"
         self.fgcolor = libtcod.white
         self.weak = False
@@ -84,7 +84,7 @@ class Player(Object):
             self.y = 1
         if self.level > 1:
             self.messages = [
-                        "You %center%c the yard." % 
+                        "You %center%c the yard..." % 
                         (C.COL4, C.COLS)]
 
     def add_message(self, message):

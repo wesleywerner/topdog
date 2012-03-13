@@ -3,23 +3,19 @@
 # object within a certain genre. i.e. spawn_foliage could return
 # a tree, a bush, a cactus...
 
+import os
 import random
 import lib.libtcodpy as libtcod
 import constants as C
 import classes as cls
-import asciimaps
 
 # all our colors are define here for easy changing
 
-TREE_FG = libtcod.darker_amber
-TREE_BG = libtcod.black
-BUSH_FG = libtcod.darker_chartreuse
-BUSH_BG = libtcod.black
 POOL_BG = libtcod.darker_sky
 POOL_FG = libtcod.sky
 PUDDLE_FG = libtcod.sky
-FENCE_BG = libtcod.darkest_grey
-FENCE_FG = libtcod.darker_sepia
+FENCE_BG = libtcod.black
+FENCE_FG = libtcod.dark_sepia
 HOLE_FG = libtcod.sepia
 
 # define our tile characters here so we can do easy ascii to map lookups
@@ -29,34 +25,48 @@ CHAR_WATER = "~"
 CHAR_BRICK = chr(177)
 CHAR_TREE = chr(6)
 CHAR_BUSH = chr(5)
+CHAR_FLOWERS = chr(15)
 
 #===============================================================[[ Foliage ]]
 
 def get_tree():
     names = ('Tree', 'Oak Tree', 'Bark Tree', 'Big Tree')
+    colors = (libtcod.darkest_lime, libtcod.darker_amber
+            ,libtcod.darkest_amber, libtcod.darker_orange, libtcod.darkest_green)
     fol = cls.Object()
     fol.char = CHAR_TREE
     fol.name = random.choice(names)
-    fol.fgcolor=TREE_FG
-    fol.bgcolor=TREE_BG
+    fol.fgcolor = random.choice(colors)
     fol.blocking = False
     fol.seethrough = False
     return fol
 
 def get_bush():
     names = ('Shrubbery', 'Thicket', 'Thornbush', 'Rosebush')
+    colors = (libtcod.darker_chartreuse, libtcod.darkest_chartreuse
+            , libtcod.darker_green, libtcod.darkest_green, libtcod.darkest_lime)
     fol = cls.Object()
     fol.char = CHAR_BUSH
     fol.name = random.choice(names)
-    fol.fgcolor=BUSH_FG
-    fol.bgcolor=BUSH_BG
+    fol.fgcolor = random.choice(colors)
     fol.blocking = False
-#    fol.seethrough = False
     fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
-    fol.message = "*crawls* under %c%s%c" % \
-                    (libtcod.COLCTRL_4, fol.name, libtcod.COLCTRL_STOP)
+    fol.message = "*crawls* under %c%s%c" % (C.COL4, fol.name, C.COLS)
     return fol
     
+def get_flowers():
+    names = ('Flowers', 'Roses')
+    colors = (libtcod.light_amber, libtcod.light_magenta
+            , libtcod.light_red, libtcod.light_azure, libtcod.light_yellow)
+    fol = cls.Object()
+    fol.char = CHAR_FLOWERS
+    fol.name = random.choice(names)
+    fol.fgcolor = random.choice(colors)
+    fol.blocking = False
+    fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
+    fol.message = "*crawls* under %c%s%c" % (C.COL4, fol.name, C.COLS)
+    return fol
+
 def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
     """
         spawn amount of random foliages, using currentmap to test against
@@ -67,6 +77,7 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
     """
     plant_choices = (get_tree
                     ,get_bush
+                    ,get_flowers
                     )
 
     for loop in range(amount):
@@ -89,8 +100,17 @@ def get_puddle():
     puddle.char = CHAR_WATER
     puddle.name = "water puddle"
     puddle.fgcolor = PUDDLE_FG
-    puddle.message = "%c*splash*%c" % (libtcod.COLCTRL_4
-                                    ,libtcod.COLCTRL_STOP)
+    puddle.message = "%c*splash*%c" % (C.COL4, C.COLS)
+    return puddle
+
+def get_pool_tile():
+    puddle = cls.Object()
+    puddle.drinkable = True
+    puddle.char = CHAR_WATER
+    puddle.name = "pool"
+    puddle.fgcolor = POOL_FG
+    puddle.bgcolor = POOL_BG
+    puddle.message = "%c*splash*%c" % (C.COL4, C.COLS)
     return puddle
 
 def spawn_pond(currentmap, amount, pond_size=4, density=6):
@@ -178,6 +198,7 @@ def fence_segment():
     panel.bgcolor = FENCE_BG
     panel.fgcolor = FENCE_FG
     panel.blocking = True
+    panel.seethrough = False
     return panel
 
 def fence_hole():
@@ -245,13 +266,13 @@ def plant_foliage(game_map):
         Plant some trees and things onto the map.
     """
     # make a few large thickets
-    spawn_foliage(game_map, amount=4, thicket_size=6, density=24)
+#    spawn_foliage(game_map, amount=2, thicket_size=12, density=2)
+    # make a few smaller, denser thickets
+#    spawn_foliage(game_map, amount=2, thicket_size=6, density=6)
     # spread some single greens around the map
     spawn_foliage(game_map, amount=10, thicket_size=1, density=1)
-    # make some pools
-    spawn_pond(game_map, amount=1, pond_size=random.randint(4, 10), density=0)
     # make some wet spots
-    spawn_pond(game_map, amount=4, pond_size=10, density=2)
+    spawn_pond(game_map, amount=3, pond_size=10, density=2)
 
 def get_brick():
     """
@@ -289,20 +310,32 @@ def transform_map(game_map):
         for e in game_map:
             e.reverse()
     
+def read_map_file(map_index):
+    f = open(os.path.join('data', 'maps', 'map%s' % (map_index)))
+    contents = f.read(3000)
+    f.close()
+    map_data = contents.split("\n")
+    return map_data
     
 def map_from_ascii(game_map):
     """
-        load map tiles from an ascii representation.
+        Load map tiles from an ascii representation.
     """
+    # here we can map ascii values to our tile objects
+    # since the ascii maps can't contain special chars
     tile_lookup = {
-                    "#": get_brick
+                    "B": get_brick
+                    ,"#": fence_segment
                     ,CHAR_TAR: get_tar
-                    ,CHAR_WATER: get_puddle
+                    ,CHAR_WATER: get_pool_tile
+                    ,'f': get_flowers
+                    ,'t': get_tree
+                    ,'b': get_bush
                 }
-    amap = random.choice(asciimaps.ASCIIMaps.maps)
+    map_data = read_map_file(2)
     for y in range(C.MAP_HEIGHT - 1):
         for x in range(C.MAP_WIDTH - 1):
-            asciic = amap[y][x]
+            asciic = map_data[y][x]
             if asciic in tile_lookup:
                 game_map[x][y] = tile_lookup[asciic]()
 
@@ -313,6 +346,7 @@ def generate_map():
     """
     game_map = blank_map()
     game_objects = []
+    map_from_ascii(game_map)
     transform_map(game_map)
     plant_foliage(game_map)
     generate_toys(game_map, game_objects)
@@ -354,7 +388,7 @@ def init_libtcod():
                                         ,libtcod.dark_chartreuse
                                         ,libtcod.black)
     # tile and npc names
-    libtcod.console_set_color_control(libtcod.COLCTRL_4
+    libtcod.console_set_color_control(C.COL4
                                         ,libtcod.light_azure
                                         ,libtcod.black)
     # all other words

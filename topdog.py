@@ -32,6 +32,7 @@ def setup_keyhandler():
                 ,libtcod.KEY_SPACE: \
                                     "if player.can_warp(game_map): warp_level()"
                 ,"d": "player.quench_thirst(game_map)"
+                ,libtcod.KEY_F5: "warp_level()"
                 })
     return handler
 
@@ -130,7 +131,9 @@ def warp_level():
     global player
     player.warp_prep()
     game_map, fov_map, game_objects = factory.generate_map()
-    #TODO: add game objects here
+    # carry our inventory item into this new level
+    if player.carrying:
+        game_objects.append(player.carrying)
     libtcod.console_set_default_foreground(0, libtcod.light_grey)
 
 if __name__ == "__main__":
