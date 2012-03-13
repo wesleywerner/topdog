@@ -22,6 +22,10 @@ class Object(object):
         self.blocking = False
         self.seethrough = False
         self.visible = True
+        self.drinkable = False
+        self.edible = False
+        self.carryable = False
+        self.limitfov = False
     
     def isblank(self):
         """ test if the tile is blank to be used for placing an object. """
