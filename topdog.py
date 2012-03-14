@@ -55,7 +55,8 @@ def game_turn(player_move_x, player_move_y):
         for npc in game_objects:
             if isinstance(npc, cls.AnimalBase):
                 if npc.move_ai:
-                    npc.move_ai.take_turn(game_map, game_objects)
+                    npc.move_ai.take_turn(game_map, fov_map
+                                        , game_objects, (player.x, player.y))
     # check game state for NPC dialogues
     if len(player.dialogues) > 0:
         gamestate.push(C.STATE_DIALOGUE)

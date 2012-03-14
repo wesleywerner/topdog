@@ -195,9 +195,8 @@ def spawn_npcs(game_map):
         npc.char = "r"
         npc.name = "rat"
         npc.fgcolor = libtcod.blue
-        npc.blocking = True
-        npc.move_step = 4
-        npc.flying = True
+        npc.blocking = False
+        npc.move_step = 1
         mai = cls.MoveAI(npc)
         mai.behaviour = cls.MoveAI.NEUTRAL
         npc.move_ai = mai

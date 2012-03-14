@@ -3,6 +3,9 @@ import random
 import lib.libtcodpy as libtcod
 import constants as C
 
+def dice(sides):
+    return random.randint(0, sides) == 0
+    
 class Dialogue():
     def __init__(self, npc_name, npc_picture, dialogue):
         self.npc_name = npc_name
@@ -94,6 +97,7 @@ class MoveAI(object):
         SKITTISH: keeps its distance
         NEUTRAL: indifferent
         FRIENDLY: follows the player at random times
+        HUNTING: actively persues the player
     """
     SKITTISH = 0x0
     NEUTRAL = 0x1
@@ -102,13 +106,28 @@ class MoveAI(object):
     def __init__(self, owner):
         self.owner = owner
         self.behaviour = None
+        self.erraticity = 10
 
-    def take_turn(self, game_map, game_objects):
+    def take_turn(self, game_map, fov_map, game_objects, playerxy):
         npc = self.owner
-        #TODO: logic here for different behaviour
-        if npc.flying:
+        x, y = (0, 0)
+        if self.behaviour == MoveAI.SKITTISH:
+            #TODO: use better path finding to move away from player
+            if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
+                x, y = npc.get_xy_towards(x, y)
+                npc.move(game_map, game_objects, -x, -y)
+        elif self.behaviour == MoveAI.NEUTRAL:
+            if dice(self.erraticity):
+                x = random.randint(-1, 1)
+            if dice(self.erraticity):
+                y = random.randint(-1, 1)
+            npc.move(game_map, game_objects, x, y)
+        elif self.behaviour == MoveAI.FRIENDLY:
             pass
-        npc.move(game_map, game_objects, random.randint(-1, 1), random.randint(-1, 1))
+        elif self.behaviour == MoveAI.HUNTING:
+            pass
+            
+#        npc.move(game_map, game_objects, 0, 0)
 
 
 class AnimalBase(object):
@@ -184,7 +203,7 @@ class AnimalBase(object):
         # normalize to length 1 keeping direction
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
-        Return (dx, dy)
+        return (dx, dy)
 
 
 class Player(AnimalBase):
