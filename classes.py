@@ -3,6 +3,12 @@ import random
 import lib.libtcodpy as libtcod
 import constants as C
 
+class Dialogue():
+    def __init__(self, npc_name, npc_picture, dialogue):
+        self.npc_name = npc_name
+        self.npc_picture = npc_picture
+        self.dialogue = dialogue
+    
 class ItemBase(object):
     """
         Inanimate items (foliage, water, walls) and map tiles.
@@ -36,7 +42,7 @@ class ActionAI(object):
     def __init__(self, owner):
         self.owner = owner
         self.hostile = False
-        self.dialogue = None
+        self.dialogue_text = None
         self.picture = None
         self.quest = None
         self.attack_rating = 0
@@ -45,13 +51,22 @@ class ActionAI(object):
         npc = self.owner
         if isinstance(target, Player):
             #TODO: logic here for behaviour
-            if self.dialogue:
+            if self.dialogue_text:
                 # show dialogue to the player
-                target.add_message(self.dialogue)
-                self.dialogue = None
+                if type(self.dialogue_text) is list:
+                    # this is a list of dialogues, talk our ear off
+                    target.add_dialogue(Dialogue(npc.name, self.picture
+                                            , self.dialogue_text.pop()))
+                    if len(self.dialogue_text) == 0:
+                        self.dialogue_text = None
+                else:
+                    # a one-liner dialogue
+                    target.add_dialogue(Dialogue(npc.name, self.picture
+                                            , self.dialogue_text))
+                    self.dialogue = None
             elif self.quest:
                 # give the player our quest
-                target.add_message("You got a quest")
+                target.add_quest(self.quest)
                 self.quest = None
             elif self.hostile:
                 # enact some hostility
@@ -176,7 +191,15 @@ class Player(AnimalBase):
         self.messages = []
         self.seen = True
         self.wizard = False
+        self.dialogues = []
 
+    def add_quest(self, quest):
+        #TODO notify player of our new quest
+        self.add_message("got a quest!")
+    
+    def add_dialogue(self, dialogue):
+        self.dialogues.append(dialogue)
+        
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
         self.add_message("The %s hit you for %s" % (attacker.name, damage))

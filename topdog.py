@@ -42,6 +42,11 @@ def game_turn(player_move_x, player_move_y):
         Call all game turn actions.
     """
     if player.move(game_map, game_objects, player_move_x, player_move_y):
+        # recompute field of vision since we moved
+        libtcod.map_compute_fov(fov_map, player.x, player.y
+                                ,player.fov_radius
+                                ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+        # move NPC's
         for npc in game_objects:
             if isinstance(npc, cls.AnimalBase):
                 if npc.move_ai:
@@ -151,12 +156,23 @@ def warp_level():
     global maps_avail
     player.warp_prep()
     game_map, fov_map = factory.generate_map(maps_avail)
+    # compute initial field of vision
+    libtcod.map_compute_fov(fov_map, player.x, player.y
+                            ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
     game_objects = [player]
     game_objects.extend(factory.spawn_toys(game_map))
     game_objects.extend(factory.spawn_npcs(game_map))
     # carry our inventory item into this new level
     if player.carrying:
         game_objects.append(player.carrying)
+
+def show_dialogues():
+    """
+        Display any NPC talk.
+    """
+    if len(player.dialogues) > 0:
+        player.add_message("you have chats waiting.")
+        player.dialogues.pop()
 
 if __name__ == "__main__":
     """
@@ -182,11 +198,12 @@ if __name__ == "__main__":
             if not player:
                 player = cls.Player()
                 warp_level()
+            # clear our displays
             libtcod.console_clear(0)
             libtcod.console_clear(canvas)
-            libtcod.map_compute_fov(fov_map, player.x, player.y
-                                    ,player.fov_radius
-                                    ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+            # show any dialogues
+            show_dialogues()
+            # draw screens
             draw_map()
             draw_player_stats()
             draw_objects()
