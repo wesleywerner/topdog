@@ -29,7 +29,7 @@ def setup_keyhandler():
                 ,libtcod.KEY_KP2: "game_turn(0, 1)"
                 ,libtcod.KEY_KP3: "game_turn(1, 1)"
                 ,libtcod.KEY_KP4: "game_turn(-1, 0)"
-                ,libtcod.KEY_KP5: "pass"
+                ,libtcod.KEY_KP5: "game_turn(0, 0)"
                 ,libtcod.KEY_KP6: "game_turn(1, 0)"
                 ,libtcod.KEY_KP7: "game_turn(-1, -1)"
                 ,libtcod.KEY_KP8: "game_turn(0, -1)"

@@ -106,6 +106,8 @@ class MoveAI(object):
     def take_turn(self, game_map, game_objects):
         npc = self.owner
         #TODO: logic here for different behaviour
+        if npc.flying:
+            pass
         npc.move(game_map, game_objects, random.randint(-1, 1), random.randint(-1, 1))
 
 
@@ -128,6 +130,7 @@ class AnimalBase(object):
         self.fov_radius = C.FOV_RADIUS_DEFAULT
         self.move_ai = None
         self.action_ai = None
+        self.flying = False
     
     def interact(self, target):
         pass
@@ -144,15 +147,16 @@ class AnimalBase(object):
             Move to the given xy offset if non blocking and not in deep water.
             Return True if so.
         """
+        if xoffset == 0 and yoffset == 0:
+            return True
         x = self.x + xoffset
         y = self.y + yoffset
         # test if within the map bounds, and no tiles block us
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             tile = game_map[x][y]
-            if tile.blocking or tile.drinkable and \
-                                game_map[self.x][self.y].drinkable:
-                pass    # cant move into a drinkable tile if already on one
-            else:
+            # cant move into a drinkable tile if already on one
+            near_deep_water = tile.drinkable and game_map[self.x][self.y].drinkable
+            if not tile.blocking and not near_deep_water or self.flying:
                 # test if moving against another being
                 blocking_us = False
                 for being in game_objects:
