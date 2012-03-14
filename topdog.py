@@ -16,6 +16,11 @@ def setup_keyhandler():
                             ,libtcod.KEY_SPACE: "gamestate.push(C.STATE_PLAYING)"
                             ,libtcod.KEY_ESCAPE: "gamestate.pop()"
                             })
+    handler.add_actions(C.STATE_DIALOGUE,
+                            {
+                            libtcod.KEY_SPACE: "player.dialogues.pop()"
+                            ,libtcod.KEY_ESCAPE: "player.dialogues.pop()"
+                            })
     handler.add_actions(C.STATE_PLAYING,
                 {
                 "q": "gamestate.pop()"
@@ -51,15 +56,43 @@ def game_turn(player_move_x, player_move_y):
             if isinstance(npc, cls.AnimalBase):
                 if npc.move_ai:
                     npc.move_ai.take_turn(game_map, game_objects)
+    # check game state for NPC dialogues
+    if len(player.dialogues) > 0:
+        gamestate.push(C.STATE_DIALOGUE)
 
-def blitscreens():
+def blit_playtime():
     """
         Draw canvas and screens onto the display.
     """
     libtcod.image_blit_rect(mullions, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
-    libtcod.console_blit(canvas, 0, 0, C.MAP_WIDTH, C.MAP_HEIGHT, 0, 2, 8)
+    libtcod.console_blit(canvas, 0, 0, C.MAP_WIDTH, C.MAP_HEIGHT, 0, C.MAP_LEFT, C.MAP_TOP)
     libtcod.console_flush()
 
+def blit_dialogues():
+    """
+        Draw dialogues onto the screen.
+    """
+    libtcod.console_clear(0)
+    icon = libtcod.image_load(os.path.join('data', 'images','icon_mouse.png'))
+    libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
+
+    if len(player.dialogues) > 0:
+        dlg = player.dialogues[-1]
+        # title
+        libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 3,
+                            libtcod.BKGND_NONE, libtcod.CENTER, 
+                            "%c%s says:%c" % (C.COL4, dlg.npc_name, C.COLS))
+        # the message
+        libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), C.MAP_TOP + 4,
+                            libtcod.BKGND_NONE, libtcod.CENTER, 
+                            dlg.dialogue)
+        # press space
+        libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
+                            C.SCREEN_HEIGHT - 2, 
+                            libtcod.BKGND_NONE, libtcod.CENTER, 
+                            "(spacebar to continue...)")
+    libtcod.console_flush()
+    
 
 def draw_map():
     """
@@ -166,22 +199,13 @@ def warp_level():
     if player.carrying:
         game_objects.append(player.carrying)
 
-def show_dialogues():
-    """
-        Display any NPC talk.
-    """
-    if len(player.dialogues) > 0:
-        player.add_message("you have chats waiting.")
-        player.dialogues.pop()
 
 if __name__ == "__main__":
     """
         Entry point.
     """
     canvas = factory.init_libtcod()
-    mullions = libtcod.image_load(
-                                os.path.join('data', 'images'
-                                ,'background.png'))
+    mullions = libtcod.image_load(os.path.join('data', 'images','background.png'))
     kb_handler = setup_keyhandler()
     gamestate = cls.GameState()
     maps_avail = factory.count_available_maps()
@@ -194,21 +218,29 @@ if __name__ == "__main__":
         state = gamestate.peek()
         if state == C.STATE_MENU:
             pass
-        if state == C.STATE_PLAYING:
+        elif state == C.STATE_PLAYING:
             if not player:
                 player = cls.Player()
+                aai = cls.ActionManual(player)
+                player.action_ai = aai
                 warp_level()
             # clear our displays
             libtcod.console_clear(0)
             libtcod.console_clear(canvas)
-            # show any dialogues
-            show_dialogues()
             # draw screens
             draw_map()
             draw_player_stats()
             draw_objects()
             draw_messages()
-            blitscreens()
+            blit_playtime()
+        elif state == C.STATE_DIALOGUE:
+            blit_dialogues()
+            if len(player.dialogues) > 0:
+                dlg = player.dialogues[-1]
+                
+            else:
+                gamestate.pop()
+        
         if gamestate.is_empty():
             break
         cmd = kb_handler.handle_stroke(gamestate.peek())

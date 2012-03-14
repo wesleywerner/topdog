@@ -63,7 +63,7 @@ class ActionAI(object):
                     # a one-liner dialogue
                     target.add_dialogue(Dialogue(npc.name, self.picture
                                             , self.dialogue_text))
-                    self.dialogue = None
+                    self.dialogue_text = None
             elif self.quest:
                 # give the player our quest
                 target.add_quest(self.quest)
@@ -72,6 +72,21 @@ class ActionAI(object):
                 # enact some hostility
                 target.take_damage(npc, self.attack_rating)
 
+
+class ActionManual(ActionAI):
+    """
+        The Action attribute for the player
+    """
+    def __init__(self, owner):
+        self.owner = owner
+
+    def contact_with(self, target):
+        player = self.owner
+        if isinstance(target, AnimalBase):
+            # engage!
+            if target.action_ai:
+                target.action_ai.contact_with(player)
+            
 
 class MoveAI(object):
     """
@@ -139,14 +154,14 @@ class AnimalBase(object):
                 pass    # cant move into a drinkable tile if already on one
             else:
                 # test if moving against another being
-                being_blocks_us = False
+                blocking_us = False
                 for being in game_objects:
                     if being.x == x and being.y == y and being.blocking:
-                        being_blocks_us = True
+                        blocking_us = True
                         if self.action_ai:
                             self.action_ai.contact_with(being)
                         break
-                if not being_blocks_us:
+                if not blocking_us:
                     self.moves = self.moves + 1
                     # but if we are little slow, we may need to way for next
                     # turn to move :p
@@ -228,7 +243,7 @@ class Player(AnimalBase):
         if super(Player, self).move(game_map, game_objects, x, y):
             self.message_trim_idx += 1
             self.pickup_item(game_objects)
-            if self.message_trim_idx % 7 == 0:
+            if self.message_trim_idx % 6 == 0:
                 self.trim_message()
             if self.moves % C.PLAYER_THIRST_INDEX == 0:
                 if self.thirsty:
