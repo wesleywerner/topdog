@@ -72,8 +72,6 @@ class MoveAI(object):
     def __init__(self, owner):
         self.owner = owner
         self.behaviour = None
-        self.moves = 0
-        self.move_step = 1
 
     def take_turn(self, game_map, game_objects):
         npc = self.owner
@@ -94,6 +92,7 @@ class AnimalBase(object):
         self.fgcolor = None
         self.seen = False
         self.moves = 0
+        self.move_step = 1
         self.carryable = False
         self.carrying = None
         self.fov_radius = C.FOV_RADIUS_DEFAULT
@@ -134,9 +133,12 @@ class AnimalBase(object):
                         break
                 if not being_blocks_us:
                     self.moves = self.moves + 1
-                    self.x = x
-                    self.y = y
-                    return True
+                    # but if we are little slow, we may need to way for next
+                    # turn to move :p
+                    if self.moves % self.move_step == 0:
+                        self.x = x
+                        self.y = y
+                        return True
 
     def get_xy_towards(self, x, y):
         """
@@ -216,6 +218,7 @@ class Player(AnimalBase):
                 self.fov_radius = tile.fov_limit
             else:
                 self.fov_radius = C.FOV_RADIUS_DEFAULT
+            return True
 
     def can_warp(self, game_map):
         return isinstance(game_map[self.x][self.y], Hole)

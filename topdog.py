@@ -41,11 +41,11 @@ def game_turn(player_move_x, player_move_y):
     """
         Call all game turn actions.
     """
-    player.move(game_map, game_objects, player_move_x, player_move_y)
-    for npc in game_objects:
-        if isinstance(npc, cls.AnimalBase):
-            if npc.move_ai:
-                npc.move_ai.take_turn(game_map, game_objects)
+    if player.move(game_map, game_objects, player_move_x, player_move_y):
+        for npc in game_objects:
+            if isinstance(npc, cls.AnimalBase):
+                if npc.move_ai:
+                    npc.move_ai.take_turn(game_map, game_objects)
 
 def blitscreens():
     """
