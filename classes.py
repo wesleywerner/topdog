@@ -1,4 +1,4 @@
-#from constants import *
+import random
 import lib.libtcodpy as libtcod
 import constants as C
 
@@ -45,6 +45,7 @@ class Player(Object):
         self.moves = 0
         self.level = 0
         self.score = 0
+        self.hp = 100
         self.fov_radius = C.FOV_RADIUS_DEFAULT
         self.scents = []
         self.hostiles = []
@@ -54,6 +55,12 @@ class Player(Object):
         self.carrying = None
         self.wizard = False
     
+    def get_hearts(self):
+        """
+            Return a countof hearts indicating our hp.
+        """
+        return int(self.hp / 10.0)
+        
     def pickup_item(self, objects):
         for obj in objects:
             if obj.x == self.x and obj.y == self.y and obj.carryable:
@@ -111,10 +118,12 @@ class Player(Object):
         self.bravery = DEFAULT_BRAVERY
 
     def quench_thirst(self, game_map):
+        messages = ("%c*laps water*%c, woof!", "%c*lap*lap*gulp*%c"
+                    , "%c*lap*lap*lap*%c")
         if game_map[self.x][self.y].drinkable:
             self.quenches = self.quenches + 1
             self.thirsty = False
-            self.add_message("You %cquenced%c your thirst." % (C.COL3, C.COLS))
+            self.add_message(random.choice(messages) % (C.COL3, C.COLS))
             if self.quenches % C.PLAYER_PIDDLE_INDEX == 0:
                 self.mustpiddle = True
 
@@ -148,6 +157,10 @@ class Player(Object):
                     self.fov_radius = tile.fov_limit
                 else:
                     self.fov_radius = C.FOV_RADIUS_DEFAULT
+                if self.thirsty:
+                    if random.randint(0, 1) == 0:
+                        self.add_message("You feel %c*thirsty*%c" % (C.COL2, C.COLS))
+
 
 class GameState():
     """

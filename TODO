@@ -4,7 +4,17 @@ NPC generators
 hint gens
 scent gens
 
+- move player info to the top
+- show detailed into in a "@" screen: level, score.
+- a die roll chance you get stuck and don't move through the brush
+- revised: we have health points (HP). eating food resolves some HP
+- weak players change heart indicator yellow, and reduces every x moves
+
 ===================================================================[[ POLISH ]]
 
++ intro screen using libtcod section 3.4
++ draw more maps
++ die roll chance you get stuck and don't move through a brush
 + more randomized synonymns for object names
++ colorized words. you enter the jones's yard. you smell baked muffins.
 + level entry messages: your tongue wags. woof woof.

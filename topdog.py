@@ -38,7 +38,7 @@ def setup_keyhandler():
 
 def blitscreens():
     libtcod.image_blit_rect(mullions, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
-    libtcod.console_blit(canvas, 0, 0, C.MAP_WIDTH, C.MAP_HEIGHT, 0, 2, 2)
+    libtcod.console_blit(canvas, 0, 0, C.MAP_WIDTH, C.MAP_HEIGHT, 0, 2, 8)
     libtcod.console_flush()
 
 def draw_map():
@@ -54,7 +54,7 @@ def draw_map():
                                             tile.char, tile.fgcolor, tile.bgcolor)
             elif tile.seen:
                 libtcod.console_put_char_ex(canvas, x, y, tile.char
-                                        ,libtcod.darker_grey, libtcod.black)
+                                        ,libtcod.darkest_grey, libtcod.black)
 
 def draw_objects():
     """
@@ -77,43 +77,47 @@ def draw_objects():
         if player.x < (C.MAP_WIDTH / 2):
             x = C.MAP_WIDTH - 2
             align = libtcod.RIGHT
-        libtcod.console_print_ex(canvas
+        libtcod.console_print_ex(0
                             ,x, C.SEENLIST_TOP
                             ,libtcod.BKGND_NONE, align
-                            ,"%c*sees*%c\n"  % (C.COL5, C.COLS) + "\n".join(seen_objects))
+                            ,"%c> you see <%c\n"  % (C.COL5, C.COLS) + "\n".join(seen_objects))
 
 def draw_player_stats():
     """
         Print player info and stats in the side panel.
     """
     tile = game_map[player.x][player.y]
-    # player sees
+    # the tile name player is standing on
     if not tile.blanktile:
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
-                                C.MAP_TILE_DESC_TOP, 
+                                C.SCREEN_HEIGHT - 2, 
                                 libtcod.BKGND_NONE, libtcod.CENTER, 
                                 "%c%s%c" % (C.COL5, tile.name, C.COLS))
-    # player stats
-    texts = [
-             "level: %c%s%c" % (C.COL5, player.level, C.COLS)
-            ,"score: %c%s%c" % (C.COL5, player.score, C.COLS)
-            ,"moves: %c%s%c" % (C.COL5, player.moves, C.COLS)
-            ]
+    # player hearts
+    heart_colors = (libtcod.red, libtcod.red, libtcod.orange, libtcod.orange
+                    , libtcod.amber, libtcod.amber, libtcod.lime, libtcod.lime
+                    , libtcod.chartreuse, libtcod.chartreuse)
+    for heart in range(player.get_hearts()):
+        libtcod.console_put_char_ex(
+                        0, heart + C.STATS_LEFT, C.STATS_TOP
+                        ,chr(3), heart_colors[heart], None)
+    texts = []
+    # player inventory
     if player.carrying:
-        texts.append("carry: %c%s%c" % (C.COL3, player.carrying.name, C.COLS))
-    if player.thirsty:
-        texts.append("You are %c%s%c. You need water." % \
-                    (C.COL2, "thirsty", C.COLS))
+        libtcod.console_print_ex(
+                        0, C.MESSAGES_LEFT + 10, C.STATS_TOP
+                        ,libtcod.BKGND_NONE, libtcod.LEFT
+                        ,"_%c%s%c_" % (C.COL3, player.carrying.name, C.COLS))
     if player.weak:
-        texts.append("You feel %cweak%c" % (C.COL1, C.COLS))
-    libtcod.console_print_ex(0, C.MESSAGES_LEFT
-                            ,C.STATS_TOP
-                            ,libtcod.BKGND_NONE, libtcod.LEFT
-                            ,"\n".join(texts))
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+                            ,libtcod.BKGND_NONE, libtcod.RIGHT
+                            ,"%c*weak*%c" % (C.COL1, C.COLS))
     
 def draw_messages():
-    messages = list(player.messages)
-    messages.reverse()
+    """
+        Display the last x messages in-game.
+    """
+    messages = list(player.messages)[-4:]
     if messages:
         libtcod.console_print_ex(0
                                 ,C.MESSAGES_LEFT

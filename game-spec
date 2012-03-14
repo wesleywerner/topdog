@@ -48,9 +48,7 @@ ranged attacks are moot (unless fido grows opposable thumbs)
 - simplified inventory: carry one item in your mouth. 
 stepping over a second item will swap them out (prompt to swap?)
 
-- no HP / life system, instead we opt for a flee mechanism. 
-The defeated will then refuse to approach the victor, at least until after a 
-rest period. If you do get cornered while in defeat mode, your life may just end.
+- revised: we have health points (HP). eating food resolves some HP.
 
 - You get thirsty every x moves, and quench your thirst with water. 
 Has the side-effect that you need to piddle too, 
@@ -68,6 +66,11 @@ these give us rewards and points.
 - dialogue is shown in a nice little window
 
 - biscuits are yummy
+
+=================================================================[[ Combat ]]
+
+- revised: we have health points (hp), represented as bravery via red hearts. eating food resolves some HP, as does drinking water when thirsty, and crossing into other yards.
+
 
 ===========================================================[[ Animal NPC's ]]
 
@@ -129,7 +132,7 @@ Legend:
     @ you
     # fence
     O hole in the fence
-    / tar
+    : ground
     ~ water
     % plant
     * food
@@ -150,7 +153,7 @@ Legend:
 
 [p]iddle: 
     you can do this most times, and anywhere. bonus for creative targets!
-    
+
 [e]at: 
     what food you are holding. relieves flee mode.
 

@@ -282,7 +282,7 @@ def get_path():
     tar = cls.Object()
     tar.blocking = False
     tar.seethrough = True
-    tar.fgcolor = libtcod.darkest_grey
+    tar.fgcolor = libtcod.darker_grey
     tar.char = CHAR_TAR
     tar.name = ""
     return tar
