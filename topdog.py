@@ -99,7 +99,7 @@ def draw_player_stats():
         libtcod.console_print_ex(
                         0, C.MESSAGES_LEFT + 10, C.STATS_TOP
                         ,libtcod.BKGND_NONE, libtcod.LEFT
-                        ,"_%c%s%c_" % (C.COL3, player.carrying.name, C.COLS))
+                        ,player.carrying.name)
     if player.weak:
         libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT

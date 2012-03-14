@@ -1,10 +1,11 @@
+import math
 import random
 import lib.libtcodpy as libtcod
 import constants as C
 
-class Object(object):
+class ItemBase(object):
     """
-        base Object for any other class that is placed on the map
+        Inanimate items (foliage, water, walls) and map tiles.
     """
     def __init__(self
                 ,blanktile=False
@@ -20,7 +21,6 @@ class Object(object):
         self.bgcolor = bgcolor
         self.blocking = False
         self.seethrough = True
-        self.visible = True
         self.seen = False
         self.drinkable = False
         self.edible = False
@@ -28,7 +28,49 @@ class Object(object):
         self.fov_limit = None
         self.message = None
 
-class Player(Object):
+
+class AnimalBase(object):
+    """
+        Living things (NPC's) and the Player.
+    """
+    def __init__(self
+                ,blanktile=False
+                ,char=".", name=""
+                ,fgcolor=libtcod.white
+                ,bgcolor=libtcod.black):
+        self.x = 0
+        self.y = 0
+        self.hp = 100
+        self.char = char
+        self.name = name
+        self.fgcolor = fgcolor
+        self.scents = []
+        self.quests = []
+        self.hostiles = []
+        self.seen = False
+        self.carryable = False
+        self.carrying = None
+        self.fov_radius = C.FOV_RADIUS_DEFAULT
+
+    def move(self, game_map, game_objects, xoffset, yoffset):
+        """
+            Move to the given x/y if its non blocking, and not in deep ocean.
+            Return True on success.
+        """
+        x = self.x + xoffset
+        y = self.y + yoffset
+        if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
+            tile = game_map[x][y]
+            if tile.blocking or tile.drinkable and \
+                                game_map[self.x][self.y].drinkable:
+                pass    # cant move into a drinkable tile if already on one
+            else:
+                self.x = x
+                self.y = y
+                return True
+
+
+class Player(AnimalBase):
     """
         Tracks the player state and provides helper functions
     """
@@ -46,19 +88,13 @@ class Player(Object):
         self.moves = 0
         self.level = 0
         self.score = 0
-        self.hp = 100
-        self.fov_radius = C.FOV_RADIUS_DEFAULT
-        self.scents = []
-        self.hostiles = []
-        self.quests = []
-        self.automove_target = None
+        self.message_trim_idx = 0
         self.messages = []
-        self.carrying = None
         self.wizard = False
-    
+
     def get_hearts(self):
         """
-            Return a countof hearts indicating our hp.
+            Return a count of hearts indicating our hp.
         """
         return int(self.hp / 10.0)
         
@@ -68,14 +104,33 @@ class Player(Object):
                 if not obj is self.carrying:
                     if self.carrying:
                         self.carrying.x, self.carrying.y = (obj.x, obj.y)
-                        self.add_message("*drops* %c%s%c" % \
-                                (C.COL3, self.carrying.name, C.COLS))
                     self.carrying = obj
                     self.carrying.x = 0
-                    self.add_message("*pickup* %c%s%c" % \
-                                (C.COL3, self.carrying.name, C.COLS))
+                    self.add_message("picked up %s" % (obj.name))
                 break
-        
+    
+    def move(self, game_map, game_objects, x, y):
+        """
+            If our parent moves okay, do some special player checks.
+        """
+        if super(Player, self).move(game_map, game_objects, x, y):
+            self.moves = self.moves + 1
+            self.message_trim_idx += 1
+            self.pickup_item(game_objects)
+            if self.message_trim_idx % 7 == 0:
+                self.trim_message()
+            if self.moves % C.PLAYER_THIRST_INDEX == 0:
+                if self.thirsty:
+                    self.weak = True
+                self.thirsty = True
+            tile = game_map[x][y]
+            if tile.message:
+                self.add_message(tile.message)
+            if tile.fov_limit:
+                self.fov_radius = tile.fov_limit
+            else:
+                self.fov_radius = C.FOV_RADIUS_DEFAULT
+
     def can_warp(self, game_map):
         return isinstance(game_map[self.x][self.y], Hole)
     
@@ -102,21 +157,13 @@ class Player(Object):
             if self.messages[-1] != message:
                 self.messages.append(message)
         self.messages = self.messages[-5:]
+        self.message_trim_idx = 1
     
     def trim_message(self):
         if self.messages:
             self.messages.reverse()
             self.messages.pop()
             self.messages.reverse()
-    
-    def fleeing(self):
-        return self.bravery < 0
-    
-    def take_hit(self, damage):
-        self.bravery = self.bravery - damage
-    
-    def recover_bravery(self):
-        self.bravery = DEFAULT_BRAVERY
 
     def quench_thirst(self, game_map):
         messages = ("%c*laps water*%c, woof!", "%c*lap*lap*gulp*%c"
@@ -132,32 +179,42 @@ class Player(Object):
         if self.mustpiddle:
             pass
 
-    def move(self, game_map, game_objects, xoffset, yoffset):
-        x = self.x + xoffset
-        y = self.y + yoffset
-        if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
-            tile = game_map[x][y]
-            if tile.blocking:
-                self.add_message("%s *bump*" % (tile.name))
-            elif tile.drinkable and game_map[self.x][self.y].drinkable:
-                self.add_message("no, don't go too deep")
-            else:
-                self.x = x
-                self.y = y
-                self.moves = self.moves + 1
-                self.pickup_item(game_objects)
-                if self.moves % 15 == 0:
-                    self.trim_message()
-                if self.moves % C.PLAYER_THIRST_INDEX == 0:
-                    if self.thirsty:
-                        self.weak = True
-                    self.thirsty = True
-                if tile.message:
-                    self.add_message(tile.message)
-                if tile.fov_limit:
-                    self.fov_radius = tile.fov_limit
-                else:
-                    self.fov_radius = C.FOV_RADIUS_DEFAULT
+
+class NPC(AnimalBase):
+    """
+        Non Player Character.
+    """
+    def __init__(self):
+        super(NPC, self).__init__()
+        self.x = 0
+        self.y = 0
+        self.color = None
+        self.char = "?"
+        self.quests = []
+        self.dialogue = None
+        self.hostile = False
+        self.fleeindex = 0
+        self.ai = None
+        self.quest = None
+
+    def move_towards(self, x, y):
+        dx = x - self.x
+        dy = y - self.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        # normalize to length 1 keeping direction
+        dx = int(round(dx / distance))
+        dy = int(round(dy / distance))
+
+    def xy(self):
+        return (self.x, self.y)
+
+    def fleeing(self):
+        return self.fleeindex == 0
+    
+    def flee_step(self, value):
+        self.fleeindex = self.fleeindex - value
+        if self.fleeindex < 0:
+            self.fleeindex = 0
 
 
 class GameState():
@@ -184,16 +241,16 @@ class GameState():
     def is_empty(self):
         return len(self.stack) == 0
 
-class Hole(Object):
+class Hole(ItemBase):
     """
         Represents a hole in the fence, similar to the stairs in a dungeon.
     """
     def __init__(self):
         super(Hole, self).__init__()
         self.char = "O"
-    
 
-class Hint(Object):
+
+class Hint(object):
     """
         
     """
@@ -201,33 +258,6 @@ class Hint(Object):
         self.radius = 0
         self.message = None
         self.visible = False
-
-
-class NPC(Object):
-    """
-        Non Player Character.
-    """
-    def __init__(self):
-        super(NPC, self).__init__()
-        self.x = 0
-        self.y = 0
-        self.color = None
-        self.char = "?"
-        self.quests = []
-        self.dialogue = None
-        self.hostile = False
-        self.fleeindex = 0
-
-    def xy(self):
-        return (self.x, self.y)
-
-    def fleeing(self):
-        return self.fleeindex == 0
-    
-    def flee_step(self, value):
-        self.fleeindex = self.fleeindex - value
-        if self.fleeindex < 0:
-            self.fleeindex = 0
 
 
 class Quest(object):

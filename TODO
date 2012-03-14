@@ -4,11 +4,11 @@ NPC generators
 hint gens
 scent gens
 
-- move player info to the top
 - show detailed into in a "@" screen: level, score.
 - a die roll chance you get stuck and don't move through the brush
 - revised: we have health points (HP). eating food resolves some HP
 - weak players change heart indicator yellow, and reduces every x moves
+- keep counter of moves since last message trim, and not total player moves.
 
 ===================================================================[[ POLISH ]]
 

@@ -24,7 +24,7 @@ def get_tree():
     names = ('Tree', 'Oak Tree', 'Bark Tree', 'Big Tree')
     colors = (libtcod.darkest_lime, libtcod.darker_amber
             ,libtcod.darkest_amber, libtcod.darker_orange, libtcod.darkest_green)
-    fol = cls.Object()
+    fol = cls.ItemBase()
     fol.char = CHAR_TREE
     fol.name = random.choice(names)
     fol.fgcolor = random.choice(colors)
@@ -36,26 +36,24 @@ def get_bush():
     names = ('Shrubbery', 'Thicket', 'Thornbush', 'Rosebush')
     colors = (libtcod.darker_chartreuse, libtcod.darkest_chartreuse
             , libtcod.darker_green, libtcod.darkest_green, libtcod.darkest_lime)
-    fol = cls.Object()
+    fol = cls.ItemBase()
     fol.char = CHAR_BUSH
     fol.name = random.choice(names)
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
     fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
-    fol.message = "%s *crawl*" % (fol.name)
     return fol
     
 def get_flower():
     names = ('Flowers', 'Roses')
     colors = (libtcod.light_amber, libtcod.light_magenta
             , libtcod.light_red, libtcod.light_azure, libtcod.light_yellow)
-    fol = cls.Object()
+    fol = cls.ItemBase()
     fol.char = CHAR_FLOWERS
     fol.name = random.choice(names)
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
     fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
-    fol.message = "%s *crawl*" % (fol.name)
     return fol
 
 def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
@@ -87,7 +85,7 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
 
 def get_puddle():
     colors = (libtcod.sky, libtcod.azure, libtcod.darker_sky, libtcod.darkest_azure)
-    puddle = cls.Object()
+    puddle = cls.ItemBase()
     puddle.drinkable = True
     puddle.char = CHAR_WATER
     puddle.name = "puddle"
@@ -96,7 +94,7 @@ def get_puddle():
     return puddle
 
 def get_pool_tile():
-    puddle = cls.Object()
+    puddle = cls.ItemBase()
     puddle.drinkable = True
     puddle.char = CHAR_WATER
     puddle.name = "pool"
@@ -156,7 +154,7 @@ def spawn_toys(game_map, game_objects):
                 , libtcod.lighter_violet, libtcod.lighter_fuchsia)
     
     for item in range(how_many):
-        toy = cls.Object()
+        toy = cls.ItemBase()
         toy.name = random.choice(toy_names)
         toy.char = chr(3)
         toy.fgcolor = random.choice(toy_colors)
@@ -190,7 +188,7 @@ def blank_map():
     """
     colors = (libtcod.darkest_lime, libtcod.darkest_green
             , libtcod.darkest_sea, libtcod.darkest_chartreuse)
-    newmap = [[ cls.Object(
+    newmap = [[ cls.ItemBase(
                 blanktile=True
                 ,fgcolor=random.choice(colors)
                 ,bgcolor=libtcod.black) 
@@ -199,7 +197,7 @@ def blank_map():
     return newmap
 
 def get_fence():
-    panel = cls.Object()
+    panel = cls.ItemBase()
     panel.name = "Fence"
     panel.char = CHAR_FENCE
     panel.fgcolor = libtcod.dark_sepia
@@ -283,7 +281,7 @@ def get_brick():
     """
         Make a brick tile.
     """
-    brick = cls.Object()
+    brick = cls.ItemBase()
     brick.blocking = True
     brick.seethrough = False
     brick.name = "wall"
@@ -295,7 +293,7 @@ def get_path():
     """
         Make a tar tile.
     """
-    tar = cls.Object()
+    tar = cls.ItemBase()
     tar.blocking = False
     tar.seethrough = True
     tar.fgcolor = libtcod.darker_grey
