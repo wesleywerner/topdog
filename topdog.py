@@ -129,8 +129,9 @@ def warp_level():
     global fov_map
     global game_objects
     global player
+    global maps_avail
     player.warp_prep()
-    game_map, fov_map, game_objects = factory.generate_map()
+    game_map, fov_map, game_objects = factory.generate_map(maps_avail)
     # carry our inventory item into this new level
     if player.carrying:
         game_objects.append(player.carrying)
@@ -146,6 +147,7 @@ if __name__ == "__main__":
                                 ,'background.png'))
     kb_handler = setup_keyhandler()
     gamestate = cls.GameState()
+    maps_avail = factory.count_available_maps()
     game_map = None
     fov_map = None
     game_objects = None

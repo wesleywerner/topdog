@@ -309,7 +309,7 @@ def read_map_file(map_index):
     map_data = contents.split("\n")
     return map_data
     
-def map_from_ascii(game_map):
+def map_from_ascii(game_map, maps_available):
     """
         Load map tiles from an ascii representation.
     """
@@ -324,21 +324,29 @@ def map_from_ascii(game_map):
                     ,'t': get_tree
                     ,'b': get_bush
                 }
-    map_data = read_map_file(1)
+    map_data = read_map_file(random.randint(1, maps_available))
     for y in range(C.MAP_HEIGHT - 1 - 3):
         for x in range(C.MAP_WIDTH - 1 - 3):
             asciic = map_data[y][x]
             if asciic in tile_lookup:
                 game_map[x + 2][y + 2] = tile_lookup[asciic]()
 
+def count_available_maps():
+    """
+        Get the count of maps available.
+    """
+    for num in range(100):
+        if not os.path.exists(os.path.join("data", "maps", "map%s" % (num + 1))):
+            return num
+            break
 
-def generate_map():
+def generate_map(maps_avail):
     """
         Generate a level map, plant trees and objects and NPC's.
     """
     game_map = blank_map()
     game_objects = []
-    map_from_ascii(game_map)
+    map_from_ascii(game_map, maps_avail)
     flip_map(game_map)
     plant_foliage(game_map)
     spawn_toys(game_map, game_objects)
@@ -391,7 +399,5 @@ def init_libtcod():
 
 #=============================================================[[ Unit Test ]]
 if __name__ == "__main__":
-    game_map = blank_map()
-    map_from_ascii(game_map)
-    flip_map(game_map)
+    print(count_available_maps())
     pass
