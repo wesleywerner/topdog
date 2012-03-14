@@ -332,12 +332,12 @@ def map_from_ascii(game_map):
                     ,'t': get_tree
                     ,'b': get_bush
                 }
-    map_data = read_map_file(2)
-    for y in range(C.MAP_HEIGHT - 1):
-        for x in range(C.MAP_WIDTH - 1):
+    map_data = read_map_file(1)
+    for y in range(C.MAP_HEIGHT - 1 - 3):
+        for x in range(C.MAP_WIDTH - 1 - 3):
             asciic = map_data[y][x]
             if asciic in tile_lookup:
-                game_map[x][y] = tile_lookup[asciic]()
+                game_map[x + 2][y + 2] = tile_lookup[asciic]()
 
 
 def generate_map():
