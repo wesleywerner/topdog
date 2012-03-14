@@ -141,10 +141,11 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
 
 #=============================================================[[ Inventory ]]
 
-def spawn_toys(game_map, game_objects):
+def spawn_toys(game_map):
     """
         Make some toys for fido.
     """
+    toys = []
     how_many = random.randint(1, 4)
     toy_names = ("tennis ball!", "bouncy ball", "rubber bone", "knotted rope"
                 ,"rubber chicken", "rubber ducky")
@@ -164,8 +165,9 @@ def spawn_toys(game_map, game_objects):
             y = random.randint(1, C.MAP_HEIGHT - 2)
             if game_map[x][y].blanktile:
                 toy.x, toy.y = (x, y)
-                game_objects.append(toy)
+                toys.append(toy)
                 break
+    return toys
 
 #=================================================================[[ NPC's ]]
 
@@ -179,7 +181,30 @@ def spawn_toys(game_map, game_objects):
 #    #create monster C
 #else:
 #    #create monster D
-#    
+
+def spawn_npcs(game_map):
+    """
+        Return a bunch of NPC's.
+    """
+    npcs = []
+    
+    for e in range(10):
+        npc = cls.AnimalBase()
+        npc.x = 1
+        npc.y = 5 + e
+        npc.char = "r"
+        npc.name = "rat"
+        npc.fgcolor = libtcod.blue
+        npc.blocking = True
+        mai = cls.MoveAI(npc)
+        mai.behaviour = cls.MoveAI.NEUTRAL
+        aai = cls.ActionAI(npc)
+        npc.action_ai = aai
+        npc.move_ai = mai
+        npcs.append(npc)
+    
+    return npcs
+    
 #===================================================================[[ Map ]]
 
 def blank_map():
@@ -359,11 +384,9 @@ def generate_map(maps_avail):
         Generate a level map, plant trees and objects and NPC's.
     """
     game_map = blank_map()
-    game_objects = []
     map_from_ascii(game_map, maps_avail)
     flip_map(game_map)
     plant_foliage(game_map)
-    spawn_toys(game_map, game_objects)
     build_fence(game_map)
     fov_map = libtcod.map_new(C.MAP_WIDTH, C.MAP_HEIGHT)
     for y in range(C.MAP_HEIGHT - 1):
@@ -371,7 +394,7 @@ def generate_map(maps_avail):
             libtcod.map_set_properties(fov_map, x, y
                                         ,game_map[x][y].seethrough
                                         ,not game_map[x][y].blocking)
-    return game_map, fov_map, game_objects
+    return game_map, fov_map
 
 
 #===============================================================[[ Libtcod ]]

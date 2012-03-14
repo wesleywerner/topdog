@@ -20,15 +20,15 @@ def setup_keyhandler():
                 {
                 "q": "gamestate.pop()"
                 ,libtcod.KEY_ESCAPE: "gamestate.pop()"
-                ,libtcod.KEY_KP1: "player.move(game_map, game_objects, -1, 1)"
-                ,libtcod.KEY_KP2: "player.move(game_map, game_objects, 0, 1)"
-                ,libtcod.KEY_KP3: "player.move(game_map, game_objects, 1, 1)"
-                ,libtcod.KEY_KP4: "player.move(game_map, game_objects, -1, 0)"
+                ,libtcod.KEY_KP1: "game_turn(-1, 1)"
+                ,libtcod.KEY_KP2: "game_turn(0, 1)"
+                ,libtcod.KEY_KP3: "game_turn(1, 1)"
+                ,libtcod.KEY_KP4: "game_turn(-1, 0)"
                 ,libtcod.KEY_KP5: "pass"
-                ,libtcod.KEY_KP6: "player.move(game_map, game_objects, 1, 0)"
-                ,libtcod.KEY_KP7: "player.move(game_map, game_objects, -1, -1)"
-                ,libtcod.KEY_KP8: "player.move(game_map, game_objects, 0, -1)"
-                ,libtcod.KEY_KP9: "player.move(game_map, game_objects, 1, -1)"
+                ,libtcod.KEY_KP6: "game_turn(1, 0)"
+                ,libtcod.KEY_KP7: "game_turn(-1, -1)"
+                ,libtcod.KEY_KP8: "game_turn(0, -1)"
+                ,libtcod.KEY_KP9: "game_turn(1, -1)"
                 ,libtcod.KEY_SPACE: \
                                     "if player.can_warp(game_map): warp_level()"
                 ,"d": "player.quench_thirst(game_map)"
@@ -36,10 +36,25 @@ def setup_keyhandler():
                 })
     return handler
 
+
+def game_turn(player_move_x, player_move_y):
+    """
+        Call all game turn actions.
+    """
+    player.move(game_map, game_objects, player_move_x, player_move_y)
+    for npc in game_objects:
+        if isinstance(npc, cls.AnimalBase):
+            if npc.move_ai:
+                npc.move_ai.take_turn(game_map, game_objects)
+
 def blitscreens():
+    """
+        Draw canvas and screens onto the display.
+    """
     libtcod.image_blit_rect(mullions, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
     libtcod.console_blit(canvas, 0, 0, C.MAP_WIDTH, C.MAP_HEIGHT, 0, 2, 8)
     libtcod.console_flush()
+
 
 def draw_map():
     """
@@ -135,7 +150,10 @@ def warp_level():
     global player
     global maps_avail
     player.warp_prep()
-    game_map, fov_map, game_objects = factory.generate_map(maps_avail)
+    game_map, fov_map = factory.generate_map(maps_avail)
+    game_objects = [player]
+    game_objects.extend(factory.spawn_toys(game_map))
+    game_objects.extend(factory.spawn_npcs(game_map))
     # carry our inventory item into this new level
     if player.carrying:
         game_objects.append(player.carrying)

@@ -29,45 +29,109 @@ class ItemBase(object):
         self.message = None
 
 
+class ActionAI(object):
+    """
+        Handles interaction with other beings.
+    """
+    def __init__(self, owner):
+        self.owner = owner
+        self.hostile = False
+        self.dialogue = None
+        self.picture = None
+        self.quest = None
+    
+    def contact_with(self, target):
+        npc = self.owner
+        if isinstance(target, Player):
+            target.add_message("The %s touches you" % (npc.name))
+
+
+class MoveAI(object):
+    """
+        Handles NPC movement.
+        SKITTISH: keeps its distance
+        NEUTRAL: indifferent
+        FRIENDLY: follows the player at random times
+    """
+    SKITTISH = 0x0
+    NEUTRAL = 0x1
+    FRIENDLY = 0x2
+
+    def __init__(self, owner):
+        self.owner = owner
+        self.behaviour = None
+
+    def take_turn(self, game_map, game_objects):
+        npc = self.owner
+        #TODO: logic here for different behaviour
+        npc.move(game_map, game_objects, random.randint(-1, 1), random.randint(-1, 1))
+
+
 class AnimalBase(object):
     """
         Living things (NPC's) and the Player.
     """
-    def __init__(self
-                ,blanktile=False
-                ,char=".", name=""
-                ,fgcolor=libtcod.white
-                ,bgcolor=libtcod.black):
+    def __init__(self):
         self.x = 0
         self.y = 0
         self.hp = 100
-        self.char = char
-        self.name = name
-        self.fgcolor = fgcolor
-        self.scents = []
-        self.quests = []
-        self.hostiles = []
+        self.char = "?"
+        self.name = "?"
+        self.fgcolor = None
         self.seen = False
         self.carryable = False
         self.carrying = None
         self.fov_radius = C.FOV_RADIUS_DEFAULT
-
+        self.move_ai = None
+        self.action_ai = None
+    
+    def interact(self, target):
+        pass
+    
+    def take_damage(self, damage):
+        pass
+    
+    def take_turn(self):
+        if self.move_ai:
+            self.move_ai.take_turn()
+        
     def move(self, game_map, game_objects, xoffset, yoffset):
         """
-            Move to the given x/y if its non blocking, and not in deep ocean.
-            Return True on success.
+            Move to the given xy offset if non blocking and not in deep water.
+            Return True if so.
         """
         x = self.x + xoffset
         y = self.y + yoffset
+        # test if within the map bounds, and no tiles block us
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             tile = game_map[x][y]
             if tile.blocking or tile.drinkable and \
                                 game_map[self.x][self.y].drinkable:
                 pass    # cant move into a drinkable tile if already on one
             else:
-                self.x = x
-                self.y = y
-                return True
+                # test if moving against another being
+                being_blocks_us = False
+                for being in game_objects:
+                    if being.x == x and being.y == y and being.blocking:
+                        being_blocks_us = True
+                        if self.action_ai:
+                            self.action_ai.contact_with(being)
+                if not being_blocks_us:
+                    self.x = x
+                    self.y = y
+                    return True
+
+    def get_xy_towards(self, x, y):
+        """
+            Get the XY for moving towards the given location.
+        """
+        dx = x - self.x
+        dy = y - self.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        # normalize to length 1 keeping direction
+        dx = int(round(dx / distance))
+        dy = int(round(dy / distance))
+        Return (dx, dy)
 
 
 class Player(AnimalBase):
@@ -79,7 +143,9 @@ class Player(AnimalBase):
         self.x = 1
         self.y = 1
         self.char = "@"
+        self.name = "player"
         self.fgcolor = libtcod.white
+        self.blocking = True
         self.weak = False
         self.thirsty = False
         self.hungry = False
@@ -90,6 +156,7 @@ class Player(AnimalBase):
         self.score = 0
         self.message_trim_idx = 0
         self.messages = []
+        self.seen = True
         self.wizard = False
 
     def get_hearts(self):
@@ -193,28 +260,8 @@ class NPC(AnimalBase):
         self.quests = []
         self.dialogue = None
         self.hostile = False
-        self.fleeindex = 0
         self.ai = None
         self.quest = None
-
-    def move_towards(self, x, y):
-        dx = x - self.x
-        dy = y - self.y
-        distance = math.sqrt(dx ** 2 + dy ** 2)
-        # normalize to length 1 keeping direction
-        dx = int(round(dx / distance))
-        dy = int(round(dy / distance))
-
-    def xy(self):
-        return (self.x, self.y)
-
-    def fleeing(self):
-        return self.fleeindex == 0
-    
-    def flee_step(self, value):
-        self.fleeindex = self.fleeindex - value
-        if self.fleeindex < 0:
-            self.fleeindex = 0
 
 
 class GameState():
