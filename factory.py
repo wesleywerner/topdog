@@ -199,6 +199,8 @@ def spawn_npcs(game_map):
         mai = cls.MoveAI(npc)
         mai.behaviour = cls.MoveAI.NEUTRAL
         aai = cls.ActionAI(npc)
+        aai.hostile = False
+        aai.dialogue = "Hello there friend!"
         npc.action_ai = aai
         npc.move_ai = mai
         npcs.append(npc)

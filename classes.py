@@ -39,11 +39,23 @@ class ActionAI(object):
         self.dialogue = None
         self.picture = None
         self.quest = None
+        self.attack_rating = 0
     
     def contact_with(self, target):
         npc = self.owner
         if isinstance(target, Player):
-            target.add_message("The %s touches you" % (npc.name))
+            #TODO: logic here for behaviour
+            if self.dialogue:
+                # show dialogue to the player
+                target.add_message(self.dialogue)
+                self.dialogue = None
+            elif self.quest:
+                # give the player our quest
+                target.add_message("You got a quest")
+                self.quest = None
+            elif self.hostile:
+                # enact some hostility
+                target.take_damage(npc, self.attack_rating)
 
 
 class MoveAI(object):
@@ -60,6 +72,8 @@ class MoveAI(object):
     def __init__(self, owner):
         self.owner = owner
         self.behaviour = None
+        self.moves = 0
+        self.move_step = 1
 
     def take_turn(self, game_map, game_objects):
         npc = self.owner
@@ -79,6 +93,7 @@ class AnimalBase(object):
         self.name = "?"
         self.fgcolor = None
         self.seen = False
+        self.moves = 0
         self.carryable = False
         self.carrying = None
         self.fov_radius = C.FOV_RADIUS_DEFAULT
@@ -88,8 +103,8 @@ class AnimalBase(object):
     def interact(self, target):
         pass
     
-    def take_damage(self, damage):
-        pass
+    def take_damage(self, attacker, damage):
+        self.hp = self.hp - damage
     
     def take_turn(self):
         if self.move_ai:
@@ -116,7 +131,9 @@ class AnimalBase(object):
                         being_blocks_us = True
                         if self.action_ai:
                             self.action_ai.contact_with(being)
+                        break
                 if not being_blocks_us:
+                    self.moves = self.moves + 1
                     self.x = x
                     self.y = y
                     return True
@@ -151,13 +168,16 @@ class Player(AnimalBase):
         self.hungry = False
         self.mustpiddle = False
         self.quenches = 0
-        self.moves = 0
         self.level = 0
         self.score = 0
         self.message_trim_idx = 0
         self.messages = []
         self.seen = True
         self.wizard = False
+
+    def take_damage(self, attacker, damage):
+        self.hp = self.hp - damage
+        self.add_message("The %s hit you for %s" % (attacker.name, damage))
 
     def get_hearts(self):
         """
@@ -181,7 +201,6 @@ class Player(AnimalBase):
             If our parent moves okay, do some special player checks.
         """
         if super(Player, self).move(game_map, game_objects, x, y):
-            self.moves = self.moves + 1
             self.message_trim_idx += 1
             self.pickup_item(game_objects)
             if self.message_trim_idx % 7 == 0:
