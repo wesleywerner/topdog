@@ -40,6 +40,7 @@ class Player(Object):
         self.fgcolor = libtcod.white
         self.weak = False
         self.thirsty = False
+        self.hungry = False
         self.mustpiddle = False
         self.quenches = 0
         self.moves = 0
@@ -123,7 +124,7 @@ class Player(Object):
         if game_map[self.x][self.y].drinkable:
             self.quenches = self.quenches + 1
             self.thirsty = False
-            self.add_message(random.choice(messages) % (C.COL3, C.COLS))
+            self.add_message(random.choice(messages) % (C.COL5, C.COLS))
             if self.quenches % C.PLAYER_PIDDLE_INDEX == 0:
                 self.mustpiddle = True
 
@@ -137,9 +138,9 @@ class Player(Object):
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             tile = game_map[x][y]
             if tile.blocking:
-                self.add_message("*bumps* %c%s%c" % (C.COL4, tile.name, C.COLS))
+                self.add_message("%s *bump*" % (tile.name))
             elif tile.drinkable and game_map[self.x][self.y].drinkable:
-                self.add_message("it's too *deep*")
+                self.add_message("no, don't go too deep")
             else:
                 self.x = x
                 self.y = y
@@ -157,9 +158,6 @@ class Player(Object):
                     self.fov_radius = tile.fov_limit
                 else:
                     self.fov_radius = C.FOV_RADIUS_DEFAULT
-                if self.thirsty:
-                    if random.randint(0, 1) == 0:
-                        self.add_message("You feel %c*thirsty*%c" % (C.COL2, C.COLS))
 
 
 class GameState():

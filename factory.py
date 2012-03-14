@@ -42,7 +42,7 @@ def get_bush():
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
     fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
-    fol.message = "*crawls* under %c%s%c" % (C.COL4, fol.name, C.COLS)
+    fol.message = "%s *crawl*" % (fol.name)
     return fol
     
 def get_flower():
@@ -55,7 +55,7 @@ def get_flower():
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
     fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
-    fol.message = "*crawls* under %c%s%c" % (C.COL4, fol.name, C.COLS)
+    fol.message = "%s *crawl*" % (fol.name)
     return fol
 
 def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
@@ -86,12 +86,13 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
 #=================================================================[[ Water ]]
 
 def get_puddle():
+    colors = (libtcod.sky, libtcod.azure, libtcod.darker_sky, libtcod.darkest_azure)
     puddle = cls.Object()
     puddle.drinkable = True
     puddle.char = CHAR_WATER
-    puddle.name = "water puddle"
-    puddle.fgcolor = libtcod.sky
-    puddle.message = "%c*splash*%c" % (C.COL4, C.COLS)
+    puddle.name = "puddle"
+    puddle.fgcolor = random.choice(colors)
+    puddle.message = "*splash*"
     return puddle
 
 def get_pool_tile():
@@ -101,7 +102,7 @@ def get_pool_tile():
     puddle.name = "pool"
     puddle.fgcolor = libtcod.sky
     puddle.bgcolor = libtcod.darker_sky
-    puddle.message = "%c*splash*%c" % (C.COL4, C.COLS)
+    puddle.message = "*splash*"
     return puddle
 
 def spawn_pond(currentmap, amount, pond_size=4, density=6):
@@ -140,7 +141,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                         currentmap[tx][ty] = puddle
             break
 
-#===============================================================[[ Objects ]]
+#=============================================================[[ Inventory ]]
 
 def spawn_toys(game_map, game_objects):
     """
@@ -168,15 +169,30 @@ def spawn_toys(game_map, game_objects):
                 game_objects.append(toy)
                 break
 
+#=================================================================[[ NPC's ]]
+
+##chances: 20% monster A, 40% monster B, 10% monster C, 30% monster D:
+#choice = libtcod.random_get_int(0, 0, 100)
+#if choice < 20:
+#    #create monster A
+#elif choice < 20+40:
+#    #create monster B
+#elif choice < 20+40+10:
+#    #create monster C
+#else:
+#    #create monster D
+#    
 #===================================================================[[ Map ]]
 
 def blank_map():
     """
         Return a new, blank map array.
     """
+    colors = (libtcod.darkest_lime, libtcod.darkest_green
+            , libtcod.darkest_sea, libtcod.darkest_chartreuse)
     newmap = [[ cls.Object(
                 blanktile=True
-                ,fgcolor=libtcod.darker_green
+                ,fgcolor=random.choice(colors)
                 ,bgcolor=libtcod.black) 
     for y in range(C.MAP_HEIGHT)]
         for x in range(C.MAP_WIDTH)]
@@ -193,7 +209,7 @@ def get_fence():
 
 def get_hole():
     hole = cls.Hole()
-    hole.name = "[SPACEBAR crawls through the Hole]"
+    hole.name = "Spacebar to crawl through this hole..."
     hole.fgcolor = libtcod.sepia
     return hole
 
@@ -373,6 +389,7 @@ def init_libtcod():
     print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
     # default font color
+    libtcod.console_set_default_foreground(0, libtcod.grey)
     # set color control codes for inline string formatting
     # listed by priority: think defcon levels
     # high alert, priority one
@@ -385,7 +402,7 @@ def init_libtcod():
                                         ,libtcod.black)
     # informational, you got a quest item
     libtcod.console_set_color_control(libtcod.COLCTRL_3
-                                        ,libtcod.dark_chartreuse
+                                        ,libtcod.green
                                         ,libtcod.black)
     # tile and npc names
     libtcod.console_set_color_control(C.COL4

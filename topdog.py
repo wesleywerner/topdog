@@ -60,27 +60,19 @@ def draw_objects():
     """
         Place all map objects on the canvas.
     """
-    seen_objects = []
     for obj in game_objects:
         if not obj is player.carrying:
             if libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
-                seen_objects.append("%c%s%c" % (C.COL3, obj.name, C.COLS))
+                if not obj.seen:
+                    obj.seen = True
+                    player.add_message("You see a %c%s%c!" % \
+                                        (C.COL3, obj.name, C.COLS))
                 libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
                                         obj.char, obj.fgcolor, None)
     # draw player
     libtcod.console_put_char_ex(canvas, player.x, player.y, 
                                 player.char, player.fgcolor, None)
-    # seen objects
-    if len(seen_objects) > 0:
-        x = 2
-        align = libtcod.LEFT
-        if player.x < (C.MAP_WIDTH / 2):
-            x = C.MAP_WIDTH - 2
-            align = libtcod.RIGHT
-        libtcod.console_print_ex(0
-                            ,x, C.SEENLIST_TOP
-                            ,libtcod.BKGND_NONE, align
-                            ,"%c> you see <%c\n"  % (C.COL5, C.COLS) + "\n".join(seen_objects))
+
 
 def draw_player_stats():
     """
@@ -112,7 +104,15 @@ def draw_player_stats():
         libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
                             ,"%c*weak*%c" % (C.COL1, C.COLS))
-    
+    elif player.thirsty:
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+                            ,libtcod.BKGND_NONE, libtcod.RIGHT
+                            ,"%c*thirsty*%c" % (C.COL2, C.COLS))
+    elif player.hungry:
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+                            ,libtcod.BKGND_NONE, libtcod.RIGHT
+                            ,"%c*hungry*%c" % (C.COL2, C.COLS))
+
 def draw_messages():
     """
         Display the last x messages in-game.
@@ -139,7 +139,6 @@ def warp_level():
     # carry our inventory item into this new level
     if player.carrying:
         game_objects.append(player.carrying)
-    libtcod.console_set_default_foreground(0, libtcod.light_grey)
 
 if __name__ == "__main__":
     """
