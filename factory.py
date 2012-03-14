@@ -9,15 +9,6 @@ import lib.libtcodpy as libtcod
 import constants as C
 import classes as cls
 
-# all our colors are define here for easy changing
-
-POOL_BG = libtcod.darker_sky
-POOL_FG = libtcod.sky
-PUDDLE_FG = libtcod.sky
-FENCE_BG = libtcod.black
-FENCE_FG = libtcod.dark_sepia
-HOLE_FG = libtcod.sepia
-
 # define our tile characters here so we can do easy ascii to map lookups
 CHAR_FENCE = "#"
 CHAR_TAR = ":"
@@ -54,7 +45,7 @@ def get_bush():
     fol.message = "*crawls* under %c%s%c" % (C.COL4, fol.name, C.COLS)
     return fol
     
-def get_flowers():
+def get_flower():
     names = ('Flowers', 'Roses')
     colors = (libtcod.light_amber, libtcod.light_magenta
             , libtcod.light_red, libtcod.light_azure, libtcod.light_yellow)
@@ -77,7 +68,7 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
     """
     plant_choices = (get_tree
                     ,get_bush
-                    ,get_flowers
+                    ,get_flower
                     )
 
     for loop in range(amount):
@@ -99,7 +90,7 @@ def get_puddle():
     puddle.drinkable = True
     puddle.char = CHAR_WATER
     puddle.name = "water puddle"
-    puddle.fgcolor = PUDDLE_FG
+    puddle.fgcolor = libtcod.sky
     puddle.message = "%c*splash*%c" % (C.COL4, C.COLS)
     return puddle
 
@@ -108,8 +99,8 @@ def get_pool_tile():
     puddle.drinkable = True
     puddle.char = CHAR_WATER
     puddle.name = "pool"
-    puddle.fgcolor = POOL_FG
-    puddle.bgcolor = POOL_BG
+    puddle.fgcolor = libtcod.sky
+    puddle.bgcolor = libtcod.darker_sky
     puddle.message = "%c*splash*%c" % (C.COL4, C.COLS)
     return puddle
 
@@ -151,7 +142,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
 
 #===============================================================[[ Objects ]]
 
-def generate_toys(game_map, game_objects):
+def spawn_toys(game_map, game_objects):
     """
         Make some toys for fido.
     """
@@ -191,24 +182,22 @@ def blank_map():
         for x in range(C.MAP_WIDTH)]
     return newmap
 
-def fence_segment():
+def get_fence():
     panel = cls.Object()
     panel.name = "Fence"
     panel.char = CHAR_FENCE
-    panel.bgcolor = FENCE_BG
-    panel.fgcolor = FENCE_FG
+    panel.fgcolor = libtcod.dark_sepia
     panel.blocking = True
     panel.seethrough = False
     return panel
 
-def fence_hole():
+def get_hole():
     hole = cls.Hole()
     hole.name = "[SPACEBAR crawls through the Hole]"
-    hole.fgcolor = HOLE_FG
-    hole.bgcolor = FENCE_BG
+    hole.fgcolor = libtcod.sepia
     return hole
 
-def make_fence_holes(game_map):
+def place_fence_holes(game_map):
     """
         Make a few random fence holes. Test they are at least next to grass
         or foliage to crawl through.
@@ -244,7 +233,7 @@ def make_fence_holes(game_map):
                     xo = x
             # test there is a space or foliage alongside
             if game_map[xo][yo].blanktile:
-                game_map[x][y] = fence_hole()
+                game_map[x][y] = get_hole()
                 break
     
 
@@ -253,12 +242,12 @@ def build_fence(game_map):
         Outline the yard with a fence like structure.
     """
     for y in range(C.MAP_HEIGHT - 0):
-        game_map[0][y] = fence_segment()
-        game_map[C.MAP_WIDTH - 1][y] = fence_segment()
+        game_map[0][y] = get_fence()
+        game_map[C.MAP_WIDTH - 1][y] = get_fence()
     for x in range(C.MAP_WIDTH - 0):
-        game_map[x][0] = fence_segment()
-        game_map[x][C.MAP_HEIGHT - 1] = fence_segment()
-    make_fence_holes(game_map)
+        game_map[x][0] = get_fence()
+        game_map[x][C.MAP_HEIGHT - 1] = get_fence()
+    place_fence_holes(game_map)
 
 
 def plant_foliage(game_map):
@@ -286,7 +275,7 @@ def get_brick():
     brick.fgcolor = libtcod.dark_grey
     return brick
 
-def get_tar():
+def get_path():
     """
         Make a tar tile.
     """
@@ -298,7 +287,7 @@ def get_tar():
     tar.name = ""
     return tar
 
-def transform_map(game_map):
+def flip_map(game_map):
     """
         Transform the map by mirroring it on X/Y.
     """
@@ -311,6 +300,9 @@ def transform_map(game_map):
             e.reverse()
     
 def read_map_file(map_index):
+    """
+        Read an ASCII map file and return it as a list of lines.
+    """
     f = open(os.path.join('data', 'maps', 'map%s' % (map_index)))
     contents = f.read(3000)
     f.close()
@@ -325,10 +317,10 @@ def map_from_ascii(game_map):
     # since the ascii maps can't contain special chars
     tile_lookup = {
                     "B": get_brick
-                    ,"#": fence_segment
-                    ,CHAR_TAR: get_tar
+                    ,"#": get_fence
+                    ,CHAR_TAR: get_path
                     ,CHAR_WATER: get_pool_tile
-                    ,'f': get_flowers
+                    ,'f': get_flower
                     ,'t': get_tree
                     ,'b': get_bush
                 }
@@ -347,9 +339,9 @@ def generate_map():
     game_map = blank_map()
     game_objects = []
     map_from_ascii(game_map)
-    transform_map(game_map)
+    flip_map(game_map)
     plant_foliage(game_map)
-    generate_toys(game_map, game_objects)
+    spawn_toys(game_map, game_objects)
     build_fence(game_map)
     fov_map = libtcod.map_new(C.MAP_WIDTH, C.MAP_HEIGHT)
     for y in range(C.MAP_HEIGHT - 1):
@@ -401,5 +393,5 @@ def init_libtcod():
 if __name__ == "__main__":
     game_map = blank_map()
     map_from_ascii(game_map)
-    transform_map(game_map)
+    flip_map(game_map)
     pass

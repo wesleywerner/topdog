@@ -68,8 +68,8 @@ class Player(Object):
                                 (C.COL3, self.carrying.name, C.COLS))
                 break
         
-    def can_warp(self, gamemap):
-        return isinstance(gamemap[self.x][self.y], Hole)
+    def can_warp(self, game_map):
+        return isinstance(game_map[self.x][self.y], Hole)
     
     def warp_prep(self):
         self.level = self.level + 1
@@ -110,8 +110,8 @@ class Player(Object):
     def recover_bravery(self):
         self.bravery = DEFAULT_BRAVERY
 
-    def quench_thirst(self, gamemap):
-        if gamemap[self.x][self.y].drinkable:
+    def quench_thirst(self, game_map):
+        if game_map[self.x][self.y].drinkable:
             self.quenches = self.quenches + 1
             self.thirsty = False
             self.add_message("You %cquenced%c your thirst." % (C.COL3, C.COLS))
@@ -122,16 +122,15 @@ class Player(Object):
         if self.mustpiddle:
             pass
 
-    def move(self, gamemap, game_objects, xoffset, yoffset):
+    def move(self, game_map, game_objects, xoffset, yoffset):
         x = self.x + xoffset
         y = self.y + yoffset
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
-            tile = gamemap[x][y]
+            tile = game_map[x][y]
             if tile.blocking:
-                self.add_message("*bumps* %c%s%c" % 
-                                 (C.COL4
-                                 ,tile.name
-                                 ,C.COLS))
+                self.add_message("*bumps* %c%s%c" % (C.COL4, tile.name, C.COLS))
+            elif tile.drinkable and game_map[self.x][self.y].drinkable:
+                self.add_message("it's too *deep*")
             else:
                 self.x = x
                 self.y = y
