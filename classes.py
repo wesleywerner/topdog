@@ -89,8 +89,8 @@ class ActionManual(ActionAI):
             # engage!
             if target.action_ai:
                 if target.action_ai.hostile:
-                    target.take_damage(target, player.action_ai.attack_rating)
-                    player.add_message("you bite for %s damage" % \
+                    target.take_damage(player, self.attack_rating)
+                    player.msg("you bite for %s damage" % \
                                          (player.action_ai.attack_rating))
             # let them have a go
             if target.action_ai:
@@ -195,6 +195,8 @@ class AnimalBase(object):
         self.hp = self.hp - damage
         if self.hp < 0:
             if self.move_ai:
+                if isinstance(attacker, Player):
+                    attacker.msg("%s runs away!" % (self.name))
                 self.move_ai.behaviour = MoveAI.SKITTISH
     
     def take_turn(self):
@@ -214,7 +216,8 @@ class AnimalBase(object):
         if x >= 0 and x < C.MAP_WIDTH and y >= 0 and y < C.MAP_HEIGHT:
             tile = game_map[x][y]
             # cant move into a drinkable tile if already on one
-            near_deep_water = tile.drinkable and game_map[self.x][self.y].drinkable
+            near_deep_water = tile.drinkable and \
+                                            game_map[self.x][self.y].drinkable
             if not tile.blocking and not near_deep_water or self.flying:
                 # test if moving against another being
                 blocking_us = False
@@ -223,7 +226,7 @@ class AnimalBase(object):
                         blocking_us = True
                         if self.action_ai:
                             self.action_ai.contact_with(being)
-                        break
+                        return True
                 if not blocking_us:
                     self.moves = self.moves + 1
                     # but if we are little slow, we may need to way for next
@@ -273,14 +276,14 @@ class Player(AnimalBase):
 
     def add_quest(self, quest):
         #TODO notify player of our new quest
-        self.add_message("got a quest!")
+        self.msg("got a quest!")
     
     def add_dialogue(self, dialogue):
         self.dialogues.append(dialogue)
         
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
-        self.add_message("The %s hit you for %s" % (attacker.name, damage))
+        self.msg("The %s hit you for %s" % (attacker.name, damage))
 
     def get_hearts(self):
         """
@@ -296,7 +299,7 @@ class Player(AnimalBase):
                         self.carrying.x, self.carrying.y = (obj.x, obj.y)
                     self.carrying = obj
                     self.carrying.x = 0
-                    self.add_message("picked up %s" % (obj.name))
+                    self.msg("picked up %s" % (obj.name))
                 break
     
     def move(self, game_map, game_objects, x, y):
@@ -314,7 +317,7 @@ class Player(AnimalBase):
                 self.thirsty = True
             tile = game_map[x][y]
             if tile.message:
-                self.add_message(tile.message)
+                self.msg(tile.message)
             if tile.fov_limit:
                 self.fov_radius = tile.fov_limit
             else:
@@ -340,7 +343,7 @@ class Player(AnimalBase):
                         "You %center%c the yard..." % 
                         (C.COL4, C.COLS)]
 
-    def add_message(self, message):
+    def msg(self, message):
         if not self.messages: 
             self.messages.append(message)
         else:
@@ -361,7 +364,7 @@ class Player(AnimalBase):
         if game_map[self.x][self.y].drinkable:
             self.quenches = self.quenches + 1
             self.thirsty = False
-            self.add_message(random.choice(messages) % (C.COL5, C.COLS))
+            self.msg(random.choice(messages) % (C.COL5, C.COLS))
             if self.quenches % C.PLAYER_PIDDLE_INDEX == 0:
                 self.mustpiddle = True
 
@@ -370,21 +373,21 @@ class Player(AnimalBase):
             pass
 
 
-class NPC(AnimalBase):
-    """
-        Non Player Character.
-    """
-    def __init__(self):
-        super(NPC, self).__init__()
-        self.x = 0
-        self.y = 0
-        self.color = None
-        self.char = "?"
-        self.quests = []
-        self.dialogue = None
-        self.hostile = False
-        self.ai = None
-        self.quest = None
+#class NPC(AnimalBase):
+#    """
+#        Non Player Character.
+#    """
+#    def __init__(self):
+#        super(NPC, self).__init__()
+#        self.x = 0
+#        self.y = 0
+#        self.color = None
+#        self.char = "?"
+#        self.quests = []
+#        self.dialogue = None
+#        self.hostile = False
+#        self.ai = None
+#        self.quest = None
 
 
 class GameState():
@@ -431,9 +434,10 @@ class Hint(object):
 
 
 class Quest(object):
-    def __init__(self):
+    def __init__(self, carrier):
+        self.carrier = carrier
         self.title = None
-        self.item = None
+        self.find_item = None
         self.reward = None
 
 
