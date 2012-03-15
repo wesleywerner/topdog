@@ -188,22 +188,23 @@ def spawn_npcs(game_map):
     """
     npcs = []
     
-    for e in range(3):
+    for e in range(1):
         npc = cls.AnimalBase()
         npc.x = 1
         npc.y = 5 + e
-        npc.char = "r"
-        npc.name = "rat"
-        npc.fgcolor = libtcod.blue
+        npc.char = "m"
+        npc.name = "mouse"
+        npc.fgcolor = libtcod.dark_amber
         npc.blocking = True
         npc.move_step = 1
         mai = cls.MoveAI(npc)
         mai.behaviour = cls.MoveAI.HUNTING
+#        mai.behaviour = cls.MoveAI.NEUTRAL
 #        mai.behaviour = cls.MoveAI.FRIENDLY
         npc.move_ai = mai
         aai = cls.ActionAI(npc)
         aai.hostile = True
-        aai.attack_rating = 5
+        aai.attack_rating = 1
         npc.action_ai = aai
         npcs.append(npc)
     

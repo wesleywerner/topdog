@@ -121,15 +121,18 @@ class MoveAI(object):
         npc = self.owner
         x, y = (0, 0)
         if self.behaviour == MoveAI.SKITTISH:
-            x, y = playerxy
-            libtcod.map_compute_fov(fov_map, npc.x, npc.y, npc.fov_radius
-                                            ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
-            if libtcod.map_is_in_fov(fov_map, x, y):
-                # player in sight!
-                if libtcod.path_compute(path_map, npc.x, npc.y, x, y):
-                    x, y = libtcod.path_walk(path_map, True)
-                    if not x is None:
-                        npc.move(game_map, game_objects, npc.x - x, npc.y - y)
+            if dice(2):
+                npc.move(game_map, game_objects, random.randint(-1, 1), random.randint(-1, 1))
+            else:
+                x, y = playerxy
+                libtcod.map_compute_fov(fov_map, npc.x, npc.y, npc.fov_radius
+                                                ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+                if libtcod.map_is_in_fov(fov_map, x, y):
+                    # player in sight!
+                    if libtcod.path_compute(path_map, npc.x, npc.y, x, y):
+                        x, y = libtcod.path_walk(path_map, True)
+                        if not x is None:
+                            npc.move(game_map, game_objects, npc.x - x, npc.y - y)
         elif self.behaviour == MoveAI.NEUTRAL:
             if dice(self.erraticity):
                 x = random.randint(-1, 1)
@@ -191,8 +194,6 @@ class AnimalBase(object):
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
         if self.hp < 0:
-#            attacker.add_message("%c%s%c *bolts* in fear!" % \
-#                                (C.COL2, self.name, C.COLS))
             if self.move_ai:
                 self.move_ai.behaviour = MoveAI.SKITTISH
     

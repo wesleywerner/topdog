@@ -86,7 +86,7 @@ def blit_dialogues():
         # the message
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), C.MAP_TOP + 4,
                             libtcod.BKGND_NONE, libtcod.CENTER, 
-                            dlg.dialogue)
+                            "\"%c%s%c\"" % (C.COL5, dlg.dialogue, C.COLS))
         # press space
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
                             C.SCREEN_HEIGHT - 2, 
