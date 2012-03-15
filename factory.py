@@ -73,11 +73,11 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
         while True:
             x = random.randint(0, C.MAP_WIDTH - thicket_size - 1)
             y = random.randint(0, C.MAP_HEIGHT - thicket_size - 1)
-            if currentmap[x][y].blanktile:
+            if currentmap[x][y].isblank():
                 for thicket in range(density):
                     tx = x + random.randint(1, thicket_size)
                     ty = y +random.randint(1, thicket_size)
-                    if currentmap[tx][ty].blanktile:
+                    if currentmap[tx][ty].isblank():
                         currentmap[tx][ty] = random.choice(plant_choices)()
                 break
 
@@ -119,7 +119,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                 for ty in range(pond_size):
                     for tx in range(pond_size):
                         tile = currentmap[x + tx][y + ty]
-                        if tile.blanktile:
+                        if tile.isblank():
                             wetness = get_puddle()
                             wetness.char = CHAR_WATER
                             wetness.fgcolor = POOL_FG
@@ -132,7 +132,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                 for litres in range(density):
                     tx = x + random.randint(1, pond_size)
                     ty = y +random.randint(1, pond_size)
-                    if currentmap[tx][ty].blanktile:
+                    if currentmap[tx][ty].isblank():
                         # transfer the current cell bgcolor
                         bgcolor = currentmap[tx][ty].bgcolor
                         puddle = get_puddle()
@@ -156,7 +156,7 @@ def place_on_map(game_map, item, near_xy=None):
         else:
             x = random.randint(1, C.MAP_WIDTH - 2)
             y = random.randint(1, C.MAP_HEIGHT - 2)
-        if game_map[x][y].blanktile:
+        if game_map[x][y].isblank():
             item.x, item.y = (x, y)
             break
 
@@ -246,9 +246,9 @@ def generate_quest(game_map, game_objects):
     aai = cls.ActionAI(giver)
     aai.dialogue_text = quest_text
     aai.hostile = False
+    aai.quest = quest
     giver.action_ai = aai
     giver.fgcolor = libtcod.yellow
-    giver.quest = cls.QuestAI(giver)
     place_on_map(game_map, giver)
     game_objects.append(giver)
 
@@ -318,8 +318,7 @@ def blank_map():
     colors = (libtcod.darkest_lime, libtcod.darkest_green
             , libtcod.darkest_sea, libtcod.darkest_chartreuse)
     newmap = [[ cls.ItemBase(
-                blanktile=True
-                ,fgcolor=random.choice(colors)
+                fgcolor=random.choice(colors)
                 ,bgcolor=libtcod.black) 
     for y in range(C.MAP_HEIGHT)]
         for x in range(C.MAP_WIDTH)]
@@ -375,7 +374,7 @@ def place_fence_holes(game_map):
                     yo = y - 1
                     xo = x
             # test there is a space or foliage alongside
-            if game_map[xo][yo].blanktile:
+            if game_map[xo][yo].isblank():
                 game_map[x][y] = get_hole()
                 break
     

@@ -18,13 +18,11 @@ class ItemBase(object):
         Inanimate items (foliage, water, walls) and map tiles.
     """
     def __init__(self
-                ,blanktile=False
                 ,char=".", name=""
                 ,fgcolor=libtcod.white
                 ,bgcolor=libtcod.black):
         self.x = 0
         self.y = 0
-        self.blanktile = blanktile
         self.char = char
         self.name = name
         self.fgcolor = fgcolor
@@ -38,6 +36,9 @@ class ItemBase(object):
         self.fov_limit = None
         self.message = None
         self.quest_id = None
+    
+    def isblank(self):
+        return self.char == "."
 
 
 class ActionAI(object):
