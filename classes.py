@@ -52,7 +52,7 @@ class ActionAI(object):
         self.attack_rating = 0
         self.quest = None
     
-    def interact_with(self, target):
+    def interact_with(self, target, game_objects):
         npc = self.owner
         if isinstance(target, Player):
             if self.dialogue_text:
@@ -71,9 +71,11 @@ class ActionAI(object):
             if self.hostile:
                 # enact some hostility
                 target.take_damage(npc, self.attack_rating)
-            if self.quest:
+            if not self.hostile and self.quest:
                 target.give_quest(npc.name, self.quest)
-            if target.carrying:
+            if target.carrying and self.quest:
+            #TODO: could move this out into the QuestAI.
+            # then the quest giver must also get an instance of this class
                 if target.carrying.quest_id:
                     if target.carrying.quest_id == self.quest.quest_id:
                         target.add_dialogue(Dialogue(npc.name, npc.picture
@@ -90,7 +92,7 @@ class ActionManual(ActionAI):
     def __init__(self, owner):
         self.owner = owner
 
-    def interact_with(self, target):
+    def interact_with(self, target, game_objects):
         player = self.owner
         if isinstance(target, AnimalBase):
             # engage
@@ -103,9 +105,9 @@ class ActionManual(ActionAI):
                     player.msg("*sniffs* the %s" % (target.name))
             # let them have a go
             if target.action_ai:
-                target.action_ai.interact_with(player)
+                target.action_ai.interact_with(player, game_objects)
             if target.quest_ai:
-                target.quest_ai.interact_with(player)
+                target.quest_ai.interact_with(player, game_objects)
         else:
             # action on inanimates, these are not tiles
             # but items in game_objects that are not AnimalBase
@@ -195,15 +197,20 @@ class QuestAI(object):
         self.item = None
         self.message = None
 
-    def interact_with(self, target):
+    def interact_with(self, target, game_objects):
         npc = self.owner
         if isinstance(target, Player):
             #TODO: we can check if the player is seeking this quest via
             # [e for e in target.seek_quests if e.quest_id == self.quest_ai.quest_id]
-            target.add_dialogue(Dialogue(npc.name, npc.picture, npc.quest_ai.message))
-            target.give_item(npc.quest_ai.item)
-            npc.quest_ai = None
-
+            if self.message:
+                target.add_dialogue(Dialogue(npc.name, npc.picture, self.message))
+                self.message = None
+            if npc.hp < 0 and self.quest_id:
+                target.msg("%s %c*dropped*%c something!" % (npc.name, C.COL3, C.COLS))
+                self.item.x = npc.x
+                self.item.y = npc.y
+                game_objects.append(self.item)
+                self.quest_id = None
 
 class AnimalBase(object):
     """
@@ -236,7 +243,7 @@ class AnimalBase(object):
         if self.hp < 0:
             if self.move_ai:
                 if isinstance(attacker, Player):
-                    attacker.msg("%s runs away!" % (self.name))
+                    attacker.msg("%s flees!" % (self.name))
                 self.move_ai.behaviour = MoveAI.SKITTISH
     
     def take_turn(self):
@@ -265,9 +272,9 @@ class AnimalBase(object):
                     if being.x == x and being.y == y and being.blocking:
                         blocking_us = True
                         if self.action_ai:
-                            self.action_ai.interact_with(being)
+                            self.action_ai.interact_with(being, game_objects)
                         if self.quest_ai:
-                            self.quest_ai.interact_with(being)
+                            self.quest_ai.interact_with(being, game_objects)
                         return True
                 if not blocking_us:
                     self.moves = self.moves + 1

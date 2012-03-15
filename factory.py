@@ -198,14 +198,18 @@ def generate_quest(game_map, game_objects):
     """
         generate a quest and place it in game.
     """
+    # use these variables in messages:
+    # %a - for antagonist, ie the one to recover the item from
+    # %b - for the berieved, who lost their precious toy
+    # %i - for the item name in question
     quests = (
-        "I have lost my %item!\nPlease help me..."
-        ,"I played in the garden and\nnow my %item is missing.\nHelp me look?"
-        ,"%npc took my %item.\nCan you bring it back for me?"
+        "I have lost my %i!\nPlease help me..."
+        ,"I played in the garden and\nnow my %i is missing.\nHelp me look?"
+        ,"%a took my %i.\nCan you bring it back for me?"
     )
     thankyous = (
-        "You found my %item,\nThank you!"
-        ,"My %item!\nI hope %npc was not\nmuch trouble.\nMy Hero!"
+        "You found my %i,\nThank you!"
+        ,"My %i!\nI hope %a was not\nmuch trouble.\nMy Hero!"
         ,"My Hero!\nI will always remember\nthis moment!"
     )
     
@@ -218,7 +222,7 @@ def generate_quest(game_map, game_objects):
     item.char = "*"
     item.quest_id = quest.quest_id
     
-    quest_text = random.choice(quests).replace("%item", item.name)
+    quest_text = random.choice(quests).replace("%i", item.name)
     quest.title = "find the %s" % (item.name)
     npc = None
     
@@ -226,13 +230,14 @@ def generate_quest(game_map, game_objects):
 #    if random.randint(0, 1) == 0:
     if True:
 #        npc = get_random_npc(attack_rating=None)
-        npc = get_random_npc(npc_char="C", attack_rating=None)
-        quest_text = quest_text.replace("%npc", npc.name)
+        npc = get_random_npc(npc_char="C", attack_rating=2)
+        quest_text = quest_text.replace("%a", npc.name)
         npc.fgcolor = libtcod.pink
         # quest ai
         quest_ai = cls.QuestAI(npc)
         quest_ai.quest_id = quest.quest_id
         quest_ai.item = item
+        quest_ai.message = "You'll never get it from me!"
         quest.owner = npc
         npc.quest_ai = quest_ai
         # done
@@ -241,9 +246,9 @@ def generate_quest(game_map, game_objects):
     else:
         place_on_map(game_map, item)
         game_objects.append(item)
-        quest_text = quest_text.replace("%npc", "some animal")
+        quest_text = quest_text.replace("%a", "some animal")
     
-    quest.thankyou = random.choice(thankyous).replace("%npc", npc.name).replace("%item", item.name)
+    quest.thankyou = random.choice(thankyous).replace("%a", npc.name).replace("%i", item.name)
     # gen quest giver
     giver = get_random_npc()
     aai = cls.ActionAI(giver)
@@ -289,12 +294,11 @@ def get_random_npc(npc_char=None, attack_rating=None):
     npc.move_ai = mov
     mov.behaviour = random.choice((cls.MoveAI.NEUTRAL, cls.MoveAI.SKITTISH))
     # action AI
+    act = cls.ActionAI(npc)
     if attack_rating:
         mov.behaviour = cls.MoveAI.HUNTING
         act.attack_rating = attack_rating
         act.hostile = True
-    act = cls.ActionAI(npc)
-    act.attack_rating = attack_rating
     npc.action_ai = act
     
     return npc

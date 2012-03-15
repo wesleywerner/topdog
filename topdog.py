@@ -20,6 +20,7 @@ def setup_keyhandler():
                             {
                             libtcod.KEY_SPACE: "player.dialogues.pop()"
                             ,libtcod.KEY_ESCAPE: "player.dialogues.pop()"
+                            ,libtcod.KEY_KPENTER: "player.dialogues.pop()"
                             })
     handler.add_actions(C.STATE_PLAYING,
                 {
@@ -208,6 +209,7 @@ def warp_level():
     game_objects = [player]
 #    game_objects.extend(factory.spawn_toys(game_map))
 #    game_objects.extend(factory.spawn_npcs(game_map, 5))
+    factory.generate_quest(game_map, game_objects)
     factory.generate_quest(game_map, game_objects)
     # carry our inventory item into this new level
     if player.carrying:
