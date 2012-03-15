@@ -1,3 +1,4 @@
+import os
 import math
 import random
 import lib.libtcodpy as libtcod
@@ -36,6 +37,7 @@ class ItemBase(object):
         self.carryable = False
         self.fov_limit = None
         self.message = None
+        self.quest_id = None
 
 
 class ActionAI(object):
@@ -92,6 +94,8 @@ class ActionManual(ActionAI):
                     target.take_damage(player, self.attack_rating)
                     player.msg("you bite for %s damage" % \
                              (player.action_ai.attack_rating))
+                else:
+                    player.msg("*sniffs* the %s" % (target.name))
             # let them have a go
             if target.action_ai:
                 target.action_ai.contact_with(player)
@@ -186,6 +190,7 @@ class AnimalBase(object):
         self.name = "?"
         self.fgcolor = None
         self.seen = False
+        self.blocking = True
         self.see_message = None
         self.moves = 0
         self.move_step = 1
@@ -411,12 +416,29 @@ class Hole(ItemBase):
         self.char = "O"
 
 
+class QuestAI(object):
+    """
+        Quest AI for NPC's.
+    """
+    def __init__(self, owner):
+        self.owner = owner
+        self.quest_id = None
+        self.item = None
+    
+    def drop_quest_item(self):
+        # drop the item around the owner
+        pass
+
+
 class Quest(object):
-    def __init__(self, carrier):
-        self.carrier = carrier
+    """
+        Quest details given to the player by a NPC.
+    """
+    def __init__(self):
+        self.owner = None
+        self.quest_id = os.urandom(2)
         self.title = None
-        self.find_item = None
-        self.reward = None
+        self.reward_cmd = None
 
 
 class KeyHandler(object):

@@ -141,74 +141,170 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
 
 #=============================================================[[ Inventory ]]
 
+def place_on_map(game_map, item, near_xy=None):
+    """
+        place item on a blank map tile
+    """
+    while True:
+        if near_xy:
+            x = random.randint(near_xy[0] - 4, near_xy[0] + 4)
+            y = random.randint(near_xy[1] - 4, near_xy[1] + 4)
+            if x > C.MAP_WIDTH - 2:
+                x = C.MAP_WIDTH - 2
+            if y > C.MAP_HEIGHT - 2:
+                y = C.MAP_HEIGHT - 2
+        else:
+            x = random.randint(1, C.MAP_WIDTH - 2)
+            y = random.randint(1, C.MAP_HEIGHT - 2)
+        if game_map[x][y].blanktile:
+            item.x, item.y = (x, y)
+            break
+
+def get_toy():
+    """
+        get a random toy artifact.
+    """
+    toy_names = ("tennis ball", "bouncy ball", "rubber bone", "knotted rope"
+                ,"rubber chicken", "rubber ducky", "fluffy ball"
+                , "dog tag", "stick", "food bowl", "blanket", "bouncy ball"
+                )
+    toy_colors = (libtcod.lighter_green, libtcod.lighter_red
+                , libtcod.lighter_blue, libtcod.lighter_yellow
+                , libtcod.lighter_lime, libtcod.lighter_sea, libtcod.lighter_han
+                , libtcod.lighter_violet, libtcod.lighter_fuchsia)
+    toy = cls.ItemBase()
+    toy.name = random.choice(toy_names)
+    toy.char = chr(3)
+    toy.fgcolor = random.choice(toy_colors)
+    toy.carryable = True
+    return toy
+
 def spawn_toys(game_map):
     """
         Make some toys for fido.
     """
     toys = []
     how_many = random.randint(1, 4)
-    toy_names = ("tennis ball!", "bouncy ball", "rubber bone", "knotted rope"
-                ,"rubber chicken", "rubber ducky")
-    toy_colors = (libtcod.lighter_green, libtcod.lighter_red
-                , libtcod.lighter_blue, libtcod.lighter_yellow
-                , libtcod.lighter_lime, libtcod.lighter_sea, libtcod.lighter_han
-                , libtcod.lighter_violet, libtcod.lighter_fuchsia)
     
     for item in range(how_many):
-        toy = cls.ItemBase()
-        toy.name = random.choice(toy_names)
-        toy.char = chr(3)
-        toy.fgcolor = random.choice(toy_colors)
-        toy.carryable = True
-        while True:
-            x = random.randint(1, C.MAP_WIDTH - 2)
-            y = random.randint(1, C.MAP_HEIGHT - 2)
-            if game_map[x][y].blanktile:
-                toy.x, toy.y = (x, y)
-                toys.append(toy)
-                break
+        toy = get_toy()
+        place_on_map(game_map, toy)
+        toys.append(toy)
     return toys
+
+#================================================================[[ Quests ]]
+
+def generate_quest(game_map, game_objects):
+    """
+        generate a quest and place it in game.
+    """
+    quests = (
+        "I have lost my %item!\nPlease help me..."
+        ,"I played in the garden and\nnow my %item is missing.\nHelp me look?"
+        ,"%npc took my %item.\nCan you bring it back for me?"
+    )
+    
+    # gen quest
+    quest = cls.Quest()
+    quest.reward_cmd = None
+    
+    # gen quest item
+    item = get_toy()
+    item.char = "*"
+    item.quest_id = quest.quest_id
+    
+    quest_text = random.choice(quests).replace("%item", item.name)
+    quest.title = "find the %s" % (item.name)
+    npc = None
+    
+    # give to a NPC, or place quest item on the map
+    if random.randint(0, 1) == 0:
+        npc = get_random_npc(attack_rating=None)
+        quest_text = quest_text.replace("%npc", npc.name)
+        npc.fgcolor = libtcod.pink
+        # action ai
+#        mov.behaviour = cls.MoveAI.HUNTING
+#        act = cls.ActionAI(npc)
+#        act.hostile = True
+#        act.attack_rating = attack_rating
+#        npc.action_ai = act
+        # quest ai
+        quest_ai = cls.QuestAI(npc)
+        quest_ai.quest_id = quest.quest_id
+        quest_ai.item = item
+        quest.owner = npc
+        # done
+        place_on_map(game_map, npc)
+        game_objects.append(npc)
+    else:
+        place_on_map(game_map, item)
+        game_objects.append(item)
+        quest_text = quest_text.replace("%npc", "somebody")
+
+    # gen quest giver
+    giver = get_random_npc()
+    aai = cls.ActionAI(giver)
+    aai.dialogue_text = quest_text
+    aai.hostile = False
+    giver.action_ai = aai
+    giver.fgcolor = libtcod.yellow
+    giver.quest = cls.QuestAI(giver)
+    place_on_map(game_map, giver)
+    game_objects.append(giver)
+
 
 #=================================================================[[ NPC's ]]
 
-##chances: 20% monster A, 40% monster B, 10% monster C, 30% monster D:
-#choice = libtcod.random_get_int(0, 0, 100)
-#if choice < 20:
-#    #create monster A
-#elif choice < 20+40:
-#    #create monster B
-#elif choice < 20+40+10:
-#    #create monster C
-#else:
-#    #create monster D
+def get_random_npc(npc_char=None, attack_rating=None):
+    """
+        get a randomly generated npc.
+    """
+    dna_bank = {
+         "m": "mouse"
+        ,"j": "monkey"
+        ,"d": "dog"
+        ,"D": "big dog"
+        ,"c": "cat"
+        ,"C": "Fat Cat"
+        ,"s": "squirrel"
+        ,"h": "human child"
+        ,"H": "human"
+        ,"b": "bird"
+    }
+    if not npc_char:
+        npc_char = random.choice(dna_bank.keys())
+    # NPC
+    npc = cls.AnimalBase()
+    npc.blocking = True
+    npc.fgcolor = libtcod.cyan
+    npc.char = npc_char
+    npc.name = dna_bank[npc_char]
+    npc.move_step = random.randint(1, 3)
+    npc.dialogue_text = "hello world"
+    # move AI
+    mov = cls.MoveAI(npc)
+    npc.move_ai = mov
+    mov.behaviour = random.choice((cls.MoveAI.NEUTRAL
+                                , cls.MoveAI.FRIENDLY, cls.MoveAI.SKITTISH))
+    # action AI
+    if attack_rating:
+        mov.behaviour = cls.MoveAI.HUNTING
+        act = cls.ActionAI(npc)
+        act.hostile = True
+        act.attack_rating = attack_rating
+        npc.action_ai = act
+    
+    return npc
 
-def spawn_npcs(game_map):
+def spawn_npcs(game_map, amount):
     """
         Return a bunch of NPC's.
     """
     npcs = []
     
-    for e in range(1):
-        npc = cls.AnimalBase()
-        npc.x = 1
-        npc.y = 5 + e
-        npc.char = "m"
-        npc.name = "mouse"
-        npc.fgcolor = libtcod.dark_amber
-        npc.blocking = True
-        npc.move_step = 1
-#        npc.see_message = "The mouse tiwddles his whiskers"
-        mai = cls.MoveAI(npc)
-#        mai.behaviour = cls.MoveAI.HUNTING
-#        mai.behaviour = cls.MoveAI.NEUTRAL
-        mai.behaviour = cls.MoveAI.FRIENDLY
-        npc.move_ai = mai
-        aai = cls.ActionAI(npc)
-        aai.dialogue_text = "I like Penguins!"
-        aai.hostile = False
-        aai.quest = cls.Quest(npc)
-        aai.attack_rating = 1
-        npc.action_ai = aai
+    for e in range(amount):
+        npc = get_random_npc()
+        place_on_map(game_map, npc)
         npcs.append(npc)
     
     return npcs
@@ -447,5 +543,7 @@ def init_libtcod():
 
 #=============================================================[[ Unit Test ]]
 if __name__ == "__main__":
-    print(count_available_maps())
+    game_map = blank_map()
+    game_objects = spawn_npcs(game_map, 20)
+    generate_quest(game_map, game_objects)
     pass

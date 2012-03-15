@@ -206,8 +206,9 @@ def warp_level():
     libtcod.map_compute_fov(fov_map, player.x, player.y
                             ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
     game_objects = [player]
-    game_objects.extend(factory.spawn_toys(game_map))
-    game_objects.extend(factory.spawn_npcs(game_map))
+#    game_objects.extend(factory.spawn_toys(game_map))
+#    game_objects.extend(factory.spawn_npcs(game_map, 5))
+    factory.generate_quest(game_map, game_objects)
     # carry our inventory item into this new level
     if player.carrying:
         game_objects.append(player.carrying)
