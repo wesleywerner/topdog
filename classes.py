@@ -53,7 +53,6 @@ class ActionAI(object):
     def contact_with(self, target):
         npc = self.owner
         if isinstance(target, Player):
-            #TODO: logic here for behaviour
             if self.dialogue_text:
                 # show dialogue to the player
                 if type(self.dialogue_text) is list:
@@ -74,6 +73,7 @@ class ActionAI(object):
             elif self.hostile:
                 # enact some hostility
                 target.take_damage(npc, self.attack_rating)
+                    
 
 
 class ActionManual(ActionAI):
@@ -191,12 +191,10 @@ class AnimalBase(object):
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
         if self.hp < 0:
-            self.name = "%s corpse" % (self.name)
-            self.char = ";"
-            self.fgcolor = libtcod.red
-            self.blocking = False
-            self.move_ai = None
-            self.action_ai = None
+#            attacker.add_message("%c%s%c *bolts* in fear!" % \
+#                                (C.COL2, self.name, C.COLS))
+            if self.move_ai:
+                self.move_ai.behaviour = MoveAI.SKITTISH
     
     def take_turn(self):
         if self.move_ai:

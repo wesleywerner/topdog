@@ -198,11 +198,11 @@ def spawn_npcs(game_map):
         npc.blocking = True
         npc.move_step = 1
         mai = cls.MoveAI(npc)
-#        mai.behaviour = cls.MoveAI.HUNTING
-        mai.behaviour = cls.MoveAI.FRIENDLY
+        mai.behaviour = cls.MoveAI.HUNTING
+#        mai.behaviour = cls.MoveAI.FRIENDLY
         npc.move_ai = mai
         aai = cls.ActionAI(npc)
-        aai.hostile = False
+        aai.hostile = True
         aai.attack_rating = 5
         npc.action_ai = aai
         npcs.append(npc)
