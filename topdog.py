@@ -38,6 +38,7 @@ def setup_keyhandler():
                 ,libtcod.KEY_SPACE: "if player.can_warp(game_map): warp_level()"
                 ,"d": "player.quench_thirst(game_map)"
                 ,"e": "player.eat_item()"
+                ,"p": "player.piddle(game_map)"
                 ,libtcod.KEY_F5: "warp_level()"
                 })
     return handler
@@ -169,15 +170,20 @@ def draw_player_stats():
     if player.weak:
         libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
-                            ,"%c*weak*%c" % (C.COL1, C.COLS))
+                            ,"%c*weakness*%c" % (C.COL1, C.COLS))
     elif player.thirsty:
         libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
-                            ,"%c*thirsty*%c" % (C.COL2, C.COLS))
+                            ,"%c*thirstys*%c" % (C.COL2, C.COLS))
     elif player.hungry:
         libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
-                            ,"%c*hungry*%c" % (C.COL2, C.COLS))
+                            ,"%c*hungrys*%c" % (C.COL2, C.COLS))
+    elif player.mustpiddle:
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+                            ,libtcod.BKGND_NONE, libtcod.RIGHT
+                            ,"%c*piddles*%c" % (C.COL2, C.COLS))
+
 
 def draw_messages():
     """

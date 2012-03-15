@@ -102,9 +102,15 @@ class ActionManual(ActionAI):
             # engage
             if target.action_ai:
                 if target.action_ai.hostile:
-                    target.take_damage(player, self.attack_rating)
-                    player.msg("you *bite* the %s" % \
-                             (target.name))
+                    if player.weak:
+                        # move away from the hostile
+                        player.msg("You can't *bite*, you are %cweak%c!" % \
+                                    (C.COL1, C.COLS))
+                        return False
+                    else:
+                        target.take_damage(player, self.attack_rating)
+                        player.msg("you *bite* the %s" % \
+                                 (target.name))
                 else:
                     player.msg("*sniffs* the %s" % (target.name))
             # let them have a go
@@ -344,7 +350,11 @@ class Player(AnimalBase):
                 if self.hp > 100:
                     self.hp = 100
                 self.carrying = None
-                self.msg("Yum!")
+                if self.weak:
+                    self.weak = False
+                    self.msg("You feel better.")
+                else:
+                    self.msg("Yum!")
             else:
                 self.msg("You chew on the %s" % (self.carrying.name))
         
@@ -449,9 +459,23 @@ class Player(AnimalBase):
             if self.quenches % C.PLAYER_PIDDLE_INDEX == 0:
                 self.mustpiddle = True
 
-    def do_piddle(self):
+    def piddle(self, game_map):
         if self.mustpiddle:
-            pass
+            # find something interesting to go against
+            surrounding = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
+            for i in range(10):
+                spot = random.choice(surrounding)
+                tile = game_map[self.x + spot[0]][self.y + spot[1]]
+                if not tile.isblank():
+                    # relief!
+                    self.msg("You *piddle* on the %s, yey!" % (tile.name))
+                    self.mustpiddle = False
+                    self.score = self.score + 10
+                    break
+            if self.mustpiddle:
+                self.score = self.score + 1
+                self.msg("*psssssss*")
+                self.mustpiddle = False
 
 
 class GameState():

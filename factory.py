@@ -236,8 +236,7 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     npc = None
     
     # give to a NPC, or place quest item on the map
-#    if random.randint(0, 1) == 0:
-    if True:
+    if random.randint(0, 1) == 0:
         npc = get_random_npc(attack_rating=default_attack_rating)
         # set attack_rating if hostile, otherwise NPC hits with 0 damaage :p
         npc.action_ai.hostile = False
@@ -271,6 +270,68 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     giver.fgcolor = libtcod.yellow
     place_on_map(game_map, game_objects, giver)
     game_objects.append(giver)
+
+
+
+def get_quest_by_template(
+                    game_map, game_objects, 
+                    , title, thankyou_text, reward_cmd=None
+                    , a_char=None, a_attack_rating=None
+                    , a_dialogue=None, a_hunter=False
+                    , b_char=None, b_dialogue=None, b_thankyou=None
+                    , i_char=None, i_name=None
+                    ):
+    """
+        generate a quest by given options.
+        - None value for any option will use random defaults.
+        - messages can contain %a (antagonist), %b (berieved) and %i (item) name placeholders.
+        - npc_hunter True: attack rating, and behaviour is Hunter
+                  False: Neutral
+    """
+    # use these variables in messages:
+    # %a - for antagonist, ie the one to recover the item from
+    # %b - for the berieved, who lost their precious toy
+    # %i - for the item name in question
+    
+    # gen quest item
+    item = get_toy()
+    if i_char:
+        item.char = i_char
+    if i_name:
+        item.name = i_name
+
+    npc = get_random_npc(npc_char=a_char, attack_rating=a_attack_rating)
+    if a_hunter:
+        npc.action_ai.hostile = True
+        npc.move_ai.behaviour = random.choice((cls.MoveAI.HUNTING, cls.MoveAI.NEUTRAL))
+
+    # quest ai
+    quest_ai = cls.QuestAI(npc)
+    quest_ai.item = item
+    npc.quest_ai = quest_ai
+    quest_ai.message = a_dialogue
+
+    place_on_map(game_map, game_objects, npc)
+    game_objects.append(npc)
+    
+    quest = cls.Quest()
+    quest.owner = npc
+    quest.reward_cmd = reward_cmd
+    item.quest_id = quest.quest_id
+    quest_ai.quest_id = quest.quest_id
+
+    # gen quest giver
+    giver = get_random_npc(npc_char=b_char)
+    aai = cls.ActionAI(giver)
+    aai.dialogue_text = b_dialogue
+#    aai.hostile = False
+    aai.quest = quest
+    giver.action_ai = aai
+    place_on_map(game_map, game_objects, giver)
+    game_objects.append(giver)
+
+    quest.title = title.replace("%a", npc.name).replace("%b", npc.giver.name).replace("%i", item.name)
+    quest.thankyou = b_thankyou
 
 
 

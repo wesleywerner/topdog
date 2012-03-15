@@ -4,7 +4,6 @@ QUESTS:action on player that is carrying quest item: success!
 NPC generators
 
 
-- weak player == no attacking allowed. eat resolves this
 - piddle.
 - only give out quest items if playeris seeking them
 - show detailed into in a "@" screen: level, score.
