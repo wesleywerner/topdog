@@ -197,15 +197,16 @@ def spawn_npcs(game_map):
         npc.fgcolor = libtcod.dark_amber
         npc.blocking = True
         npc.move_step = 1
-        npc.see_message = "The mouse tiwddles his whiskers"
+#        npc.see_message = "The mouse tiwddles his whiskers"
         mai = cls.MoveAI(npc)
 #        mai.behaviour = cls.MoveAI.HUNTING
-        mai.behaviour = cls.MoveAI.NEUTRAL
-#        mai.behaviour = cls.MoveAI.FRIENDLY
+#        mai.behaviour = cls.MoveAI.NEUTRAL
+        mai.behaviour = cls.MoveAI.FRIENDLY
         npc.move_ai = mai
         aai = cls.ActionAI(npc)
         aai.dialogue_text = "I like Penguins!"
         aai.hostile = False
+        aai.quest = cls.Quest(npc)
         aai.attack_rating = 1
         npc.action_ai = aai
         npcs.append(npc)
@@ -415,7 +416,7 @@ def init_libtcod():
                                     libtcod.FONT_LAYOUT_ASCII_INROW)
     print('creating screen.')
     libtcod.console_init_root(C.SCREEN_WIDTH, C.SCREEN_HEIGHT, 
-                              'TopDog -- v%s' % (C.VERSION), C.FULLSCREEN)
+                              'top dog -- v%s' % (C.VERSION), C.FULLSCREEN)
     print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
     # default font color

@@ -66,11 +66,11 @@ class ActionAI(object):
                     target.add_dialogue(Dialogue(npc.name, self.picture
                                             , self.dialogue_text))
                     self.dialogue_text = None
-            elif self.quest:
+            if self.quest:
                 # give the player our quest
-                target.add_quest(self.quest)
+                target.give_quest(npc.name, self.quest)
                 self.quest = None
-            elif self.hostile:
+            if self.hostile:
                 # enact some hostility
                 target.take_damage(npc, self.attack_rating)
                     
@@ -263,7 +263,7 @@ class Player(AnimalBase):
         self.x = 1
         self.y = 1
         self.char = "@"
-        self.name = "player"
+        self.name = "topdog"
         self.fgcolor = libtcod.white
         self.blocking = True
         self.weak = False
@@ -279,9 +279,9 @@ class Player(AnimalBase):
         self.wizard = False
         self.dialogues = []
 
-    def add_quest(self, quest):
+    def give_quest(self, npc_name, quest):
         #TODO notify player of our new quest
-        self.msg("got a quest!")
+        self.msg("%s gave you a %c*quest*%c!" % (npc_name, C.COL2, C.COLS))
     
     def add_dialogue(self, dialogue):
         self.dialogues.append(dialogue)
@@ -378,23 +378,6 @@ class Player(AnimalBase):
             pass
 
 
-#class NPC(AnimalBase):
-#    """
-#        Non Player Character.
-#    """
-#    def __init__(self):
-#        super(NPC, self).__init__()
-#        self.x = 0
-#        self.y = 0
-#        self.color = None
-#        self.char = "?"
-#        self.quests = []
-#        self.dialogue = None
-#        self.hostile = False
-#        self.ai = None
-#        self.quest = None
-
-
 class GameState():
     """
         Handles game state via a stack based finite machine.
@@ -428,16 +411,6 @@ class Hole(ItemBase):
         self.char = "O"
 
 
-class Hint(object):
-    """
-        
-    """
-    def __init__(self):
-        self.radius = 0
-        self.message = None
-        self.visible = False
-
-
 class Quest(object):
     def __init__(self, carrier):
         self.carrier = carrier
@@ -445,15 +418,6 @@ class Quest(object):
         self.find_item = None
         self.reward = None
 
-
-class Scent(object):
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.radius = 0
-        self.reward = None
-        self.detect_message = None
-        self.found_message = None
 
 class KeyHandler(object):
     """
