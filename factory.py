@@ -196,14 +196,13 @@ def spawn_npcs(game_map):
         npc.name = "rat"
         npc.fgcolor = libtcod.blue
         npc.blocking = True
-        npc.move_step = 1
+        npc.move_step = 2
         mai = cls.MoveAI(npc)
-        mai.behaviour = cls.MoveAI.NEUTRAL
+        mai.behaviour = cls.MoveAI.HUNTING
         npc.move_ai = mai
         aai = cls.ActionAI(npc)
         aai.hostile = True
-        aai.attack_rating = 10
-        aai.dialogue_text = ["I have nothing more for you.", "I have a %cquest%c for you.\nCome back to me shortly,\nI will give it to you." % (C.COL3, C.COLS)]
+        aai.attack_rating = 5
         npc.action_ai = aai
         npcs.append(npc)
     
@@ -398,7 +397,8 @@ def generate_map(maps_avail):
             libtcod.map_set_properties(fov_map, x, y
                                         ,game_map[x][y].seethrough
                                         ,not game_map[x][y].blocking)
-    return game_map, fov_map
+    path_map = libtcod.path_new_using_map(fov_map)
+    return game_map, fov_map, path_map
 
 
 #===============================================================[[ Libtcod ]]

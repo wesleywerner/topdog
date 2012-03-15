@@ -108,13 +108,16 @@ class MoveAI(object):
     SKITTISH = 0x0
     NEUTRAL = 0x1
     FRIENDLY = 0x2
+    HUNTING = 0x3
 
     def __init__(self, owner):
         self.owner = owner
         self.behaviour = None
         self.erraticity = 10
+        self.prey_x = 0
+        self.prey_y = 0
 
-    def take_turn(self, game_map, fov_map, game_objects, playerxy):
+    def take_turn(self, game_map, fov_map, path_map, game_objects, playerxy):
         npc = self.owner
         x, y = (0, 0)
         if self.behaviour == MoveAI.SKITTISH:
@@ -131,7 +134,27 @@ class MoveAI(object):
         elif self.behaviour == MoveAI.FRIENDLY:
             pass
         elif self.behaviour == MoveAI.HUNTING:
-            pass
+            # look for prey
+            x, y = playerxy
+            libtcod.map_compute_fov(fov_map, npc.x, npc.y, npc.fov_radius
+                                            ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+            if libtcod.map_is_in_fov(fov_map, x, y):
+                # player in sight!
+                if libtcod.path_compute(path_map, npc.x, npc.y, x, y):
+                    self.prey_x = x
+                    self.prey_y = y
+                    x, y = libtcod.path_walk(path_map, True)
+                    if not x is None:
+                        npc.move(game_map, game_objects, x - npc.x, y - npc.y)
+            else:
+                # prowl last know prey location
+                if libtcod.path_compute(path_map, npc.x, npc.y
+                                        ,self.prey_x, self.prey_y):
+                    x, y = libtcod.path_walk(path_map, True)
+                    npc.move(game_map, game_objects, x - npc.x, y - npc.y)
+
+
+    #                libtcod.path_reverse(path_map)
             
 
 class AnimalBase(object):
@@ -154,10 +177,7 @@ class AnimalBase(object):
         self.move_ai = None
         self.action_ai = None
         self.flying = False
-    
-    def interact(self, target):
-        pass
-    
+
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
         if self.hp < 0:

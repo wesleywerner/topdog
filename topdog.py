@@ -47,16 +47,16 @@ def game_turn(player_move_x, player_move_y):
         Call all game turn actions.
     """
     if player.move(game_map, game_objects, player_move_x, player_move_y):
-        # recompute field of vision since we moved
-        libtcod.map_compute_fov(fov_map, player.x, player.y
-                                ,player.fov_radius
-                                ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
         # move NPC's
         for npc in game_objects:
             if isinstance(npc, cls.AnimalBase):
                 if npc.move_ai:
-                    npc.move_ai.take_turn(game_map, fov_map
-                                        , game_objects, (player.x, player.y))
+                    npc.move_ai.take_turn(game_map, fov_map, path_map
+                                        ,game_objects, (player.x, player.y))
+        # recompute field of vision since we moved
+        libtcod.map_compute_fov(fov_map, player.x, player.y
+                                ,player.fov_radius
+                                ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
     # check game state for NPC dialogues
     if len(player.dialogues) > 0:
         gamestate.push(C.STATE_DIALOGUE)
@@ -190,11 +190,12 @@ def warp_level():
     """
     global game_map
     global fov_map
+    global path_map
     global game_objects
     global player
     global maps_avail
     player.warp_prep()
-    game_map, fov_map = factory.generate_map(maps_avail)
+    game_map, fov_map, path_map = factory.generate_map(maps_avail)
     # compute initial field of vision
     libtcod.map_compute_fov(fov_map, player.x, player.y
                             ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
@@ -216,6 +217,7 @@ if __name__ == "__main__":
     gamestate = cls.GameState()
     maps_avail = factory.count_available_maps()
     game_map = None
+    path_map = None
     fov_map = None
     game_objects = None
     player = None
@@ -254,5 +256,6 @@ if __name__ == "__main__":
         if cmd:
             exec cmd
     # shut down
+    libtcod.dijkstra_delete(path_map)
     libtcod.console_delete(canvas)
     libtcod.console_clear(0)

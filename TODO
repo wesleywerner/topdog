@@ -14,7 +14,7 @@ scent gens
 
 + intro screen using libtcod section 3.4
 + draw more maps
-+ die roll chance you get stuck and don't move through a brush
++ mouse movement: http://roguebasin.roguelikedevelopment.org/index.php/Complete_Roguelike_Tutorial,_using_python%2Blibtcod,_part_7
 + more randomized synonymns for object names
 + colorized words. you enter the jones's yard. you smell baked muffins.
 + level entry messages: your tongue wags. woof woof.
