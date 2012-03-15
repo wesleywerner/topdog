@@ -71,8 +71,9 @@ class ActionAI(object):
             if self.hostile:
                 # enact some hostility
                 target.take_damage(npc, self.attack_rating)
-            if not self.hostile and self.quest:
-                target.give_quest(npc.name, self.quest)
+#            if not self.hostile and npc.quest_ai:
+#                target.give_quest(npc.name, npc.quest_ai.item)
+#                npc.quest_ai = None
             if target.carrying and self.quest:
             #TODO: could move this out into the QuestAI.
             # then the quest giver must also get an instance of this class
@@ -205,6 +206,10 @@ class QuestAI(object):
             if self.message:
                 target.add_dialogue(Dialogue(npc.name, npc.picture, self.message))
                 self.message = None
+            if not npc.action_ai.hostile and self.quest_id:
+                target.msg("%s %c*gives*%c you a %s" % (npc.name, C.COL3, C.COLS, self.item.name))
+                target.give_item(self.item)
+                self.quest_id = None
             if npc.hp < 0 and self.quest_id:
                 target.msg("%s %c*dropped*%c something!" % (npc.name, C.COL3, C.COLS))
                 self.item.x = npc.x

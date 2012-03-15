@@ -194,7 +194,7 @@ def spawn_toys(game_map):
 
 #================================================================[[ Quests ]]
 
-def generate_quest(game_map, game_objects):
+def generate_quest(game_map, game_objects, default_attack_rating):
     """
         generate a quest and place it in game.
     """
@@ -211,6 +211,7 @@ def generate_quest(game_map, game_objects):
         "You found my %i,\nThank you!"
         ,"My %i!\nI hope %a was not\nmuch trouble.\nMy Hero!"
         ,"My Hero!\nI will always remember\nthis moment!"
+        ,"Thank you TopDog!\nMy %i is safe again..."
     )
     
     # gen quest
@@ -224,20 +225,22 @@ def generate_quest(game_map, game_objects):
     
     quest_text = random.choice(quests).replace("%i", item.name)
     quest.title = "find the %s" % (item.name)
+    quest.thankyou = random.choice(thankyous).replace("%i", item.name)
     npc = None
     
     # give to a NPC, or place quest item on the map
-#    if random.randint(0, 1) == 0:
-    if True:
-#        npc = get_random_npc(attack_rating=None)
-        npc = get_random_npc(npc_char="C", attack_rating=2)
+    if random.randint(0, 1) == 0:
+        npc = get_random_npc(attack_rating=default_attack_rating)
+#        npc.action_ai.hostile = True    # None attack_rating NPC's 
+        npc.move_ai.behaviour = random.choice((cls.MoveAI.HUNTING, cls.MoveAI.NEUTRAL))
         quest_text = quest_text.replace("%a", npc.name)
+        quest.thankyou = quest.thankyou.replace("%a", npc.name)
         npc.fgcolor = libtcod.pink
         # quest ai
         quest_ai = cls.QuestAI(npc)
         quest_ai.quest_id = quest.quest_id
         quest_ai.item = item
-        quest_ai.message = "You'll never get it from me!"
+        quest_ai.message = "here take it!"     # antagonist dialogue message
         quest.owner = npc
         npc.quest_ai = quest_ai
         # done
@@ -248,7 +251,6 @@ def generate_quest(game_map, game_objects):
         game_objects.append(item)
         quest_text = quest_text.replace("%a", "some animal")
     
-    quest.thankyou = random.choice(thankyous).replace("%a", npc.name).replace("%i", item.name)
     # gen quest giver
     giver = get_random_npc()
     aai = cls.ActionAI(giver)
@@ -259,6 +261,7 @@ def generate_quest(game_map, game_objects):
     giver.fgcolor = libtcod.yellow
     place_on_map(game_map, giver)
     game_objects.append(giver)
+
 
 
 #=================================================================[[ NPC's ]]
@@ -315,6 +318,17 @@ def spawn_npcs(game_map, amount):
         npcs.append(npc)
     
     return npcs
+
+def get_storyline_npcs(game_level):
+    """
+        get NPC's for our doggy storyline.
+    """
+    # multiple dialogue texts show *last to first*
+    if game_level == 1:
+        pass
+        #TODO add storyline characters here :-)
+
+    
     
 #===================================================================[[ Map ]]
 
@@ -551,5 +565,5 @@ def init_libtcod():
 if __name__ == "__main__":
     game_map = blank_map()
     game_objects = spawn_npcs(game_map, 20)
-    generate_quest(game_map, game_objects)
+    generate_quest(game_map, game_objects, None)
     pass
