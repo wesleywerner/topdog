@@ -151,10 +151,8 @@ class MoveAI(object):
                 if libtcod.path_compute(path_map, npc.x, npc.y
                                         ,self.prey_x, self.prey_y):
                     x, y = libtcod.path_walk(path_map, True)
-                    npc.move(game_map, game_objects, x - npc.x, y - npc.y)
-
-
-    #                libtcod.path_reverse(path_map)
+                    if not x is None:
+                        npc.move(game_map, game_objects, x - npc.x, y - npc.y)
             
 
 class AnimalBase(object):
