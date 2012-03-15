@@ -121,10 +121,15 @@ class MoveAI(object):
         npc = self.owner
         x, y = (0, 0)
         if self.behaviour == MoveAI.SKITTISH:
-            #TODO: use better path finding to move away from player
-            if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
-                x, y = npc.get_xy_towards(x, y)
-                npc.move(game_map, game_objects, -x, -y)
+            x, y = playerxy
+            libtcod.map_compute_fov(fov_map, npc.x, npc.y, npc.fov_radius
+                                            ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+            if libtcod.map_is_in_fov(fov_map, x, y):
+                # player in sight!
+                if libtcod.path_compute(path_map, npc.x, npc.y, x, y):
+                    x, y = libtcod.path_walk(path_map, True)
+                    if not x is None:
+                        npc.move(game_map, game_objects, npc.x - x, npc.y - y)
         elif self.behaviour == MoveAI.NEUTRAL:
             if dice(self.erraticity):
                 x = random.randint(-1, 1)
@@ -295,7 +300,7 @@ class Player(AnimalBase):
         if super(Player, self).move(game_map, game_objects, x, y):
             self.message_trim_idx += 1
             self.pickup_item(game_objects)
-            if self.message_trim_idx % 6 == 0:
+            if self.message_trim_idx % 10 == 0:
                 self.trim_message()
             if self.moves % C.PLAYER_THIRST_INDEX == 0:
                 if self.thirsty:
