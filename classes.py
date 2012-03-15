@@ -49,42 +49,38 @@ class ActionAI(object):
         self.owner = owner
         self.hostile = False
         self.dialogue_text = None
-        self.picture = None
-        self.quest = None
         self.attack_rating = 0
+        self.quest = None
     
-    def contact_with(self, target):
+    def interact_with(self, target):
         npc = self.owner
         if isinstance(target, Player):
             if self.dialogue_text:
                 # show dialogue to the player
                 if type(self.dialogue_text) is list:
                     # this is a list of dialogues, talk our ear off
-                    target.add_dialogue(Dialogue(npc.name, self.picture
+                    target.add_dialogue(Dialogue(npc.name, npc.picture
                                             , self.dialogue_text.pop()))
                     if len(self.dialogue_text) == 0:
                         self.dialogue_text = None
                 else:
                     # a one-liner dialogue
-                    target.add_dialogue(Dialogue(npc.name, self.picture
+                    target.add_dialogue(Dialogue(npc.name, npc.picture
                                             , self.dialogue_text))
                     self.dialogue_text = None
-            if self.quest:
-                # give the player our quest
-                target.give_quest(npc.name, self.quest)
             if self.hostile:
                 # enact some hostility
                 target.take_damage(npc, self.attack_rating)
-            else:
-                #TODO friendly, give player the quest item if we have it.
+            if self.quest:
+                target.give_quest(npc.name, self.quest)
             if target.carrying:
                 if target.carrying.quest_id:
                     if target.carrying.quest_id == self.quest.quest_id:
-                        target.add_dialogue(Dialogue(npc.name, self.picture
-                                ,"You found my %s! Thank you friend!" % (target.carrying.name)))
-                        target.msg("You give %s's %s back" % (npc.name, target.carrying.name))
-                        #TODO: take player inv away, or give him something as reward!
-                    
+                        target.add_dialogue(Dialogue(npc.name, npc.picture
+                                            , self.quest.thankyou))
+                        self.quest = None
+                        target.carrying = None
+                        #TODO: give player reward
 
 
 class ActionManual(ActionAI):
@@ -94,7 +90,7 @@ class ActionManual(ActionAI):
     def __init__(self, owner):
         self.owner = owner
 
-    def contact_with(self, target):
+    def interact_with(self, target):
         player = self.owner
         if isinstance(target, AnimalBase):
             # engage
@@ -107,7 +103,9 @@ class ActionManual(ActionAI):
                     player.msg("*sniffs* the %s" % (target.name))
             # let them have a go
             if target.action_ai:
-                target.action_ai.contact_with(player)
+                target.action_ai.interact_with(player)
+            if target.quest_ai:
+                target.quest_ai.interact_with(player)
         else:
             # action on inanimates, these are not tiles
             # but items in game_objects that are not AnimalBase
@@ -185,7 +183,27 @@ class MoveAI(object):
                     x, y = libtcod.path_walk(path_map, True)
                     if not x is None:
                         npc.move(game_map, game_objects, x - npc.x, y - npc.y)
-            
+
+
+class QuestAI(object):
+    """
+        Quest AI for NPC's.
+    """
+    def __init__(self, owner):
+        self.owner = owner
+        self.quest_id = None
+        self.item = None
+        self.message = None
+
+    def interact_with(self, target):
+        npc = self.owner
+        if isinstance(target, Player):
+            #TODO: we can check if the player is seeking this quest via
+            # [e for e in target.seek_quests if e.quest_id == self.quest_ai.quest_id]
+            target.add_dialogue(Dialogue(npc.name, npc.picture, npc.quest_ai.message))
+            target.give_item(npc.quest_ai.item)
+            npc.quest_ai = None
+
 
 class AnimalBase(object):
     """
@@ -208,7 +226,10 @@ class AnimalBase(object):
         self.fov_radius = C.FOV_RADIUS_DEFAULT
         self.move_ai = None
         self.action_ai = None
+        self.quest_ai = None
+        self.quest = None
         self.flying = False
+        self.picture = None
 
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
@@ -244,7 +265,9 @@ class AnimalBase(object):
                     if being.x == x and being.y == y and being.blocking:
                         blocking_us = True
                         if self.action_ai:
-                            self.action_ai.contact_with(being)
+                            self.action_ai.interact_with(being)
+                        if self.quest_ai:
+                            self.quest_ai.interact_with(being)
                         return True
                 if not blocking_us:
                     self.moves = self.moves + 1
@@ -292,9 +315,20 @@ class Player(AnimalBase):
         self.seen = True
         self.wizard = True
         self.dialogues = []
-
+        self.seek_quests = []
+    
+    def give_item(self, item):
+        """
+            give player an inventory item, drops items if we have to.
+        """
+        if self.carrying:
+            self.carrying.x, self.carrying.y = (self.x, self.y)
+        self.carrying = item
+        self.carrying.x = 0
+        self.msg("got a %s" % (item.name))
+    
     def give_quest(self, npc_name, quest):
-        #TODO notify player of our new quest
+        self.seek_quests.append(quest)
         self.msg("%s gave you a %c*quest*%c!" % (npc_name, C.COL2, C.COLS))
     
     def add_dialogue(self, dialogue):
@@ -313,12 +347,7 @@ class Player(AnimalBase):
     def pickup_item(self, objects):
         for obj in objects:
             if obj.x == self.x and obj.y == self.y and obj.carryable:
-                if not obj is self.carrying:
-                    if self.carrying:
-                        self.carrying.x, self.carrying.y = (obj.x, obj.y)
-                    self.carrying = obj
-                    self.carrying.x = 0
-                    self.msg("picked up %s" % (obj.name))
+                self.give_item(obj)
                 break
     
     def move(self, game_map, game_objects, x, y):
@@ -425,20 +454,6 @@ class Hole(ItemBase):
         self.char = "O"
 
 
-class QuestAI(object):
-    """
-        Quest AI for NPC's.
-    """
-    def __init__(self, owner):
-        self.owner = owner
-        self.quest_id = None
-        self.item = None
-    
-    def drop_quest_item(self):
-        # drop the item around the owner
-        pass
-
-
 class Quest(object):
     """
         Quest details given to the player by a NPC.
@@ -447,8 +462,9 @@ class Quest(object):
         self.owner = None
         self.quest_id = os.urandom(2)
         self.title = None
+        self.thankyou = None
         self.reward_cmd = None
-
+    
 
 class KeyHandler(object):
     """

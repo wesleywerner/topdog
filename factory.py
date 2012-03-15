@@ -203,6 +203,11 @@ def generate_quest(game_map, game_objects):
         ,"I played in the garden and\nnow my %item is missing.\nHelp me look?"
         ,"%npc took my %item.\nCan you bring it back for me?"
     )
+    thankyous = (
+        "You found my %item,\nThank you!"
+        ,"My %item!\nI hope %npc was not\nmuch trouble.\nMy Hero!"
+        ,"My Hero!\nI will always remember\nthis moment!"
+    )
     
     # gen quest
     quest = cls.Quest()
@@ -218,8 +223,10 @@ def generate_quest(game_map, game_objects):
     npc = None
     
     # give to a NPC, or place quest item on the map
-    if random.randint(0, 1) == 0:
-        npc = get_random_npc(attack_rating=None)
+#    if random.randint(0, 1) == 0:
+    if True:
+#        npc = get_random_npc(attack_rating=None)
+        npc = get_random_npc(npc_char="C", attack_rating=None)
         quest_text = quest_text.replace("%npc", npc.name)
         npc.fgcolor = libtcod.pink
         # quest ai
@@ -227,14 +234,16 @@ def generate_quest(game_map, game_objects):
         quest_ai.quest_id = quest.quest_id
         quest_ai.item = item
         quest.owner = npc
+        npc.quest_ai = quest_ai
         # done
         place_on_map(game_map, npc)
         game_objects.append(npc)
     else:
         place_on_map(game_map, item)
         game_objects.append(item)
-        quest_text = quest_text.replace("%npc", "somebody")
-
+        quest_text = quest_text.replace("%npc", "some animal")
+    
+    quest.thankyou = random.choice(thankyous).replace("%npc", npc.name).replace("%item", item.name)
     # gen quest giver
     giver = get_random_npc()
     aai = cls.ActionAI(giver)
@@ -278,15 +287,15 @@ def get_random_npc(npc_char=None, attack_rating=None):
     # move AI
     mov = cls.MoveAI(npc)
     npc.move_ai = mov
-    mov.behaviour = random.choice((cls.MoveAI.NEUTRAL
-                                , cls.MoveAI.FRIENDLY, cls.MoveAI.SKITTISH))
+    mov.behaviour = random.choice((cls.MoveAI.NEUTRAL, cls.MoveAI.SKITTISH))
     # action AI
     if attack_rating:
         mov.behaviour = cls.MoveAI.HUNTING
-        act = cls.ActionAI(npc)
-        act.hostile = True
         act.attack_rating = attack_rating
-        npc.action_ai = act
+        act.hostile = True
+    act = cls.ActionAI(npc)
+    act.attack_rating = attack_rating
+    npc.action_ai = act
     
     return npc
 
