@@ -72,10 +72,18 @@ class ActionAI(object):
             if self.quest:
                 # give the player our quest
                 target.give_quest(npc.name, self.quest)
-                self.quest = None
             if self.hostile:
                 # enact some hostility
                 target.take_damage(npc, self.attack_rating)
+            else:
+                #TODO friendly, give player the quest item if we have it.
+            if target.carrying:
+                if target.carrying.quest_id:
+                    if target.carrying.quest_id == self.quest.quest_id:
+                        target.add_dialogue(Dialogue(npc.name, self.picture
+                                ,"You found my %s! Thank you friend!" % (target.carrying.name)))
+                        target.msg("You give %s's %s back" % (npc.name, target.carrying.name))
+                        #TODO: take player inv away, or give him something as reward!
                     
 
 
@@ -282,7 +290,7 @@ class Player(AnimalBase):
         self.message_trim_idx = 0
         self.messages = []
         self.seen = True
-        self.wizard = False
+        self.wizard = True
         self.dialogues = []
 
     def give_quest(self, npc_name, quest):
@@ -290,7 +298,7 @@ class Player(AnimalBase):
         self.msg("%s gave you a %c*quest*%c!" % (npc_name, C.COL2, C.COLS))
     
     def add_dialogue(self, dialogue):
-        self.dialogues.append(dialogue)
+        self.dialogues.insert(0, dialogue)
         
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage

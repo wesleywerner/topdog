@@ -222,12 +222,6 @@ def generate_quest(game_map, game_objects):
         npc = get_random_npc(attack_rating=None)
         quest_text = quest_text.replace("%npc", npc.name)
         npc.fgcolor = libtcod.pink
-        # action ai
-#        mov.behaviour = cls.MoveAI.HUNTING
-#        act = cls.ActionAI(npc)
-#        act.hostile = True
-#        act.attack_rating = attack_rating
-#        npc.action_ai = act
         # quest ai
         quest_ai = cls.QuestAI(npc)
         quest_ai.quest_id = quest.quest_id
