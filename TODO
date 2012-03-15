@@ -3,7 +3,10 @@
 QUESTS:action on player that is carrying quest item: success!
 NPC generators
 
-* quest success reward core
+
+- weak player == no attacking allowed. eat resolves this
+- piddle.
+- only give out quest items if playeris seeking them
 - show detailed into in a "@" screen: level, score.
 - a die roll chance you get stuck and don't move through the brush
 - revised: we have health points (HP). eating food resolves some HP
@@ -23,5 +26,6 @@ NPC generators
 
 ========================================================[[ Tweaks ]]
 player.eat_item() adjusts hp
-
+C.PLAYER_THIRST_INDEX
+C.PLAYER_PIDDLE_INDEX
 

@@ -186,9 +186,9 @@ def draw_messages():
     messages = list(player.messages)[-4:]
     if messages:
         libtcod.console_print_ex(0
-                                ,C.MESSAGES_LEFT
+                                ,C.MAP_WIDTH
                                 ,C.MESSAGES_TOP
-                                ,libtcod.BKGND_NONE, libtcod.LEFT
+                                ,libtcod.BKGND_NONE, libtcod.RIGHT
                                 ,"\n".join(messages))
 
 def warp_level():
@@ -201,14 +201,21 @@ def warp_level():
     global game_objects
     global player
     global maps_avail
+    
+    #prepare ftl
     player.warp_prep()
+    # init new maps
     game_map, fov_map, path_map = factory.generate_map(maps_avail)
-    # compute initial field of vision
+    # compute field of vision
     libtcod.map_compute_fov(fov_map, player.x, player.y
                             ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+    # add player, NPC's, foliage, food
     game_objects = [player]
     game_objects.extend(factory.spawn_level_objects(game_map, player.level))
-    factory.generate_quest(game_map, game_objects, default_attack_rating=None)
+    # add level quests and story
+    factory.spawn_level_quests(game_map, game_objects, player.level)
+#    factory.spawn_level_storyline(game_map, game_objects, player.level)
+
     # carry our inventory item into this new level
     if player.carrying:
         game_objects.append(player.carrying)

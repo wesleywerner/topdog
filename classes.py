@@ -72,9 +72,10 @@ class ActionAI(object):
             if self.hostile:
                 # enact some hostility
                 player.take_damage(npc, self.attack_rating)
-#            if not self.hostile and npc.quest_ai:
-#                player.give_quest(npc.name, npc.quest_ai.item)
-#                npc.quest_ai = None
+                player.msg("%s %c*bites*%c!" % (npc.name, C.COL1, C.COLS))
+            if not self.hostile and npc.quest_ai:
+                player.give_item(npc.quest_ai.item)
+                npc.quest_ai = None
             if player.carrying and self.quest:
             #TODO: could move this out into the QuestAI.
             # then the quest giver must also get an instance of this class
@@ -102,8 +103,8 @@ class ActionManual(ActionAI):
             if target.action_ai:
                 if target.action_ai.hostile:
                     target.take_damage(player, self.attack_rating)
-                    player.msg("you bite for %s damage" % \
-                             (player.action_ai.attack_rating))
+                    player.msg("you *bite* the %s" % \
+                             (target.name))
                 else:
                     player.msg("*sniffs* the %s" % (target.name))
             # let them have a go
@@ -209,9 +210,14 @@ class QuestAI(object):
                 target.add_dialogue(Dialogue(npc.name, npc.picture, self.message))
                 self.message = None
             if not npc.action_ai.hostile and self.quest_id:
-                target.msg("%s %c*gives*%c you a %s" % (npc.name, C.COL3, C.COLS, self.item.name))
-                target.give_item(self.item)
-                self.quest_id = None
+                print("does player have quest %s?" % (self.quest_id))
+                if len([e for e in target.seek_quests if e.quest_id == self.quest_id]) == 1:
+                    print('yes')
+                    target.msg("%s %c*gives*%c you a %s" % (npc.name, C.COL3, C.COLS, self.item.name))
+                    target.give_item(self.item)
+                    self.quest_id = None
+                else:
+                    print('no')
             if npc.hp < 0 and self.quest_id:
                 target.msg("%s %c*dropped*%c something!" % (npc.name, C.COL3, C.COLS))
                 self.item.x = npc.x
@@ -250,7 +256,7 @@ class AnimalBase(object):
         if self.hp < 0:
             if self.move_ai:
                 if isinstance(attacker, Player):
-                    attacker.msg("%s flees!" % (self.name))
+                    attacker.msg("%s %c*flees*%c" % (self.name, C.COL2, C.COLS))
                 self.move_ai.behaviour = MoveAI.SKITTISH
     
     def take_turn(self):
@@ -327,7 +333,7 @@ class Player(AnimalBase):
         self.message_trim_idx = 0
         self.messages = []
         self.seen = True
-        self.wizard = True
+        self.wizard = False
         self.dialogues = []
         self.seek_quests = []
     
@@ -339,6 +345,8 @@ class Player(AnimalBase):
                     self.hp = 100
                 self.carrying = None
                 self.msg("Yum!")
+            else:
+                self.msg("You chew on the %s" % (self.carrying.name))
         
     def give_item(self, item):
         """
@@ -352,7 +360,7 @@ class Player(AnimalBase):
     
     def give_quest(self, npc_name, quest):
         self.seek_quests.append(quest)
-        self.msg("%s gave you a %c*quest*%c!" % (npc_name, C.COL2, C.COLS))
+        self.msg("*%s gave you a %c*quest*%c!" % (npc_name, C.COL2, C.COLS))
     
     def add_dialogue(self, dialogue):
         self.dialogues.insert(0, dialogue)
@@ -361,7 +369,7 @@ class Player(AnimalBase):
         self.hp = self.hp - damage
         if self.hp < 0:
             self.hp = 0
-        self.msg("The %s hit you for %s" % (attacker.name, damage))
+#        self.msg("The %s hit you for %s" % (attacker.name, damage))
 
     def get_hearts(self):
         """

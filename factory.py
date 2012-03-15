@@ -236,10 +236,11 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     npc = None
     
     # give to a NPC, or place quest item on the map
-    if random.randint(0, 1) == 0:
+#    if random.randint(0, 1) == 0:
+    if True:
         npc = get_random_npc(attack_rating=default_attack_rating)
         # set attack_rating if hostile, otherwise NPC hits with 0 damaage :p
-        npc.action_ai.hostile = True
+        npc.action_ai.hostile = False
         npc.move_ai.behaviour = random.choice((cls.MoveAI.HUNTING, cls.MoveAI.NEUTRAL))
         quest_text = quest_text.replace("%a", npc.name)
         quest.thankyou = quest.thankyou.replace("%a", npc.name)
@@ -307,9 +308,10 @@ def get_random_npc(npc_char=None, attack_rating=None):
     # action AI
     act = cls.ActionAI(npc)
     if attack_rating:
-        mov.behaviour = cls.MoveAI.HUNTING
-        act.attack_rating = attack_rating
-        act.hostile = True
+        if attack_rating > 0:
+            mov.behaviour = cls.MoveAI.HUNTING
+            act.attack_rating = attack_rating
+            act.hostile = True
     npc.action_ai = act
     
     return npc
@@ -331,14 +333,36 @@ def spawn_level_objects(game_map, game_level):
     npcs = 0
     food = 0
     objects = []
-    # level progression
-    if game_level == 1:
-        toys = random.randint(3, 5)
-        npcs = random.randint(3, 5)
-        food = random.randint(3, 5)
+    
+    # level progression grid format
+    # --------------------------------
+    #     NPC     |  TOYS   |  FOOD |
+    # --------------------------------
+    #   (min,max, |         |       |
+    #     attack_rating)    |       |
+    #             |,(min,max)       |
+    #             |       ,(min,max)|
+    progression = (
+        ((0, 1, 1)  ,(1, 2)  ,(1, 1))
+       ,((0, 1, 1)  ,(1, 2)  ,(1, 1))
+       ,((0, 1, 2)  ,(1, 3)  ,(1, 1))
+       ,((0, 2, 2)  ,(1, 3)  ,(1, 1))
+       ,((1, 2, 3)  ,(2, 3)  ,(1, 2))
+       ,((1, 2, 3)  ,(2, 3)  ,(1, 2))
+       ,((1, 3, 3)  ,(2, 4)  ,(1, 2))
+       ,((1, 3, 4)  ,(2, 4)  ,(1, 3))
+       ,((2, 4, 4)  ,(6, 9)  ,(2, 3))
+       ,((2, 4, 4)  ,(2, 4)  ,(2, 3))
+    )
+    
+    prog = progression[game_level]
+    npcs = random.randint(prog[0][0], prog[0][1])
+    toys = random.randint(prog[1][0], prog[1][1])
+    food = random.randint(prog[2][0], prog[2][1])
+        
     # npcs
     for item in range(npcs):
-        npc = get_random_npc(attack_rating=10)
+        npc = get_random_npc(npc_char=None, attack_rating=random.randint(0, prog[0][2]))
         place_on_map(game_map, objects, npc)
         objects.append(npc)
     # toys
@@ -353,6 +377,25 @@ def spawn_level_objects(game_map, game_level):
         objects.append(eat)
     
     return objects
+
+
+def spawn_level_quests(game_map, game_objects, game_level):
+    """
+        create quests based on the level.
+    """
+    if game_level == 1:
+    #TODO
+        generate_quest(game_map, game_objects, default_attack_rating=None)
+
+
+def spawn_level_storyline(game_map, game_objects, game_level):
+    """
+        add some NPC's and dialogue for our storyline.
+    """
+    if game_level == 1:
+    #TODO
+        generate_quest(game_map, game_objects, default_attack_rating=None)
+    
 
 #===================================================================[[ Map ]]
 
@@ -573,7 +616,7 @@ def init_libtcod():
                                         ,libtcod.black)
     # informational, you got a quest item
     libtcod.console_set_color_control(libtcod.COLCTRL_3
-                                        ,libtcod.green
+                                        ,libtcod.light_green
                                         ,libtcod.black)
     # tile and npc names
     libtcod.console_set_color_control(C.COL4
