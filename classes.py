@@ -329,6 +329,15 @@ class Player(AnimalBase):
         self.dialogues = []
         self.seek_quests = []
     
+    def eat_item(self):
+        if self.carrying:
+            if self.carrying.edible:
+                self.hp = self.hp + 15.0
+                if self.hp > 100:
+                    self.hp = 100
+                self.carrying = None
+                self.msg("Yum!")
+        
     def give_item(self, item):
         """
             give player an inventory item, drops items if we have to.
@@ -348,6 +357,8 @@ class Player(AnimalBase):
         
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
+        if self.hp < 0:
+            self.hp = 0
         self.msg("The %s hit you for %s" % (attacker.name, damage))
 
     def get_hearts(self):

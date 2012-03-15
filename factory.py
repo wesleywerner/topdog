@@ -14,6 +14,8 @@ CHAR_FENCE = "#"
 CHAR_TAR = ":"
 CHAR_WATER = "~"
 CHAR_BRICK = chr(177)
+CHAR_TOY = chr(3)
+CHAR_FOOD = chr(4)
 CHAR_TREE = chr(6)
 CHAR_BUSH = chr(5)
 CHAR_FLOWERS = chr(15)
@@ -41,7 +43,7 @@ def get_bush():
     fol.name = random.choice(names)
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
-    fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
+    fol.fov_limit = random.randint(2, 4)
     return fol
     
 def get_flower():
@@ -53,7 +55,7 @@ def get_flower():
     fol.name = random.choice(names)
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
-    fol.fov_limit = random.randint(3, C.FOV_RADIUS_DEFAULT / 2)
+    fol.fov_limit = random.randint(2, 4)
     return fol
 
 def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
@@ -141,9 +143,9 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
 
 #=============================================================[[ Inventory ]]
 
-def place_on_map(game_map, item, near_xy=None):
+def place_on_map(game_map, game_objects, item, near_xy=None):
     """
-        place item on a blank map tile
+        place item on a blank map tile. dont overlap existing objects either.
     """
     while True:
         if near_xy:
@@ -154,9 +156,14 @@ def place_on_map(game_map, item, near_xy=None):
             if y > C.MAP_HEIGHT - 2:
                 y = C.MAP_HEIGHT - 2
         else:
-            x = random.randint(1, C.MAP_WIDTH - 2)
-            y = random.randint(1, C.MAP_HEIGHT - 2)
-        if game_map[x][y].isblank():
+            x = random.randint(2, C.MAP_WIDTH - 2)
+            y = random.randint(2, C.MAP_HEIGHT - 2)
+        # test against object collisions
+        try_again = False
+        for obj in game_objects:
+            if obj.x == x and obj.y == y:
+                try_again = True
+        if game_map[x][y].isblank() and not try_again:
             item.x, item.y = (x, y)
             break
 
@@ -174,24 +181,25 @@ def get_toy():
                 , libtcod.lighter_violet, libtcod.lighter_fuchsia)
     toy = cls.ItemBase()
     toy.name = random.choice(toy_names)
-    toy.char = chr(3)
+    toy.char = CHAR_TOY
     toy.fgcolor = random.choice(toy_colors)
     toy.carryable = True
     return toy
 
-def spawn_toys(game_map):
-    """
-        Make some toys for fido.
-    """
-    toys = []
-    how_many = random.randint(1, 4)
-    
-    for item in range(how_many):
-        toy = get_toy()
-        place_on_map(game_map, toy)
-        toys.append(toy)
-    return toys
 
+def get_food():
+    """
+        get a food stuff.
+    """
+    names = ("biscuit", "cherry pie", "bone", "banana", "salami", "peach", "pizze slice")
+    eat = cls.ItemBase()
+    eat.name = random.choice(names)
+    eat.char = CHAR_FOOD
+    eat.fgcolor = libtcod.dark_orange
+    eat.carryable = True
+    eat.edible = True
+    return eat
+    
 #================================================================[[ Quests ]]
 
 def generate_quest(game_map, game_objects, default_attack_rating):
@@ -220,7 +228,6 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     
     # gen quest item
     item = get_toy()
-    item.char = "*"
     item.quest_id = quest.quest_id
     
     quest_text = random.choice(quests).replace("%i", item.name)
@@ -231,7 +238,8 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     # give to a NPC, or place quest item on the map
     if random.randint(0, 1) == 0:
         npc = get_random_npc(attack_rating=default_attack_rating)
-#        npc.action_ai.hostile = True    # None attack_rating NPC's 
+        # set attack_rating if hostile, otherwise NPC hits with 0 damaage :p
+        npc.action_ai.hostile = True
         npc.move_ai.behaviour = random.choice((cls.MoveAI.HUNTING, cls.MoveAI.NEUTRAL))
         quest_text = quest_text.replace("%a", npc.name)
         quest.thankyou = quest.thankyou.replace("%a", npc.name)
@@ -240,14 +248,15 @@ def generate_quest(game_map, game_objects, default_attack_rating):
         quest_ai = cls.QuestAI(npc)
         quest_ai.quest_id = quest.quest_id
         quest_ai.item = item
-        quest_ai.message = "here take it!"     # antagonist dialogue message
+        # let the offender say something
+#        quest_ai.message = "here take it!"     # antagonist dialogue message
         quest.owner = npc
         npc.quest_ai = quest_ai
         # done
-        place_on_map(game_map, npc)
+        place_on_map(game_map, game_objects, npc)
         game_objects.append(npc)
     else:
-        place_on_map(game_map, item)
+        place_on_map(game_map, game_objects, item)
         game_objects.append(item)
         quest_text = quest_text.replace("%a", "some animal")
     
@@ -259,7 +268,7 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     aai.quest = quest
     giver.action_ai = aai
     giver.fgcolor = libtcod.yellow
-    place_on_map(game_map, giver)
+    place_on_map(game_map, game_objects, giver)
     game_objects.append(giver)
 
 
@@ -278,9 +287,8 @@ def get_random_npc(npc_char=None, attack_rating=None):
         ,"c": "cat"
         ,"C": "Fat Cat"
         ,"s": "squirrel"
-        ,"h": "human child"
-        ,"H": "human"
         ,"b": "bird"
+        ,"p": "p"
     }
     if not npc_char:
         npc_char = random.choice(dna_bank.keys())
@@ -306,19 +314,6 @@ def get_random_npc(npc_char=None, attack_rating=None):
     
     return npc
 
-def spawn_npcs(game_map, amount):
-    """
-        Return a bunch of NPC's.
-    """
-    npcs = []
-    
-    for e in range(amount):
-        npc = get_random_npc()
-        place_on_map(game_map, npc)
-        npcs.append(npc)
-    
-    return npcs
-
 def get_storyline_npcs(game_level):
     """
         get NPC's for our doggy storyline.
@@ -328,8 +323,37 @@ def get_storyline_npcs(game_level):
         pass
         #TODO add storyline characters here :-)
 
+def spawn_level_objects(game_map, game_level):
+    """
+        create a bunch of level objects.
+    """
+    toys = 0
+    npcs = 0
+    food = 0
+    objects = []
+    # level progression
+    if game_level == 1:
+        toys = random.randint(3, 5)
+        npcs = random.randint(3, 5)
+        food = random.randint(3, 5)
+    # npcs
+    for item in range(npcs):
+        npc = get_random_npc(attack_rating=10)
+        place_on_map(game_map, objects, npc)
+        objects.append(npc)
+    # toys
+    for item in range(toys):
+        toy = get_toy()
+        place_on_map(game_map, objects, toy)
+        objects.append(toy)
+    # food
+    for item in range(food):
+        eat = get_food()
+        place_on_map(game_map, objects, eat)
+        objects.append(eat)
     
-    
+    return objects
+
 #===================================================================[[ Map ]]
 
 def blank_map():
@@ -563,7 +587,4 @@ def init_libtcod():
 
 #=============================================================[[ Unit Test ]]
 if __name__ == "__main__":
-    game_map = blank_map()
-    game_objects = spawn_npcs(game_map, 20)
-    generate_quest(game_map, game_objects, None)
     pass

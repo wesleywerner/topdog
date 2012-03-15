@@ -35,9 +35,9 @@ def setup_keyhandler():
                 ,libtcod.KEY_KP7: "game_turn(-1, -1)"
                 ,libtcod.KEY_KP8: "game_turn(0, -1)"
                 ,libtcod.KEY_KP9: "game_turn(1, -1)"
-                ,libtcod.KEY_SPACE: \
-                                    "if player.can_warp(game_map): warp_level()"
+                ,libtcod.KEY_SPACE: "if player.can_warp(game_map): warp_level()"
                 ,"d": "player.quench_thirst(game_map)"
+                ,"e": "player.eat_item()"
                 ,libtcod.KEY_F5: "warp_level()"
                 })
     return handler
@@ -121,8 +121,8 @@ def draw_objects():
                 if not obj.seen:
                     obj.seen = True
                     if isinstance(obj, cls.AnimalBase):
-                        player.msg("You see a %c%s%c (%s)" % \
-                                        (C.COL4, obj.name, C.COLS, obj.char))
+                        player.msg("You see a %c%s%c" % \
+                                        (C.COL4, obj.name, C.COLS))
                         if obj.see_message:
                             player.msg(obj.see_message)
                     else:
@@ -207,8 +207,7 @@ def warp_level():
     libtcod.map_compute_fov(fov_map, player.x, player.y
                             ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
     game_objects = [player]
-#    game_objects.extend(factory.spawn_toys(game_map))
-#    game_objects.extend(factory.spawn_npcs(game_map, 5))
+    game_objects.extend(factory.spawn_level_objects(game_map, player.level))
     factory.generate_quest(game_map, game_objects, default_attack_rating=None)
     # carry our inventory item into this new level
     if player.carrying:
