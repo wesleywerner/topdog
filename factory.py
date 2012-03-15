@@ -224,7 +224,7 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     
     # gen quest
     quest = cls.Quest()
-    quest.reward_cmd = None
+    quest.reward_cmd = "player.hp = 100"
     
     # gen quest item
     item = get_toy()

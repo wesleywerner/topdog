@@ -55,35 +55,37 @@ class ActionAI(object):
     def interact_with(self, target, game_objects):
         npc = self.owner
         if isinstance(target, Player):
+            player = target
             if self.dialogue_text:
                 # show dialogue to the player
                 if type(self.dialogue_text) is list:
                     # this is a list of dialogues, talk our ear off
-                    target.add_dialogue(Dialogue(npc.name, npc.picture
+                    player.add_dialogue(Dialogue(npc.name, npc.picture
                                             , self.dialogue_text.pop()))
                     if len(self.dialogue_text) == 0:
                         self.dialogue_text = None
                 else:
                     # a one-liner dialogue
-                    target.add_dialogue(Dialogue(npc.name, npc.picture
+                    player.add_dialogue(Dialogue(npc.name, npc.picture
                                             , self.dialogue_text))
                     self.dialogue_text = None
             if self.hostile:
                 # enact some hostility
-                target.take_damage(npc, self.attack_rating)
+                player.take_damage(npc, self.attack_rating)
 #            if not self.hostile and npc.quest_ai:
-#                target.give_quest(npc.name, npc.quest_ai.item)
+#                player.give_quest(npc.name, npc.quest_ai.item)
 #                npc.quest_ai = None
-            if target.carrying and self.quest:
+            if player.carrying and self.quest:
             #TODO: could move this out into the QuestAI.
             # then the quest giver must also get an instance of this class
-                if target.carrying.quest_id:
-                    if target.carrying.quest_id == self.quest.quest_id:
-                        target.add_dialogue(Dialogue(npc.name, npc.picture
+                if player.carrying.quest_id:
+                    if player.carrying.quest_id == self.quest.quest_id:
+                        if self.quest.reward_cmd:
+                            exec self.quest.reward_cmd
+                        player.add_dialogue(Dialogue(npc.name, npc.picture
                                             , self.quest.thankyou))
                         self.quest = None
-                        target.carrying = None
-                        #TODO: give player reward
+                        player.carrying = None
 
 
 class ActionManual(ActionAI):

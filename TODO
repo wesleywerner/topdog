@@ -3,7 +3,7 @@
 QUESTS:action on player that is carrying quest item: success!
 NPC generators
 
-
+* quest success reward core
 - show detailed into in a "@" screen: level, score.
 - a die roll chance you get stuck and don't move through the brush
 - revised: we have health points (HP). eating food resolves some HP
@@ -18,3 +18,10 @@ NPC generators
 + more toy names, bush names, tree names
 + colorized words. you enter the jones's yard. you smell baked muffins.
 + level entry messages: your tongue wags. woof woof.
+
+
+
+========================================================[[ Tweaks ]]
+player.eat_item() adjusts hp
+
+
