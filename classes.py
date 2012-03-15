@@ -137,7 +137,14 @@ class MoveAI(object):
                 y = random.randint(-1, 1)
             npc.move(game_map, game_objects, x, y)
         elif self.behaviour == MoveAI.FRIENDLY:
-            pass
+            x, y = playerxy
+            # player in sight!
+            if libtcod.path_compute(path_map, npc.x, npc.y, x, y):
+                # stick a little bit away
+                if libtcod.path_size(path_map) > 3:
+                    x, y = libtcod.path_walk(path_map, True)
+                    if not x is None:
+                        npc.move(game_map, game_objects, x - npc.x, y - npc.y)
         elif self.behaviour == MoveAI.HUNTING:
             # look for prey
             x, y = playerxy

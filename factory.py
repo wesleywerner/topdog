@@ -199,10 +199,10 @@ def spawn_npcs(game_map):
         npc.move_step = 1
         mai = cls.MoveAI(npc)
 #        mai.behaviour = cls.MoveAI.HUNTING
-        mai.behaviour = cls.MoveAI.SKITTISH
+        mai.behaviour = cls.MoveAI.FRIENDLY
         npc.move_ai = mai
         aai = cls.ActionAI(npc)
-        aai.hostile = True
+        aai.hostile = False
         aai.attack_rating = 5
         npc.action_ai = aai
         npcs.append(npc)
@@ -397,7 +397,8 @@ def generate_map(maps_avail):
         for x in range(C.MAP_WIDTH - 1):
             libtcod.map_set_properties(fov_map, x, y
                                         ,game_map[x][y].seethrough
-                                        ,not game_map[x][y].blocking)
+                                        ,not game_map[x][y].blocking and \
+                                         not game_map[x][y].drinkable)
     path_map = libtcod.path_new_using_map(fov_map)
     return game_map, fov_map, path_map
 
