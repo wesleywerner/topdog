@@ -127,18 +127,23 @@ def draw_objects():
     libtcod.console_put_char_ex(canvas, player.x, player.y, 
                                 player.char, player.fgcolor, None)
 
+def object_at(x, y):
+    for obj in game_objects:
+        if obj.x == x and obj.y == y and not obj is player:
+            return obj
 
 def draw_player_stats():
     """
         Print player info and stats in the side panel.
     """
-    tile = game_map[player.x][player.y]
-    # the tile name player is standing on
-    if not tile.blanktile:
-        libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
-                                C.SCREEN_HEIGHT - 2, 
-                                libtcod.BKGND_NONE, libtcod.CENTER, 
-                                "%c%s%c" % (C.COL5, tile.name, C.COLS))
+    tile = object_at(player.x, player.y)
+    if not tile:
+        tile = game_map[player.x][player.y]
+    # the object/tile name player is standing on
+    libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
+                            C.SCREEN_HEIGHT - 2, 
+                            libtcod.BKGND_NONE, libtcod.CENTER, 
+                            "%c%s%c" % (C.COL5, tile.name, C.COLS))
     # player hearts
     heart_colors = (libtcod.red, libtcod.red, libtcod.orange, libtcod.orange
                     , libtcod.amber, libtcod.amber, libtcod.lime, libtcod.lime
@@ -223,6 +228,7 @@ if __name__ == "__main__":
             if not player:
                 player = cls.Player()
                 aai = cls.ActionManual(player)
+                aai.attack_rating = 10
                 player.action_ai = aai
                 warp_level()
             # clear our displays

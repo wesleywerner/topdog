@@ -88,6 +88,12 @@ class ActionManual(ActionAI):
         if isinstance(target, AnimalBase):
             # engage!
             if target.action_ai:
+                if target.action_ai.hostile:
+                    target.take_damage(target, player.action_ai.attack_rating)
+                    player.add_message("you bite for %s damage" % \
+                                         (player.action_ai.attack_rating))
+            # let them have a go
+            if target.action_ai:
                 target.action_ai.contact_with(player)
             
 
@@ -127,8 +133,6 @@ class MoveAI(object):
         elif self.behaviour == MoveAI.HUNTING:
             pass
             
-#        npc.move(game_map, game_objects, 0, 0)
-
 
 class AnimalBase(object):
     """
@@ -156,6 +160,13 @@ class AnimalBase(object):
     
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
+        if self.hp < 0:
+            self.name = "%s corpse" % (self.name)
+            self.char = ";"
+            self.fgcolor = libtcod.red
+            self.blocking = False
+            self.move_ai = None
+            self.action_ai = None
     
     def take_turn(self):
         if self.move_ai:

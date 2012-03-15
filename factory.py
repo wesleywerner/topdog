@@ -195,13 +195,14 @@ def spawn_npcs(game_map):
         npc.char = "r"
         npc.name = "rat"
         npc.fgcolor = libtcod.blue
-        npc.blocking = False
+        npc.blocking = True
         npc.move_step = 1
         mai = cls.MoveAI(npc)
         mai.behaviour = cls.MoveAI.NEUTRAL
         npc.move_ai = mai
         aai = cls.ActionAI(npc)
-        aai.hostile = False
+        aai.hostile = True
+        aai.attack_rating = 10
         aai.dialogue_text = ["I have nothing more for you.", "I have a %cquest%c for you.\nCome back to me shortly,\nI will give it to you." % (C.COL3, C.COLS)]
         npc.action_ai = aai
         npcs.append(npc)
