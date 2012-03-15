@@ -86,15 +86,19 @@ class ActionManual(ActionAI):
     def contact_with(self, target):
         player = self.owner
         if isinstance(target, AnimalBase):
-            # engage!
+            # engage
             if target.action_ai:
                 if target.action_ai.hostile:
                     target.take_damage(player, self.attack_rating)
                     player.msg("you bite for %s damage" % \
-                                         (player.action_ai.attack_rating))
+                             (player.action_ai.attack_rating))
             # let them have a go
             if target.action_ai:
                 target.action_ai.contact_with(player)
+        else:
+            # action on inanimates, these are not tiles
+            # but items in game_objects that are not AnimalBase
+            player.msg("*sniffs* the %s" % (target.name))
             
 
 class MoveAI(object):
@@ -182,6 +186,7 @@ class AnimalBase(object):
         self.name = "?"
         self.fgcolor = None
         self.seen = False
+        self.see_message = None
         self.moves = 0
         self.move_step = 1
         self.carryable = False

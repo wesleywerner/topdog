@@ -197,13 +197,15 @@ def spawn_npcs(game_map):
         npc.fgcolor = libtcod.dark_amber
         npc.blocking = True
         npc.move_step = 1
+        npc.see_message = "The mouse tiwddles his whiskers"
         mai = cls.MoveAI(npc)
-        mai.behaviour = cls.MoveAI.HUNTING
-#        mai.behaviour = cls.MoveAI.NEUTRAL
+#        mai.behaviour = cls.MoveAI.HUNTING
+        mai.behaviour = cls.MoveAI.NEUTRAL
 #        mai.behaviour = cls.MoveAI.FRIENDLY
         npc.move_ai = mai
         aai = cls.ActionAI(npc)
-        aai.hostile = True
+        aai.dialogue_text = "I like Penguins!"
+        aai.hostile = False
         aai.attack_rating = 1
         npc.action_ai = aai
         npcs.append(npc)

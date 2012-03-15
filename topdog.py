@@ -119,8 +119,16 @@ def draw_objects():
             if libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
                 if not obj.seen:
                     obj.seen = True
-                    player.msg("You see a %c%s%c!" % \
-                                        (C.COL3, obj.name, C.COLS))
+                    col = C.COL3
+                    if isinstance(obj, cls.AnimalBase):
+                        player.msg("You see a %c%s%c (%s)" % \
+                                        (C.COL4, obj.name, C.COLS, obj.char))
+                        if obj.see_message:
+                            player.msg("%c%s%c" % \
+                                            (C.COL2, obj.see_message, C.COLS))
+                    else:
+                        player.msg("You see a %c%s%c (%s)" % \
+                                            (C.COL3, obj.name, C.COLS, obj.char))
                 libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
                                         obj.char, obj.fgcolor, None)
     # draw player
