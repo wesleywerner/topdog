@@ -339,8 +339,9 @@ class Player(AnimalBase):
     def inventory_name(self):
         if self.carrying:
             if self.carrying.quest_id:
-                return "%c*%s*%c" % \
-                   (C.COL4, self.carrying.name, C.COLS)
+                return "%c*%s*%c" % (C.COL4, self.carrying.name, C.COLS)
+            elif self.carrying.edible:
+                return "%c*%s*%c" % (C.COL5, self.carrying.name, C.COLS)
             else:
                 return self.carrying.name
         return ""

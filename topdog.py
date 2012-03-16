@@ -120,7 +120,6 @@ def blit_player_stats():
     else:
         inv_item = ""
     
-#    hungry, thirsty, piddle, inventory
     labels = (
         ""
         ,""
@@ -129,15 +128,14 @@ def blit_player_stats():
         ,"%cmoves%c:" % (C.COL5, C.COLS)
         ,"%cinventory%c:" % (C.COL5, C.COLS)
         )
-    values = (
+    values = [
         "%cTop Dog Stats%c" % (C.COL5, C.COLS)
         ,""
         ,str(player.level)
         ,str(player.score)
         ,str(player.moves)
         ,inv_item
-    )
-    
+    ]
     
     # name, score, inventory
     libtcod.console_print_ex(0, C.STATS_SCREEN_LEFT, C.STATS_SCREEN_TOP,
@@ -148,6 +146,24 @@ def blit_player_stats():
                         libtcod.BKGND_NONE, libtcod.LEFT, 
                         "\n".join(values))
     
+    # quests
+    values = []
+    if len(player.seek_quests) > 0:
+        values = ["%cQUESTS%c" % (C.COL5, C.COLS)]
+    for q in player.seek_quests:
+        values.append("+ %s" % (q.title))
+    
+    # hungry, thirsty, piddle, inventory
+    if player.weak:
+        values.append("+ %cweak%c, [e]at food" % (C.COL1, C.COLS))
+    if player.hungry:
+        values.append("+ %chungry%c, [e]at *food*" % (C.COL2, C.COLS))
+    if player.thirsty:
+        values.append("+ %cthirsty%c, [d]rink water" % (C.COL2, C.COLS))
+    libtcod.console_print_ex(0, 4, C.SCREEN_HEIGHT / 2,
+                        libtcod.BKGND_NONE, libtcod.LEFT, 
+                        "\n".join(values))
+
     
     
     # player hearts
@@ -239,19 +255,19 @@ def draw_player_stats():
                     ,libtcod.BKGND_NONE, libtcod.LEFT
                     ,player.inventory_name())
     if player.weak:
-        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STAT_HEART_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
                             ,"%c*weakness*%c" % (C.COL1, C.COLS))
     elif player.thirsty:
-        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STAT_HEART_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
                             ,"%c*thirstys*%c" % (C.COL2, C.COLS))
     elif player.hungry:
-        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STAT_HEART_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
                             ,"%c*hungrys*%c" % (C.COL2, C.COLS))
     elif player.mustpiddle:
-        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
+        libtcod.console_print_ex(0, C.MAP_WIDTH, C.STAT_HEART_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
                             ,"%c*piddles*%c" % (C.COL2, C.COLS))
 

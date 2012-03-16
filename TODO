@@ -8,6 +8,7 @@ NPC generators
 - ? help screen
 bug?: quest item carrier is friendly, doesnt igve item to you
 - add score on quest rewards
+bug: npc giving quest item if you already have item, just does nothing
 
 ===================================================================[[ POLISH ]]
 
