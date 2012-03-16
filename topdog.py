@@ -43,6 +43,12 @@ def setup_keyhandler():
             ,libtcod.KEY_KP8: "game_turn(0, -1)"
             ,libtcod.KEY_KP9: "game_turn(1, -1)"
             ,libtcod.KEY_SPACE: "if player.can_warp(game_map): warp_level()"
+
+            ,libtcod.KEY_UP: "game_turn(0, -1)"
+            ,libtcod.KEY_DOWN: "game_turn(0, 1)"
+            ,libtcod.KEY_LEFT: "game_turn(-1, 0)"
+            ,libtcod.KEY_RIGHT: "game_turn(1, 0)"
+
             ,"d": "player.quench_thirst(game_map)"
             ,libtcod.KEY_KPDIV: "player.quench_thirst(game_map)"
             ,"e": "player.eat_item()"
@@ -51,7 +57,6 @@ def setup_keyhandler():
             ,libtcod.KEY_KPSUB: "player.piddle(game_map)"
             ,"i": "gamestate.push(C.STATE_STATS)"
             ,"?": "blit_help()"
-            ,libtcod.KEY_F5: "warp_level()"
             })
     return handler
 
@@ -204,13 +209,27 @@ def blit_help():
 #    helptext = ["%c%s%s" % (C.COL5, C.COLS, C.VERSION)]
     helptext = ["The %cPuppy%c has been kidnapped by the %cFat Cat Mafioso%c. You travel from yard to yard, searching for the crafty Cats..." % (C.COL4, C.COLS, C.COL1, C.COLS)]
     
-    helptext.append("\n%cHOW TO PLAY%c" % (C.COL5, C.COLS))
-#    helptext.append("" % (C.COL5, C.COLS))
-#    helptext.append("" % (C.COL5, C.COLS))
-#    helptext.append("" % (C.COL5, C.COLS))
+    helptext.append("Walk into other animals to interact with them.")
+    helptext.append("\n%cKEYPAD%c" % (C.COL5, C.COLS))
+    helptext.append("Use the %cKeypad%c to move, this is preferred as \
+diagonals are the dog's bark. The %cARROW%c keys also move you." \
+        % (C.COL4, C.COLS, C.COL4, C.COLS))
+
+    helptext.append("\n%cACTIONS%c" % (C.COL5, C.COLS))
+    helptext.append("[%cd%c]rink water when standing in some" % (C.COL5, C.COLS))
+    helptext.append("[%ce%c]at food you are carrying" % (C.COL5, C.COLS))
+    helptext.append("[%cp%c]piddle when you drank too much" % (C.COL5, C.COLS))
+    helptext.append("[%ci%c]nfo screen of stats and quests" % (C.COL5, C.COLS))
+
+    helptext.append("These keypad keys also map to actions, this mnemonic to remember:")
+    helptext.append("%cD%crink and %cD%civide\n%cE%cat and %cM%cultiply\n%cP%ciddle to %cS%cubtract ;)" % (C.COL1, C.COLS, C.COL1, C.COLS
+                , C.COL2, C.COLS, C.COL2, C.COLS
+                , C.COL3, C.COLS, C.COL3, C.COLS))
+
+    helptext.append("Now go find that %cPuppy!%c" % (C.COL5, C.COLS))
 
     libtcod.console_print_rect(0, 4, 10, C.MAP_WIDTH - 4, C.MAP_HEIGHT - 2,
-                        "\n".join(helptext))
+                        "\n\n".join(helptext))
     libtcod.console_flush()
     
     # wait for key press, ignore key-ups
