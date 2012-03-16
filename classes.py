@@ -50,7 +50,6 @@ class ActionAI(object):
         self.hostile = False
         self.dialogue_text = None
         self.attack_rating = 0
-        self.quest = None
     
     def interact_with(self, target, game_objects):
         npc = self.owner
@@ -73,17 +72,6 @@ class ActionAI(object):
                 # enact some hostility
                 player.take_damage(npc, self.attack_rating)
                 player.msg("%s %c*bites*%c!" % (npc.name, C.COL1, C.COLS))
-            if player.carrying and self.quest:
-            #TODO: could move this out into the QuestAI.
-            # then the quest giver must also get an instance of this class
-                if player.carrying.quest_id:
-                    if player.carrying.quest_id == self.quest.quest_id:
-                        if self.quest.reward_cmd:
-                            exec self.quest.reward_cmd
-                        player.add_dialogue(Dialogue(npc.name, npc.picture
-                                            , self.quest.thankyou))
-                        self.quest = None
-                        player.carrying = None
 
 
 class ActionManual(ActionAI):
@@ -198,30 +186,69 @@ class QuestAI(object):
     """
         Quest AI for NPC's.
     """
-    def __init__(self, owner):
-        self.owner = owner
-        self.quest_id = None
+    def __init__(self, quest_id=os.urandom(4)):
+        self.quest_id = quest_id
+        self.owner = None
         self.item = None
-        self.message = None
+        self.title = None
+        self.success_message = None
+        self.success_command = None
+    
+    def end_quest(self):
+        self.owner.quest_ai = None
 
     def interact_with(self, target, game_objects):
-        npc = self.owner
         if isinstance(target, Player):
-            #TODO: we can check if the player is seeking this quest via
-            # [e for e in target.seek_quests if e.quest_id == self.quest_ai.quest_id]
-            if self.message:
-                target.add_dialogue(Dialogue(npc.name, npc.picture, self.message))
-                self.message = None
-            if not npc.action_ai.hostile and self.quest_id:
-                target.msg("%s %c*gives*%c you a %s" % (npc.name, C.COL3, C.COLS, self.item.name))
-                target.give_item(self.item)
-                self.quest_id = None
-            if npc.hp < 0 and self.quest_id:
-                target.msg("%s %c*dropped*%c something!" % (npc.name, C.COL3, C.COLS))
-                self.item.x = npc.x
-                self.item.y = npc.y
-                game_objects.append(self.item)
-                self.quest_id = None
+            player = target
+            npc = self.owner
+            if self.item:
+                # this is the item carrier
+                if npc.action_ai.hostile:
+                    # we must fight for the item. drop it if we scattered
+                    if npc.move_ai.behaviour == MoveAI.SKITTISH:
+                        # only drop item if the player has this as a quest!
+                        if player.seeks_quest(self.quest_id):
+                            target.msg("%s %c*drops*%c an item" % (npc.name, C.COL3, C.COLS))
+                            self.item.x = npc.x
+                            self.item.y = npc.y
+                            game_objects.append(self.item)
+                            # no more quest for this npc
+                            self.end_quest()
+                else:
+                    if player.seeks_quest(self.quest_id):
+                        # give it out for free
+                        player.msg("%s %c*gives*%c you a %s" % \
+                                    (npc.name, C.COL3, C.COLS, self.item.name))
+                        player.give_item(self.item)
+                        # no more quest for this npc
+                        self.end_quest()
+            else:
+                # this is the quest giver.
+                if player.has_quest_item(self.quest_id):
+                    # player has our prized posession
+                    if self.success_command:
+                        # reward player
+                        exec(self.success_command)
+                    # say thanks
+                    player.addscore(10)
+                    player.remove_inventory()
+                    player.remove_quest(self.quest_id)
+                    player.add_dialogue(Dialogue(npc.name, npc.picture
+                                    , self.success_message))                    
+                    # no more quest for this npc
+                    self.end_quest()
+                elif not player.seeks_quest(self.quest_id):
+                    # give the player a quest
+                    player.give_quest(QuestData(self.quest_id, npc.name, self.title))
+
+class QuestData(object):
+    """
+        quest data conainer kept by player.quests[]
+    """
+    def __init__(self, quest_id, npc_name, title):
+        self.quest_id = quest_id
+        self.npc_name = npc_name
+        self.title = title    
 
 
 class AnimalBase(object):
@@ -334,8 +361,17 @@ class Player(AnimalBase):
         self.seen = True
         self.wizard = False
         self.dialogues = []
-        self.seek_quests = []
+        self.quests = []
     
+    def addscore(self, value):
+        self.score = self.score + 10
+        
+    def heal(self, hp):
+        """ heal by the given hp """
+        self.hp = self.hp + hp
+        if selp.hp > 100:
+            self.hp = 100
+        
     def inventory_name(self):
         if self.carrying:
             if self.carrying.quest_id:
@@ -345,7 +381,10 @@ class Player(AnimalBase):
             else:
                 return self.carrying.name
         return ""
-            
+    
+    def remove_inventory(self):
+        self.carrying = None
+        
     def eat_item(self):
         if self.carrying:
             if self.carrying.edible:
@@ -371,10 +410,24 @@ class Player(AnimalBase):
         self.carrying.x = 0
         self.msg("got a %s" % (item.name))
     
-    def give_quest(self, npc_name, quest):
-        self.seek_quests.append(quest)
-        self.msg("*%s gave you a %c*quest*%c!" % (npc_name, C.COL2, C.COLS))
+    def give_quest(self, quest):
+        self.quests.append(quest)
+        self.msg("*%s gave you a %c*quest*%c!" % (quest.npc_name, C.COL2, C.COLS))
     
+    def seeks_quest(self, quest_id):
+        """ return if the player is seeking quest_id item """
+        return len([e for e in self.quests if e.quest_id == quest_id])
+
+    def has_quest_item(self, quest_id):
+        """ return if player has quest_id item in posession """
+        if self.carrying:
+            if self.carrying.quest_id:
+                return self.carrying.quest_id == quest_id
+    
+    def remove_quest(self, quest_id):
+        """ remove the given quest """
+        self.quests = [e for e in self.quests if e.quest_id != quest_id]
+        
     def add_dialogue(self, dialogue):
         self.dialogues.insert(0, dialogue)
         
@@ -382,7 +435,6 @@ class Player(AnimalBase):
         self.hp = self.hp - damage
         if self.hp < 0:
             self.hp = 0
-#        self.msg("The %s hit you for %s" % (attacker.name, damage))
 
     def get_hearts(self):
         """
@@ -476,10 +528,10 @@ class Player(AnimalBase):
                     # relief!
                     self.msg("You *piddle* on the %s, yey!" % (tile.name))
                     self.mustpiddle = False
-                    self.score = self.score + 10
+                    self.addscore(10)
                     break
             if self.mustpiddle:
-                self.score = self.score + 1
+                self.addscore(1)
                 self.msg("*psssssss*")
                 self.mustpiddle = False
 
@@ -516,18 +568,6 @@ class Hole(ItemBase):
         super(Hole, self).__init__()
         self.char = "O"
 
-
-class Quest(object):
-    """
-        Quest details given to the player by a NPC.
-    """
-    def __init__(self):
-        self.owner = None
-        self.quest_id = os.urandom(2)
-        self.title = None
-        self.thankyou = None
-        self.reward_cmd = None
-    
 
 class KeyHandler(object):
     """

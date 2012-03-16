@@ -148,9 +148,9 @@ def blit_player_stats():
     
     # quests
     values = []
-    if len(player.seek_quests) > 0:
+    if len(player.quests) > 0:
         values = ["%cQUESTS%c" % (C.COL5, C.COLS)]
-    for q in player.seek_quests:
+    for q in player.quests:
         values.append("+ %s" % (q.title))
     
     # hungry, thirsty, piddle, inventory
