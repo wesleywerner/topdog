@@ -3,9 +3,15 @@
 QUESTS:action on player that is carrying quest item: success!
 NPC generators
 
+new map tiles to add:
+R red brick
+= light walking stones
+- putting green
+; gravel
+& compost
+[ car
 
-- piddle.
-- only give out quest items if playeris seeking them
+- fill map empty rects so not to spawn items inside closed buldings :)
 - show detailed into in a "@" screen: level, score.
 - a die roll chance you get stuck and don't move through the brush
 - revised: we have health points (HP). eating food resolves some HP

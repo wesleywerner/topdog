@@ -216,14 +216,9 @@ class QuestAI(object):
                 target.add_dialogue(Dialogue(npc.name, npc.picture, self.message))
                 self.message = None
             if not npc.action_ai.hostile and self.quest_id:
-                print("does player have quest %s?" % (self.quest_id))
-                if len([e for e in target.seek_quests if e.quest_id == self.quest_id]) == 1:
-                    print('yes')
-                    target.msg("%s %c*gives*%c you a %s" % (npc.name, C.COL3, C.COLS, self.item.name))
-                    target.give_item(self.item)
-                    self.quest_id = None
-                else:
-                    print('no')
+                target.msg("%s %c*gives*%c you a %s" % (npc.name, C.COL3, C.COLS, self.item.name))
+                target.give_item(self.item)
+                self.quest_id = None
             if npc.hp < 0 and self.quest_id:
                 target.msg("%s %c*dropped*%c something!" % (npc.name, C.COL3, C.COLS))
                 self.item.x = npc.x

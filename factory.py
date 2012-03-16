@@ -11,7 +11,8 @@ import classes as cls
 
 # define our tile characters here so we can do easy ascii to map lookups
 CHAR_FENCE = "#"
-CHAR_TAR = ":"
+CHAR_GRAVEL = ":"
+CHAR_STONE = chr(176)
 CHAR_WATER = "~"
 CHAR_BRICK = chr(177)
 CHAR_TOY = chr(3)
@@ -274,7 +275,7 @@ def generate_quest(game_map, game_objects, default_attack_rating):
 
 
 def get_quest_by_template(
-                    game_map, game_objects, 
+                    game_map, game_objects 
                     , title, thankyou_text, reward_cmd=None
                     , a_char=None, a_attack_rating=None
                     , a_dialogue=None, a_hunter=False
@@ -554,7 +555,7 @@ def plant_foliage(game_map):
     # make some wet spots
     spawn_pond(game_map, amount=3, pond_size=10, density=2)
 
-def get_brick():
+def get_brick(color=libtcod.dark_grey):
     """
         Make a brick tile.
     """
@@ -563,21 +564,35 @@ def get_brick():
     brick.seethrough = False
     brick.name = "wall"
     brick.char = CHAR_BRICK
-    brick.fgcolor = libtcod.dark_grey
+    brick.fgcolor = color
     return brick
 
 def get_path():
     """
-        Make a tar tile.
+        Make a gravel tile.
     """
-    tar = cls.ItemBase()
-    tar.blocking = False
-    tar.seethrough = True
-    tar.fgcolor = libtcod.darker_grey
-    tar.char = CHAR_TAR
-    tar.name = ""
-    return tar
+    t = cls.ItemBase()
+    t.blocking = False
+    t.seethrough = True
+    t.fgcolor = random.choice((libtcod.darker_grey, libtcod.darkest_gray, libtcod.darkest_sepia))
+    t.char = CHAR_GRAVEL
+    t.name = ""
+    return t
 
+def get_tile(char="?", color=libtcod.white, blocks=False
+            , seethrough=True, name="", msg=None):
+    """
+        Make a stone tile.
+    """
+    t = cls.ItemBase()
+    t.blocking = blocks
+    t.seethrough = seethrough
+    t.fgcolor = color
+    t.char = char
+    t.name = name
+    t.message = msg
+    return t
+    
 def flip_map(game_map):
     """
         Transform the map by mirroring it on X/Y.
@@ -607,20 +622,28 @@ def map_from_ascii(game_map, maps_available):
     # here we can map ascii values to our tile objects
     # since the ascii maps can't contain special chars
     tile_lookup = {
-                    "B": get_brick
-                    ,"#": get_fence
-                    ,CHAR_TAR: get_path
-                    ,CHAR_WATER: get_pool_tile
-                    ,'f': get_flower
-                    ,'t': get_tree
-                    ,'b': get_bush
+                    "B": "get_brick(libtcod.dark_grey)"
+                    ,"R": "get_brick(libtcod.darkest_red)"
+                    ,"=": "get_tile(CHAR_STONE, libtcod.darkest_grey)"
+                    ,"-": "get_tile('-', libtcod.light_green)"
+                    ,"&": "get_tile('&', random.choice((libtcod.darkest_yellow, libtcod.darkest_lime, libtcod.darker_gray)), blocks=True, name='compost', msg='the compost stinks good!')"
+                    ,"[": "get_tile('[', libtcod.light_grey, True, False, 'car')"
+                    ,"#": "get_fence()"
+                    ,CHAR_GRAVEL: "get_path()"
+                    ,";": "get_path()"
+                    ,CHAR_WATER: "get_pool_tile()"
+                    ,'f': "get_flower()"
+                    ,'t': "get_tree()"
+                    ,'b': "get_bush()"
                 }
+#                get_tile(char="?", color=libtcod.white, blocks=False, seethrough=True, name="")
     map_data = read_map_file(random.randint(1, maps_available))
     for y in range(C.MAP_HEIGHT - 1 - 3):
         for x in range(C.MAP_WIDTH - 1 - 3):
             asciic = map_data[y][x]
             if asciic in tile_lookup:
-                game_map[x + 2][y + 2] = tile_lookup[asciic]()
+                tile = eval(tile_lookup[asciic])
+                game_map[x + 2][y + 2] = tile
 
 def count_available_maps():
     """
