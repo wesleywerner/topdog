@@ -346,12 +346,7 @@ def add_random_quest(game_map, game_objects):
     quest_item = get_toy()
     quest_master = get_random_npc()
     quest_npc = None
-    
-#    quest_master.fgcolor=libtcod.green
-#    quest_master.char="c"
-#    quest_master.name="cat"
-#    quest_master.action_ai.dialogue_text = "Help me top dog ^_^"
-    
+
     # use a quest npc to carry the item
     if dice(2):
         # is it hostile?
@@ -362,8 +357,6 @@ def add_random_quest(game_map, game_objects):
         place_on_map(game_map, game_objects, quest_npc)
         game_objects.append(quest_npc)
         quest_item.x = 0
-#        quest_master.fgcolor = libtcod.green        #!
-#        quest_npc.fgcolor = libtcod.red             #!
     else:
         place_on_map(game_map, game_objects, quest_item)
         game_objects.append(quest_item)
