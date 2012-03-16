@@ -26,7 +26,10 @@ SUB piddle
 quickstart characters
 + a FRIENDLY bird called Shona starts near you, she calls you closer and says:
     "Hi Top Dog!\nI'm here to help you start playing..."
-    "Always watch your health hearts at the top when you play.
+    "Always watch your health hearts, and messages, at the top of the screen."
+    "Walk over items to pick them up in your mouth.\nYou can only carry one item at a time."
+    "If you get thirsty running around, stand on some water to [d]rink (keypad DIV).\nIf you get hungry, pick up some food and [e]at it (keypad MUL).\nOnce you have to [p]iddle, stand next to something interesting for extra points ;)"
+    
 
 
 ## level 2 - the neighbours

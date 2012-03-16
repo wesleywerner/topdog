@@ -216,7 +216,7 @@ def blit_help():
     helptext.append("Walk into other animals to interact with them.")
     helptext.append("\n%cKEYPAD%c" % (C.COL5, C.COLS))
     helptext.append("Use the %cKeypad%c to move, this is preferred as \
-diagonals are the dog's bark. The %cARROW%c keys also move you." \
+diagonals are the dog's bark. Keypad 5 shows your stats, as does [i]nfo. The %cARROW%c keys also move you." \
         % (C.COL4, C.COLS, C.COL4, C.COLS))
 
     helptext.append("\n%cACTIONS%c" % (C.COL5, C.COLS))
