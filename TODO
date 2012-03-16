@@ -14,6 +14,12 @@ fix: quest thankyou message npc name display bug
 + level entry messages: your tongue wags. woof woof.
 
 
+KEYS
+DIV drink
+MUL eat
+SUB piddle
+5 stats
+
 ========================================================[[ Known Issues ]]
 
 - holding an inventory item while a NPC gives you a quest item

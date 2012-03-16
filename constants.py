@@ -26,6 +26,7 @@ STATE_MENU = 0x1
 STATE_PLAYING = 0x2
 STATE_DIALOGUE = 0x3
 STATE_STATS = 0x4
+STATE_HELP = 0x5
 
 # player tweaks
 FOV_RADIUS_DEFAULT = 12         # default player fov. gets reduces under shrubbery.

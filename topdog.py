@@ -22,11 +22,12 @@ def setup_keyhandler():
             ,libtcod.KEY_ESCAPE: "player.dialogues.pop()"
             ,libtcod.KEY_KPENTER: "player.dialogues.pop()"
             })
-    handler.add_actions(C.STATE_STATS,
+    handler.add_actions(C.STATE_STATS or C.STATE_HELP,
             {
             libtcod.KEY_SPACE: "gamestate.pop()"
             ,libtcod.KEY_ESCAPE: "gamestate.pop()"
             ,libtcod.KEY_KPENTER: "gamestate.pop()"
+            ,libtcod.KEY_KP5: "gamestate.pop()"
             })
     handler.add_actions(C.STATE_PLAYING,
             {
@@ -36,16 +37,20 @@ def setup_keyhandler():
             ,libtcod.KEY_KP2: "game_turn(0, 1)"
             ,libtcod.KEY_KP3: "game_turn(1, 1)"
             ,libtcod.KEY_KP4: "game_turn(-1, 0)"
-            ,libtcod.KEY_KP5: "game_turn(0, 0)"
+            ,libtcod.KEY_KP5: "gamestate.push(C.STATE_STATS)"
             ,libtcod.KEY_KP6: "game_turn(1, 0)"
             ,libtcod.KEY_KP7: "game_turn(-1, -1)"
             ,libtcod.KEY_KP8: "game_turn(0, -1)"
             ,libtcod.KEY_KP9: "game_turn(1, -1)"
             ,libtcod.KEY_SPACE: "if player.can_warp(game_map): warp_level()"
             ,"d": "player.quench_thirst(game_map)"
+            ,libtcod.KEY_KPDIV: "player.quench_thirst(game_map)"
             ,"e": "player.eat_item()"
+            ,libtcod.KEY_KPMUL: "player.eat_item()"
             ,"p": "player.piddle(game_map)"
+            ,libtcod.KEY_KPSUB: "player.piddle(game_map)"
             ,"i": "gamestate.push(C.STATE_STATS)"
+            ,"?": "blit_help()"
             ,libtcod.KEY_F5: "warp_level()"
             })
     return handler
@@ -179,7 +184,39 @@ def blit_player_stats():
                         ,chr(3), heart_colors[heart], None)
                         
     libtcod.console_flush()
+
+
+def blit_help():
+    """
+        Show help.
+    """
+    libtcod.console_clear(0)
+    icon = libtcod.image_load(os.path.join('data', 'images', 'stats-frame.png'))
+    libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
     
+    libtcod.console_print_ex(0, C.SCREEN_WIDTH / 2, 2,
+                        libtcod.BKGND_NONE, libtcod.CENTER, 
+                        "%cTop Dog%c\nv%s\n^_^" % (C.COL5, C.COLS, C.VERSION))
+                            
+
+#    helptext = ["%c%s%s" % (C.COL5, C.COLS, C.VERSION)]
+    helptext = ["The %cPuppy%c has been kidnapped by the %cFat Cat Mafioso%c. You travel from yard to yard, searching for the crafty Cats..." % (C.COL4, C.COLS, C.COL1, C.COLS)]
+    
+    helptext.append("\n%cHOW TO PLAY%c" % (C.COL5, C.COLS))
+#    helptext.append("" % (C.COL5, C.COLS))
+#    helptext.append("" % (C.COL5, C.COLS))
+#    helptext.append("" % (C.COL5, C.COLS))
+
+    libtcod.console_print_rect(0, 4, 10, C.MAP_WIDTH - 4, C.MAP_HEIGHT - 2,
+                        "\n".join(helptext))
+    libtcod.console_flush()
+    
+    # wait for key press, ignore key-ups
+    while True:
+        key = libtcod.console_wait_for_keypress(True)
+        if key.pressed:
+            break
+
 
 def draw_map():
     """
@@ -360,7 +397,8 @@ if __name__ == "__main__":
                 gamestate.pop()
         elif state == C.STATE_STATS:
             blit_player_stats()
-            
+        elif state == C.STATE_HELP:
+            blit_help()
         if gamestate.is_empty():
             break
         cmd = kb_handler.handle_stroke(gamestate.peek())
