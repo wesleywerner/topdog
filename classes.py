@@ -399,13 +399,16 @@ class Player(AnimalBase):
                     self.msg("Yum!")
             else:
                 self.msg("You chew on the %s" % (self.carrying.name))
-        
+
     def give_item(self, item):
         """
             give player an inventory item, drops items if we have to.
         """
+        # drop the current
         if self.carrying:
             self.carrying.x, self.carrying.y = (self.x, self.y)
+            self.carrying = None
+        # set new inventory
         self.carrying = item
         self.carrying.x = 0
         self.msg("got a %s" % (item.name))

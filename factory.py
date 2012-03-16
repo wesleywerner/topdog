@@ -346,16 +346,18 @@ def add_random_quest(game_map, game_objects):
     quest_master = get_random_npc()
     quest_npc = None
     
+    # use a quest npc to carry the item
     if dice(2):
-        # use a quest npc to carry the item
         # is it hostile?
-        if True or dice(6):
+        if dice(6):         #!
             quest_npc = get_random_npc(attack_rating=1)
         else:
             quest_npc = get_random_npc()
         place_on_map(game_map, game_objects, quest_npc)
         game_objects.append(quest_npc)
         quest_item.x = 0
+#        quest_master.fgcolor = libtcod.green        #!
+#        quest_npc.fgcolor = libtcod.red             #!
     else:
         place_on_map(game_map, game_objects, quest_item)
     
