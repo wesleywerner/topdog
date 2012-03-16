@@ -475,18 +475,19 @@ def spawn_level_quests(game_map, game_objects, game_level):
     add_random_quest(game_map, game_objects)
 
 
-def spawn_level_storyline(game_map, game_objects, game_level):
+def spawn_level_storyline(game_map, game_objects, player):
     """
         add some NPC's and dialogue for our doggy tail.
     """
-    if game_level == 1:
+    if player.level == 1:
         npc = get_random_npc(npc_char="c", attack_rating=None)
         npc.see_message = "the %s waves to you closer..." % (npc.name)
         npc.action_ai.dialogue_text = "Hello there doggy guy"
-        place_on_map(game_map, game_objects, npc)
+        place_on_map(game_map, game_objects, npc, near_xy=(player.x, player.y))
         game_objects.append(npc)
 
 #===================================================================[[ Map ]]
+
 
 def blank_map():
     """
