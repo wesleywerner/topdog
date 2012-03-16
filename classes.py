@@ -38,7 +38,7 @@ class ItemBase(object):
         self.quest_id = None
     
     def isblank(self):
-        return not self.blocking
+        return not self.blocking and not self.drinkable
 
 
 class ActionAI(object):
