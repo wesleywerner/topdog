@@ -72,6 +72,9 @@ class ActionAI(object):
                 # enact some hostility
                 player.take_damage(npc, self.attack_rating)
                 player.msg("%s %c*bites*%c!" % (npc.name, C.COL1, C.COLS))
+            if npc.see_message:
+                # now that we interacted, get rid of our see_message
+                npc.see_message = None
 
 
 class ActionManual(ActionAI):

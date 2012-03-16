@@ -249,7 +249,9 @@ def draw_objects():
                                         (C.COL4, obj.name, C.COLS)
                                         , allow_duplicates=False)
                         if obj.see_message:
-                            player.msg(obj.see_message)
+                            player.msg("%c%s%c" % \
+                                    (C.COL2, obj.see_message, C.COLS)
+                                    ,allow_duplicates=False)
                     else:
                         player.msg("You see a %c%s%c" % \
                                             (C.COL3, obj.name, C.COLS)
@@ -348,7 +350,7 @@ def warp_level():
     game_objects.extend(factory.spawn_level_objects(game_map, player.level))
     # add level quests and story
     factory.spawn_level_quests(game_map, game_objects, player.level)
-#    factory.spawn_level_storyline(game_map, game_objects, player.level)
+    factory.spawn_level_storyline(game_map, game_objects, player.level)
 
     # carry our inventory item into this new level
     if player.carrying:
