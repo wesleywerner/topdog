@@ -3,19 +3,8 @@
 QUESTS:action on player that is carrying quest item: success!
 NPC generators
 
-new map tiles to add:
-R red brick
-= light walking stones
-- putting green
-; gravel
-& compost
-[ car
 
-- fill map empty rects so not to spawn items inside closed buldings :)
 - show detailed into in a "@" screen: level, score.
-- a die roll chance you get stuck and don't move through the brush
-- revised: we have health points (HP). eating food resolves some HP
-- weak players change heart indicator yellow, and reduces every x moves
 - keep counter of moves since last message trim, and not total player moves.
 
 ===================================================================[[ POLISH ]]
@@ -33,4 +22,4 @@ R red brick
 player.eat_item() adjusts hp
 C.PLAYER_THIRST_INDEX
 C.PLAYER_PIDDLE_INDEX
-
+C.PLAYER_WEAK_HP_DICE

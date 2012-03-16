@@ -341,7 +341,7 @@ class Player(AnimalBase):
     def eat_item(self):
         if self.carrying:
             if self.carrying.edible:
-                self.hp = self.hp + 15.0
+                self.hp = self.hp + 25.0
                 if self.hp > 100:
                     self.hp = 100
                 self.carrying = None
@@ -402,6 +402,9 @@ class Player(AnimalBase):
                     self.weak = True
                 self.thirsty = True
             tile = game_map[x][y]
+            if self.weak:
+                if dice(C.PLAYER_WEAK_HP_DICE):
+                    self.hp = self.hp - 1
             if tile.message:
                 self.msg(tile.message)
             if tile.fov_limit:

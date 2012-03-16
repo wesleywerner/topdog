@@ -99,7 +99,7 @@ def blit_dialogues():
 
 def draw_map():
     """
-        Draw the map t2iles onto the canvas.
+        Draw the map tiles onto the canvas.
     """
     for y in range(C.MAP_HEIGHT - 0):
         for x in range(C.MAP_WIDTH - 0):
@@ -153,9 +153,13 @@ def draw_player_stats():
                             libtcod.BKGND_NONE, libtcod.CENTER, 
                             "%c%s%c" % (C.COL5, tile.name, C.COLS))
     # player hearts
-    heart_colors = (libtcod.red, libtcod.red, libtcod.orange, libtcod.orange
-                    , libtcod.amber, libtcod.amber, libtcod.lime, libtcod.lime
-                    , libtcod.chartreuse, libtcod.chartreuse)
+    if player.weak:
+        heart_colors = [libtcod.red]* 10
+    else:
+        heart_colors = (libtcod.red, libtcod.red, libtcod.orange, libtcod.orange
+                        , libtcod.amber, libtcod.amber, libtcod.lime, libtcod.lime
+                        , libtcod.chartreuse, libtcod.chartreuse)
+
     for heart in range(player.get_hearts()):
         libtcod.console_put_char_ex(
                         0, heart + C.STATS_LEFT, C.STATS_TOP
