@@ -59,7 +59,7 @@ class ActionAI(object):
                 # show dialogue to the player
                 if type(self.dialogue_text) is list:
                     # this is a list of dialogues, talk our ear off
-                    player.add_dialogue(Dialogue(npc.name, npc.picture
+                    player.add_dialogue(Dialogue(npc.name
                                             , self.dialogue_text.pop()))
                     if len(self.dialogue_text) == 0:
                         self.dialogue_text = None

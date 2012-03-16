@@ -92,7 +92,9 @@ def blit_dialogues():
         dlg = player.dialogues[-1]
         if dlg.npc_picture:
             icon = libtcod.image_load(os.path.join('data', 'images', dlg.npc_picture))
-            libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
+        else:
+            icon = libtcod.image_load(os.path.join('data', 'images', 'icon-%s.png' % (dlg.npc_name)))
+        libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
         # title
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 3,
                             libtcod.BKGND_NONE, libtcod.CENTER, 
