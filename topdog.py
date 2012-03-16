@@ -316,6 +316,17 @@ def warp_level():
         game_objects.append(player.carrying)
 
 
+def get_names_under_mouse():
+    mouse = libtcod.mouse_get_status()
+    x, y = (mouse.cx, mouse.cy)
+    tile = object_at(x, y)
+    if not tile:
+        tile = game_map[x][y]
+    libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
+                            C.SCREEN_HEIGHT - 1, 
+                            libtcod.BKGND_NONE, libtcod.CENTER, 
+                            "%c%s%c" % (C.COL5, (x, y), C.COLS))    
+
 if __name__ == "__main__":
     """
         Entry point.
@@ -350,6 +361,7 @@ if __name__ == "__main__":
             draw_player_stats()
             draw_objects()
             draw_messages()
+            get_names_under_mouse()
             blit_playtime()
         elif state == C.STATE_DIALOGUE:
             blit_dialogues()

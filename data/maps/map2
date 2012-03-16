@@ -2,35 +2,35 @@
       :::                           
       :::                           
 ======:::           BBBBBBBBBBBBBB  
------=:::  :  :     B            B  
---f--=::::::::::::::B            B  
-bff--=:::     : : : B            B  
+-----=:::  :  :     BBBBBBBBBBBBBB  
+--f--=::::::::::::::BBBBBBBBBBBBBB  
+bff--=:::     : : : BBBBBBBBBBBBBB  
 -----=:::       : : BBBBBBBBBBBBBB  
 -f-f-=:::        : :           ==   
 bf-f-=:::        :             ==   
 -----=:::         : ::        RRRR  
--fff-=:::       t   ::::      R  R  
--f---=:::         :::::::     R  R  
-b--f-=:::     t  ::: ::::::  :R  R  
--ff--=:::        :::::: ::    R  R  
--f---=:::       :::::::::::   R  R  
+-fff-=:::       t   ::::      RBBR  
+-f---=:::         :::::::     RBBR  
+b--f-=:::     t  ::: ::::::  :RBBR  
+-ff--=:::        :::::: ::    RBBR  
+-f---=:::       :::::::::::   RBBR  
 -f-f-=:::    t  :: :::: :::   RRRR  
 bf---=:::       ::::::::::     ==   
 --ff-=:::        :::: :::::    ==   
 -f---=:::       :::::::::::   RRRR  
----f-=:::     t ::::::::::    R  R  
-b----=:::       :: ::::::::   R  R  
--fff-=:::       ::::::::  :  :R  R  
---f--=:::     t  ::: ::::: :: R  R  
-b--f-=:::        ::::::::     R  R  
+---f-=:::     t ::::::::::    RBBR  
+b----=:::       :: ::::::::   RBBR  
+-fff-=:::       ::::::::  :  :RBBR  
+--f--=:::     t  ::: ::::: :: RBBR  
+b--f-=:::        ::::::::     RBBR  
 --f--=:::          ::::::     RRRR  
 -----=:::          ::::  :     ==   
 ======:::        t  : :    :   ==   
       :::                   : RRRR  
-      :::      :    t        :R  R  
-      :::     ::     :    :   R  R  
-   BBBBBBBBB  :  : :  :  ::   R  R  
-   BBBBBBBBB==================R  R  
-   BBBBBBBBB                  R  R  
+      :::      :    t        :RBBR  
+      :::     ::     :    :   RBBR  
+   BBBBBBBBB  :  : :  :  ::   RBBR  
+   BBBBBBBBB==================RBBR  
+   BBBBBBBBB                  RBBR  
    BBBBBBBBBb b    b   b  b   RRRR  
    BBBBBBBBBbbbbtbbbbtbbbbbtbbbbbbb 

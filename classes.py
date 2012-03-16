@@ -219,6 +219,7 @@ class QuestAI(object):
                         # give it out for free
                         player.msg("%s %c*gives*%c you a %s" % \
                                     (npc.name, C.COL3, C.COLS, self.item.name))
+                        game_objects.append(self.item)
                         player.give_item(self.item)
                         # no more quest for this npc
                         self.end_quest()

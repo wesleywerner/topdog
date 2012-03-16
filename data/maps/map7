@@ -3,10 +3,10 @@
         t     bBB : BBb             
  t         bBBBBB : BBBBBb     tt   
          bBBBBB:::::::BBBBBb        
-    t   bBBB:::  ::    ::BBBb       
-      bBBB:               :BBB      
-      BBB      -------     :BBB     
- t   bBB:    -----------    :BBb    
+    t   bBBB:::  ::    ::BB         
+         B:                         
+               -------        B     
+ t   bB      -----------      Bb    
     bBB:    -------------    :BBbt  
     BB:    ---------------    :BB   
    bBB    -----------------    BB   
@@ -24,11 +24,11 @@
    BB    -------------------    BB  
    BB:   -------------------   :BB  
     BB    -----------------    BBb  
-    BB:    ---------------   ::BB   
-     BB:    -------------    :BBb   
-  t   BB:    -----------    :BBb    
-      BBB :    -------     :BBB     
- t     BBB:               :BBBb     
+    BB:     --------------   ::BB   
+     BB:    -------------     BBb   
+  t   BB:    -----------       b    
+      B        -------     :        
+ t       B:               :BB       
          BBB:           ::BBb       
           BBBBB: : :::BBBBBb        
     t  t    BBBBB : BBBBBb          
