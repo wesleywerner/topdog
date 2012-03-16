@@ -38,7 +38,7 @@ class ItemBase(object):
         self.quest_id = None
     
     def isblank(self):
-        return self.char == "."
+        return not self.blocking
 
 
 class ActionAI(object):
@@ -73,9 +73,6 @@ class ActionAI(object):
                 # enact some hostility
                 player.take_damage(npc, self.attack_rating)
                 player.msg("%s %c*bites*%c!" % (npc.name, C.COL1, C.COLS))
-            if not self.hostile and npc.quest_ai:
-                player.give_item(npc.quest_ai.item)
-                npc.quest_ai = None
             if player.carrying and self.quest:
             #TODO: could move this out into the QuestAI.
             # then the quest giver must also get an instance of this class
@@ -226,6 +223,7 @@ class QuestAI(object):
                 game_objects.append(self.item)
                 self.quest_id = None
 
+
 class AnimalBase(object):
     """
         Living things (NPC's) and the Player.
@@ -338,6 +336,15 @@ class Player(AnimalBase):
         self.dialogues = []
         self.seek_quests = []
     
+    def inventory_name(self):
+        if self.carrying:
+            if self.carrying.quest_id:
+                return "%c*%s*%c" % \
+                   (C.COL4, self.carrying.name, C.COLS)
+            else:
+                return self.carrying.name
+        return ""
+            
     def eat_item(self):
         if self.carrying:
             if self.carrying.edible:

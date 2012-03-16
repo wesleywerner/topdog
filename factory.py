@@ -152,10 +152,10 @@ def place_on_map(game_map, game_objects, item, near_xy=None):
         if near_xy:
             x = random.randint(near_xy[0] - 4, near_xy[0] + 4)
             y = random.randint(near_xy[1] - 4, near_xy[1] + 4)
-            if x > C.MAP_WIDTH - 2:
-                x = C.MAP_WIDTH - 2
-            if y > C.MAP_HEIGHT - 2:
-                y = C.MAP_HEIGHT - 2
+            if x > C.MAP_WIDTH - 3:
+                x = C.MAP_WIDTH - 3
+            if y > C.MAP_HEIGHT - 3:
+                y = C.MAP_HEIGHT - 3
         else:
             x = random.randint(2, C.MAP_WIDTH - 2)
             y = random.randint(2, C.MAP_HEIGHT - 2)
@@ -237,11 +237,15 @@ def generate_quest(game_map, game_objects, default_attack_rating):
     npc = None
     
     # give to a NPC, or place quest item on the map
-    if random.randint(0, 1) == 0:
+#    if random.randint(0, 1) == 0:
+    if True:
         npc = get_random_npc(attack_rating=default_attack_rating)
         # set attack_rating if hostile, otherwise NPC hits with 0 damaage :p
         npc.action_ai.hostile = False
-        npc.move_ai.behaviour = random.choice((cls.MoveAI.HUNTING, cls.MoveAI.NEUTRAL))
+        if npc.action_ai.hostile:
+            npc.move_ai.behaviour = random.choice((cls.MoveAI.HUNTING, cls.MoveAI.NEUTRAL))
+        else:
+            npc.move_ai.behaviour = cls.MoveAI.NEUTRAL
         quest_text = quest_text.replace("%a", npc.name)
         quest.thankyou = quest.thankyou.replace("%a", npc.name)
         npc.fgcolor = libtcod.pink
@@ -351,7 +355,7 @@ def get_random_npc(npc_char=None, attack_rating=None):
         ,"C": "Fat Cat"
         ,"s": "squirrel"
         ,"b": "bird"
-        ,"p": "p"
+        ,"p": "parrot"
     }
     if not npc_char:
         npc_char = random.choice(dna_bank.keys())

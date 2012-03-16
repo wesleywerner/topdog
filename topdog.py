@@ -45,7 +45,7 @@ def setup_keyhandler():
             ,"d": "player.quench_thirst(game_map)"
             ,"e": "player.eat_item()"
             ,"p": "player.piddle(game_map)"
-            ,"@": "gamestate.push(C.STATE_STATS)"
+            ,"i": "gamestate.push(C.STATE_STATS)"
             ,libtcod.KEY_F5: "warp_level()"
             })
     return handler
@@ -108,6 +108,61 @@ def blit_player_stats():
         Draw player stats and quests screen.
     """
     libtcod.console_clear(0)
+    icon = libtcod.image_load(os.path.join('data', 'images', 'stats-frame.png'))
+    libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
+    
+    if player.carrying:
+        if player.carrying.quest_id:
+            inv_item = "%c%s%c\n%c*quest item*%c" % \
+                (C.COL3, player.carrying.name, C.COLS, C.COL4, C.COLS)
+        else:
+            inv_item = "%c%s%c" % (C.COL3, player.carrying.name, C.COLS)
+    else:
+        inv_item = ""
+    
+#    hungry, thirsty, piddle, inventory
+    labels = (
+        ""
+        ,""
+        ,"%clevel%c:" % (C.COL5, C.COLS)
+        ,"%cscore%c:" % (C.COL5, C.COLS)
+        ,"%cmoves%c:" % (C.COL5, C.COLS)
+        ,"%cinventory%c:" % (C.COL5, C.COLS)
+        )
+    values = (
+        "%cTop Dog Stats%c" % (C.COL5, C.COLS)
+        ,""
+        ,str(player.level)
+        ,str(player.score)
+        ,str(player.moves)
+        ,inv_item
+    )
+    
+    
+    # name, score, inventory
+    libtcod.console_print_ex(0, C.STATS_SCREEN_LEFT, C.STATS_SCREEN_TOP,
+                        libtcod.BKGND_NONE, libtcod.RIGHT, 
+                        "\n".join(labels))
+
+    libtcod.console_print_ex(0, C.STATS_SCREEN_LEFT + 2, C.STATS_SCREEN_TOP,
+                        libtcod.BKGND_NONE, libtcod.LEFT, 
+                        "\n".join(values))
+    
+    
+    
+    # player hearts
+    if player.weak:
+        heart_colors = [libtcod.red]* 10
+    else:
+        heart_colors = (libtcod.red, libtcod.red, libtcod.orange, libtcod.orange
+                        , libtcod.amber, libtcod.amber, libtcod.lime, libtcod.lime
+                        , libtcod.chartreuse, libtcod.chartreuse)
+    for heart in range(player.get_hearts()):
+        libtcod.console_put_char_ex(
+                        0, heart + C.STAT_HEART_LEFT, C.STAT_HEART_TOP
+                        ,chr(3), heart_colors[heart], None)
+                        
+    libtcod.console_flush()
     
 
 def draw_map():
@@ -175,15 +230,14 @@ def draw_player_stats():
 
     for heart in range(player.get_hearts()):
         libtcod.console_put_char_ex(
-                        0, heart + C.STATS_LEFT, C.STATS_TOP
+                        0, heart + C.STAT_HEART_LEFT, C.STAT_HEART_TOP
                         ,chr(3), heart_colors[heart], None)
     texts = []
     # player inventory
-    if player.carrying:
-        libtcod.console_print_ex(
-                        0, C.MESSAGES_LEFT + 10, C.STATS_TOP
-                        ,libtcod.BKGND_NONE, libtcod.LEFT
-                        ,player.carrying.name)
+    libtcod.console_print_ex(
+                    0, C.MESSAGES_LEFT + 10, C.STAT_HEART_TOP
+                    ,libtcod.BKGND_NONE, libtcod.LEFT
+                    ,player.inventory_name())
     if player.weak:
         libtcod.console_print_ex(0, C.MAP_WIDTH, C.STATS_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
