@@ -161,8 +161,8 @@ def place_on_map(game_map, game_objects, item, near_xy=None):
             if y > C.MAP_HEIGHT - 3:
                 y = C.MAP_HEIGHT - 3
         else:
-            x = random.randint(2, C.MAP_WIDTH - 2)
-            y = random.randint(2, C.MAP_HEIGHT - 2)
+            x = random.randint(4, C.MAP_WIDTH - 4)
+            y = random.randint(4, C.MAP_HEIGHT - 4)
         # test against object collisions
         try_again = False
         for obj in game_objects:
@@ -312,6 +312,7 @@ def link_quest(game_map, game_objects
     else:
         # no npc carries this item, its placed on the map.
         ai_master.owner = quest_master
+    title = title.replace("%a", "the culprit")
     title = title.replace("%b", quest_master.name)
     title = title.replace("%i", quest_item.name)
     ai_master.title = title

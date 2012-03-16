@@ -204,15 +204,17 @@ def draw_objects():
         if not obj is player.carrying:
             if libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
                 if not obj.seen:
-                    obj.seen = True
+#                    obj.seen = True
                     if isinstance(obj, cls.AnimalBase):
                         player.msg("You see a %c%s%c" % \
-                                        (C.COL4, obj.name, C.COLS))
+                                        (C.COL4, obj.name, C.COLS)
+                                        , allow_duplicates=False)
                         if obj.see_message:
                             player.msg(obj.see_message)
                     else:
                         player.msg("You see a %c%s%c" % \
-                                            (C.COL3, obj.name, C.COLS))
+                                            (C.COL3, obj.name, C.COLS)
+                                            , allow_duplicates=False)
                 libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
                                         obj.char, obj.fgcolor, None)
     # draw player

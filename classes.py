@@ -458,7 +458,7 @@ class Player(AnimalBase):
         if super(Player, self).move(game_map, game_objects, x, y):
             self.message_trim_idx += 1
             self.pickup_item(game_objects)
-            if self.message_trim_idx % 10 == 0:
+            if self.message_trim_idx % 6 == 0:
                 self.trim_message()
             if self.moves % C.PLAYER_THIRST_INDEX == 0:
                 if self.thirsty:
@@ -495,12 +495,16 @@ class Player(AnimalBase):
                         "You %center%c the yard..." % 
                         (C.COL4, C.COLS)]
 
-    def msg(self, message):
+    def msg(self, message, allow_duplicates=True):
         if not self.messages: 
             self.messages.append(message)
         else:
-            if self.messages[-1] != message:
-                self.messages.append(message)
+            if allow_duplicates:
+                if self.messages[-1] != message:
+                    self.messages.append(message)
+            else:
+                if self.messages.count(message) == 0:
+                    self.messages.append(message)
         self.messages = self.messages[-5:]
         self.message_trim_idx = 1
     

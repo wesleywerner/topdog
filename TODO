@@ -1,23 +1,24 @@
 ===================================================================[[ TODO ]]
 
-QUESTS:action on player that is carrying quest item: success!
-NPC generators
-
 
 - ? help screen
 
-bug: npc giving quest item if you already have item, just does nothing
 
 ===================================================================[[ POLISH ]]
 
+fix: quest thankyou message npc name display bug
 + intro screen using libtcod section 3.4
-+ draw more maps
 + mouse movement: http://roguebasin.roguelikedevelopment.org/index.php/Complete_Roguelike_Tutorial,_using_python%2Blibtcod,_part_7
 + more toy names, bush names, tree names
 + colorized words. you enter the jones's yard. you smell baked muffins.
 + level entry messages: your tongue wags. woof woof.
 
 
+========================================================[[ Known Issues ]]
+
+- holding an inventory item while a NPC gives you a quest item
+    will drop the quest item onto the tile you are standing on.
+    move off and on again to switch you inventory with the quest item.
 
 ========================================================[[ Tweaks ]]
 player.eat_item() adjusts hp
