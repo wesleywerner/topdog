@@ -11,36 +11,43 @@ def setup_keyhandler():
     """
     handler = cls.KeyHandler()
     handler.add_actions(C.STATE_MENU,
-                            {
-                            "q": "gamestate.pop()"
-                            ,libtcod.KEY_SPACE: "gamestate.push(C.STATE_PLAYING)"
-                            ,libtcod.KEY_ESCAPE: "gamestate.pop()"
-                            })
+            {
+            "q": "gamestate.pop()"
+            ,libtcod.KEY_SPACE: "gamestate.push(C.STATE_PLAYING)"
+            ,libtcod.KEY_ESCAPE: "gamestate.pop()"
+            })
     handler.add_actions(C.STATE_DIALOGUE,
-                            {
-                            libtcod.KEY_SPACE: "player.dialogues.pop()"
-                            ,libtcod.KEY_ESCAPE: "player.dialogues.pop()"
-                            ,libtcod.KEY_KPENTER: "player.dialogues.pop()"
-                            })
+            {
+            libtcod.KEY_SPACE: "player.dialogues.pop()"
+            ,libtcod.KEY_ESCAPE: "player.dialogues.pop()"
+            ,libtcod.KEY_KPENTER: "player.dialogues.pop()"
+            })
+    handler.add_actions(C.STATE_STATS,
+            {
+            libtcod.KEY_SPACE: "gamestate.pop()"
+            ,libtcod.KEY_ESCAPE: "gamestate.pop()"
+            ,libtcod.KEY_KPENTER: "gamestate.pop()"
+            })
     handler.add_actions(C.STATE_PLAYING,
-                {
-                "q": "gamestate.pop()"
-                ,libtcod.KEY_ESCAPE: "gamestate.pop()"
-                ,libtcod.KEY_KP1: "game_turn(-1, 1)"
-                ,libtcod.KEY_KP2: "game_turn(0, 1)"
-                ,libtcod.KEY_KP3: "game_turn(1, 1)"
-                ,libtcod.KEY_KP4: "game_turn(-1, 0)"
-                ,libtcod.KEY_KP5: "game_turn(0, 0)"
-                ,libtcod.KEY_KP6: "game_turn(1, 0)"
-                ,libtcod.KEY_KP7: "game_turn(-1, -1)"
-                ,libtcod.KEY_KP8: "game_turn(0, -1)"
-                ,libtcod.KEY_KP9: "game_turn(1, -1)"
-                ,libtcod.KEY_SPACE: "if player.can_warp(game_map): warp_level()"
-                ,"d": "player.quench_thirst(game_map)"
-                ,"e": "player.eat_item()"
-                ,"p": "player.piddle(game_map)"
-                ,libtcod.KEY_F5: "warp_level()"
-                })
+            {
+            "q": "gamestate.pop()"
+            ,libtcod.KEY_ESCAPE: "gamestate.pop()"
+            ,libtcod.KEY_KP1: "game_turn(-1, 1)"
+            ,libtcod.KEY_KP2: "game_turn(0, 1)"
+            ,libtcod.KEY_KP3: "game_turn(1, 1)"
+            ,libtcod.KEY_KP4: "game_turn(-1, 0)"
+            ,libtcod.KEY_KP5: "game_turn(0, 0)"
+            ,libtcod.KEY_KP6: "game_turn(1, 0)"
+            ,libtcod.KEY_KP7: "game_turn(-1, -1)"
+            ,libtcod.KEY_KP8: "game_turn(0, -1)"
+            ,libtcod.KEY_KP9: "game_turn(1, -1)"
+            ,libtcod.KEY_SPACE: "if player.can_warp(game_map): warp_level()"
+            ,"d": "player.quench_thirst(game_map)"
+            ,"e": "player.eat_item()"
+            ,"p": "player.piddle(game_map)"
+            ,"@": "gamestate.push(C.STATE_STATS)"
+            ,libtcod.KEY_F5: "warp_level()"
+            })
     return handler
 
 
@@ -75,12 +82,12 @@ def blit_dialogues():
     """
         Draw dialogues onto the screen.
     """
-    libtcod.console_clear(0)
-    icon = libtcod.image_load(os.path.join('data', 'images','icon_mouse.png'))
-    libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
-
     if len(player.dialogues) > 0:
+        libtcod.console_clear(0)
         dlg = player.dialogues[-1]
+        if dlg.npc_picture:
+            icon = libtcod.image_load(os.path.join('data', 'images', dlg.npc_picture))
+            libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
         # title
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 3,
                             libtcod.BKGND_NONE, libtcod.CENTER, 
@@ -95,6 +102,12 @@ def blit_dialogues():
                             libtcod.BKGND_NONE, libtcod.CENTER, 
                             "(spacebar to continue...)")
     libtcod.console_flush()
+
+def blit_player_stats():
+    """
+        Draw player stats and quests screen.
+    """
+    libtcod.console_clear(0)
     
 
 def draw_map():
@@ -270,10 +283,11 @@ if __name__ == "__main__":
             blit_dialogues()
             if len(player.dialogues) > 0:
                 dlg = player.dialogues[-1]
-                
             else:
                 gamestate.pop()
-        
+        elif state == C.STATE_STATS:
+            blit_player_stats()
+            
         if gamestate.is_empty():
             break
         cmd = kb_handler.handle_stroke(gamestate.peek())
