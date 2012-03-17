@@ -86,7 +86,7 @@ def blit_playtime():
     """
     libtcod.image_blit_rect(mullions, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
     libtcod.console_blit(canvas, 0, 0, C.MAP_WIDTH, C.MAP_HEIGHT, 0, C.MAP_LEFT, C.MAP_TOP)
-    libtcod.console_flush()
+
 
 def blit_dialogues():
     """
@@ -117,7 +117,7 @@ def blit_dialogues():
                             C.SCREEN_HEIGHT - 2, 
                             libtcod.BKGND_NONE, libtcod.CENTER, 
                             "(spacebar or enter...)")
-    libtcod.console_flush()
+
 
 def blit_player_stats():
     """
@@ -194,7 +194,7 @@ def blit_player_stats():
                         0, heart + C.STAT_HEART_LEFT, C.STAT_HEART_TOP
                         ,chr(3), heart_colors[heart], None)
                         
-    libtcod.console_flush()
+
 
 
 def blit_help():
@@ -211,29 +211,30 @@ def blit_help():
                             
 
 #    helptext = ["%c%s%s" % (C.COL5, C.COLS, C.VERSION)]
-    helptext = ["The %cPuppy%c has been kidnapped by the %cFat Cat Mafioso%c. You travel from yard to yard, searching for the crafty Cats..99." % (C.COL4, C.COLS, C.COL1, C.COLS)]
+    helptext = ["The %cPuppy%c has been kidnapped by the %cFat Cat Mafioso%c. You travel from yard to yard, searching for the crafty Cats!" % (C.COL4, C.COLS, C.COL1, C.COLS)]
     
-    helptext.append("Walk into other animals to interact with them.")
+    helptext.append("\nYou are the %c@%c sign. Walk into other animals to interact with them." % (C.COL3, C.COLS))
     helptext.append("\n%cKEYPAD%c" % (C.COL5, C.COLS))
-    helptext.append("Use the %cKeypad%c to move, this is preferred as \
+    helptext.append("\nUse the %cKeypad%c to move, this is preferred as \
 diagonals are the dog's bark. Keypad 5 shows your stats, as does [i]nfo. The %cARROW%c keys also move you." \
         % (C.COL4, C.COLS, C.COL4, C.COLS))
 
     helptext.append("\n%cACTIONS%c" % (C.COL5, C.COLS))
-    helptext.append("[%cd%c]rink water when standing in some" % (C.COL5, C.COLS))
-    helptext.append("[%ce%c]at food you are carrying" % (C.COL5, C.COLS))
-    helptext.append("[%cp%c]piddle when you drank too much" % (C.COL5, C.COLS))
-    helptext.append("[%ci%c]nfo screen of stats and quests" % (C.COL5, C.COLS))
+    helptext.append("\n[%cd%c]rink water" % (C.COL5, C.COLS))
+    helptext.append("[%ce%c]at food" % (C.COL5, C.COLS))
+    helptext.append("[%cp%c]piddle to find reflief" % (C.COL5, C.COLS))
+    helptext.append("[%ci%c]nfo screen: stats and quests" % (C.COL5, C.COLS))
 
-    helptext.append("These keypad keys also map to actions, this mnemonic to remember:")
-    helptext.append("%cD%crink and %cD%civide\n%cE%cat and %cM%cultiply\n%cP%ciddle to %cS%cubtract ;)" % (C.COL1, C.COLS, C.COL1, C.COLS
+    helptext.append("\nThe keypad also map to actions, use this mnemonic to remember:")
+    helptext.append("\n%cD%crink and %cD%civide\n%cE%cat and %cM%cultiply\n%cP%ciddling %cS%coothes ;)" % (C.COL1, C.COLS, C.COL1, C.COLS
                 , C.COL2, C.COLS, C.COL2, C.COLS
                 , C.COL3, C.COLS, C.COL3, C.COLS))
 
-    helptext.append("Now go find that %cPuppy!%c" % (C.COL5, C.COLS))
+    helptext.append("\nNow go find that %cPuppy!%c" % (C.COL5, C.COLS))
+    helptext.append("\nWOOF!")
 
     libtcod.console_print_rect(0, 4, 10, C.MAP_WIDTH - 4, C.MAP_HEIGHT - 2,
-                        "\n\n".join(helptext))
+                        "\n".join(helptext))
     libtcod.console_flush()
     
     # wait for key press, ignore key-ups
@@ -344,11 +345,15 @@ def draw_messages():
     """
     messages = list(player.messages)[-5:]
     if messages:
+        # move messages with our player
+        y = player.y - 4
+        if y < C.MESSAGES_TOP:
+            y = C.MESSAGES_TOP
         libtcod.console_print_ex(0
-                                ,C.MAP_WIDTH
-                                ,C.MESSAGES_TOP
-                                ,libtcod.BKGND_NONE, libtcod.RIGHT
+                                ,C.MAP_WIDTH / 2, y
+                                ,libtcod.BKGND_NONE, libtcod.CENTER
                                 ,"\n".join(messages))
+    
 
 def warp_level():
     """
@@ -415,8 +420,8 @@ if __name__ == "__main__":
             draw_map()
             draw_player_stats()
             draw_objects()
-            draw_messages()
             blit_playtime()
+            draw_messages()
         elif state == C.STATE_DIALOGUE:
             blit_dialogues()
             if len(player.dialogues) > 0:
@@ -429,6 +434,7 @@ if __name__ == "__main__":
             blit_help()
         if gamestate.is_empty():
             break
+        libtcod.console_flush()
         cmd = kb_handler.handle_stroke(gamestate.peek())
         if cmd:
             exec cmd
