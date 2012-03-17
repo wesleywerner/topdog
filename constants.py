@@ -29,7 +29,7 @@ STATE_STATS = 0x4
 STATE_HELP = 0x5
 
 # player tweaks
-FOV_RADIUS_DEFAULT = 12         # default player fov. gets reduces under shrubbery.
+FOV_RADIUS_DEFAULT = 6         # default player fov. gets reduces under shrubbery.
 PLAYER_THIRST_INDEX = 400       # amount of moves before we get thirsty
 PLAYER_PIDDLE_INDEX = 3         # amount ofquesnches before we need to piddle
 PLAYER_WEAK_HP_DICE = 12        # if weak, the dice roll that reduces hp each move

@@ -16,8 +16,8 @@ CHAR_GRAVEL = ":"
 CHAR_STONE = chr(176)
 CHAR_WATER = "~"
 CHAR_BRICK = chr(177)
-CHAR_TOY = chr(3)
-CHAR_FOOD = chr(4)
+CHAR_TOY = chr(13)
+CHAR_FOOD = chr(3)
 CHAR_TREE = chr(6)
 CHAR_BUSH = chr(5)
 CHAR_FLOWERS = chr(15)
@@ -48,7 +48,7 @@ def get_bush():
     fol.name = random.choice(names)
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
-    fol.fov_limit = random.randint(2, 4)
+    fol.fov_limit = random.randint(1, 3)
     return fol
     
 def get_flower():
@@ -60,7 +60,7 @@ def get_flower():
     fol.name = random.choice(names)
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
-    fol.fov_limit = random.randint(2, 4)
+    fol.fov_limit = random.randint(1, 3)
     return fol
 
 def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
@@ -200,7 +200,7 @@ def get_food():
     eat = cls.ItemBase()
     eat.name = random.choice(names)
     eat.char = CHAR_FOOD
-    eat.fgcolor = libtcod.dark_orange
+    eat.fgcolor = libtcod.red
     eat.carryable = True
     eat.edible = True
     return eat
@@ -284,7 +284,7 @@ def get_food():
 
 def link_quest(game_map, game_objects 
             , title, quest_master, quest_item
-            , quest_npc=None, success_message=None, success_command=None
+            , quest_npc=None, success_dialogue=None, success_command=None
             ):
     """
         Link the given items together into a quest.
@@ -317,9 +317,12 @@ def link_quest(game_map, game_objects
     title = title.replace("%i", quest_item.name)
     ai_master.title = title
     ai_master.owner = quest_master
-    success_message = success_message.replace("%b", quest_master.name)
-    success_message = success_message.replace("%i", quest_item.name)
-    ai_master.success_message = success_message
+    # replace dialogue placeholders
+    success_dialogue = [e.replace("%b", quest_master.name).replace("%i", quest_item.name) \
+        for e in success_dialogue]
+#    success_dialogue = success_dialogue.replace("%b", quest_master.name)
+#    success_dialogue = success_dialogue.replace("%i", quest_item.name)
+    ai_master.success_dialogue = success_dialogue
 
 
 def add_random_quest(game_map, game_objects):
@@ -367,7 +370,7 @@ def add_random_quest(game_map, game_objects):
     # glue the quest together
     link_quest(game_map, game_objects 
             , title, quest_master, quest_item
-            , quest_npc, success_message=success)
+            , quest_npc, success_dialogue=[success])
 
 #=================================================================[[ NPC's ]]
 
@@ -470,9 +473,8 @@ def spawn_level_quests(game_map, game_objects, game_level):
     """
         create quests based on the level.
     """
-#    if game_level == 1:
-#    #TODO
-    add_random_quest(game_map, game_objects)
+    if game_level == 2:
+        add_random_quest(game_map, game_objects)
 
 
 def spawn_level_storyline(game_map, game_objects, player):
@@ -480,11 +482,48 @@ def spawn_level_storyline(game_map, game_objects, player):
         add some NPC's and dialogue for our doggy tail.
     """
     if player.level == 1:
-        npc = get_random_npc(npc_char="c", attack_rating=None)
-        npc.see_message = "the %s waves to you closer..." % (npc.name)
-        npc.action_ai.dialogue_text = "Hello there doggy guy"
+
+        npc = get_random_npc(npc_char="b", attack_rating=None)
+        npc.name = "Shona the bird"
+        npc.picture = "icon-bird.png"
+        npc.see_message = "Shona (b) chirps you closer..."
+        npc.action_ai.dialogue_text = [
+            "Now go find the %cJulie the mouse%c to learn about quests... Good luck!\n^_^" % (C.COL2, C.COLS)
+            ,"If you get thirsty running around, stand on some water to [d]rink (keypad DIV).\n\nIf you get hungry, pick up some food and [e]at it (keypad MUL).\n\nIf you have to [p]iddle (keypad SUB), stand next to something interesting for extra points ;)"
+            ,"Hi Top Dog! I'm here to help you start...\n\nWatch your health hearts, and messages, at the top of the screen.\n\n Walk over items to pick them up in your mouth.\n\nYou can only carry one item at a time.\n\nWalk into other animals to talk, or fight, depending if they are hostile."
+        ]
+
+        npc_b = get_random_npc(npc_char="m", attack_rating=None)
+        npc_b.name = "Julie the mouse"
+        npc_b.picture = "icon-mouse.png"
+        npc_b.action_ai.dialogue_text = [
+        "The monkeys stole my piece of cheese just now!\n Can you go get it back for me, pleeeeeease? :)"
+        ,"Hi Top Dog, I am Julie the mouse. Can you help me?"
+        ]
+
+        quest_item = get_food()
+        quest_item.name = "Julie's cheese"
+        quest_item.edible = False
+        
+        npc_a = get_random_npc(npc_char="j", attack_rating=1)
+        npc_a.move_ai.behaviour = cls.MoveAI.NEUTRAL
+        npc_a.action_ai.dialogue_text = [
+        "You want %c*this*%c cheese? Ha! Not without a fight!" % (C.COL5, C.COLS)]
+        
+        dlg_b = [
+            "I just got a birdy-gram...\n\nThe dog next door, Girly, is asking for you.\nIt is %c*important*%c.\n\nJust Crawl into the hole in the fence, and go find her." % (C.COL2, C.COLS)
+            ,"Oh thank you Top Dog! Those monkeys are always trouble...\n\nOh, by the way..."
+        ]
+        
+        link_quest(game_map, game_objects 
+            , "get Julie's cheese from monkey", quest_master=npc_b, quest_item=quest_item
+            , quest_npc=npc_a, success_dialogue=dlg_b, success_command=None
+            )
+        
         place_on_map(game_map, game_objects, npc, near_xy=(player.x, player.y))
-        game_objects.append(npc)
+        place_on_map(game_map, game_objects, npc_b)
+        place_on_map(game_map, game_objects, npc_a)
+        game_objects.extend((npc, npc_b, npc_a))
 
 #===================================================================[[ Map ]]
 

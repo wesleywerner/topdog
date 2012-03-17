@@ -56,22 +56,29 @@ class ActionAI(object):
         if isinstance(target, Player):
             player = target
             if self.dialogue_text:
-                # show dialogue to the player
-                if type(self.dialogue_text) is list:
-                    # this is a list of dialogues, talk our ear off
-                    player.add_dialogue(Dialogue(npc.name
-                                            , self.dialogue_text.pop()))
-                    if len(self.dialogue_text) == 0:
+                # show dialogue to the player, and if we have a quest item,
+                # only if player is seeking it.
+                show_dialogue = True
+                if npc.quest_ai:
+                    if npc.quest_ai.item:
+                        if not player.seeks_quest(npc.quest_ai.quest_id):
+                            show_dialogue = False
+                if show_dialogue:
+                    if type(self.dialogue_text) is list:
+                        # this is a list of dialogues, talk our ear off
+                        while len(self.dialogue_text) > 0:
+                            player.add_dialogue(Dialogue(npc.name, npc.picture
+                                                    , self.dialogue_text.pop()))
                         self.dialogue_text = None
-                else:
-                    # a one-liner dialogue
-                    player.add_dialogue(Dialogue(npc.name, npc.picture
-                                            , self.dialogue_text))
+                    else:
+                        # a one-liner dialogue
+                        player.add_dialogue(Dialogue(npc.name, npc.picture
+                                                , self.dialogue_text))
                     self.dialogue_text = None
             if self.hostile:
                 # enact some hostility
                 player.take_damage(npc, self.attack_rating)
-                player.msg("%s %c*bites*%c!" % (npc.name, C.COL1, C.COLS))
+                player.msg("%s %c*bites*%c you!" % (npc.name, C.COL1, C.COLS))
             if npc.see_message:
                 # now that we interacted, get rid of our see_message
                 npc.see_message = None
@@ -92,15 +99,15 @@ class ActionManual(ActionAI):
                 if target.action_ai.hostile:
                     if player.weak:
                         # move away from the hostile
-                        player.msg("You can't *bite*, you are %cweak%c!" % \
-                                    (C.COL1, C.COLS))
+                        player.msg("%cYou are too weak to bite%c" % \
+                                    (C.COL2, C.COLS))
                         return False
                     else:
                         target.take_damage(player, self.attack_rating)
-                        player.msg("you *bite* the %s" % \
-                                 (target.name))
+                        player.msg("you %c*bite*%c the %s" % \
+                                 (C.COL1, C.COLS, target.name))
                 else:
-                    player.msg("*sniffs* the %s" % (target.name))
+                    player.msg("*sniffs* %s" % (target.name))
             # let them have a go
             if target.action_ai:
                 target.action_ai.interact_with(player, game_objects)
@@ -109,7 +116,7 @@ class ActionManual(ActionAI):
         else:
             # action on inanimates, these are not tiles
             # but items in game_objects that are not AnimalBase
-            player.msg("*sniffs* the %s" % (target.name))
+            player.msg("*sniffs* %s" % (target.name))
             
 
 class MoveAI(object):
@@ -194,7 +201,7 @@ class QuestAI(object):
         self.owner = None
         self.item = None
         self.title = None
-        self.success_message = None
+        self.success_dialogue = None
         self.success_command = None
     
     def end_quest(self):
@@ -211,7 +218,7 @@ class QuestAI(object):
                     if npc.move_ai.behaviour == MoveAI.SKITTISH:
                         # only drop item if the player has this as a quest!
                         if player.seeks_quest(self.quest_id):
-                            target.msg("%s %c*drops*%c an item" % (npc.name, C.COL3, C.COLS))
+                            target.msg("%s %c*drops*%c something" % (npc.name, C.COL3, C.COLS))
                             self.item.x = npc.x
                             self.item.y = npc.y
                             game_objects.append(self.item)
@@ -237,8 +244,9 @@ class QuestAI(object):
                     player.addscore(10)
                     player.remove_inventory()
                     player.remove_quest(self.quest_id)
-                    player.add_dialogue(Dialogue(npc.name, npc.picture
-                                    , self.success_message))                    
+                    while len(self.success_dialogue) > 0:
+                        player.add_dialogue(Dialogue(npc.name, npc.picture
+                                    , self.success_dialogue.pop()))
                     # no more quest for this npc
                     self.end_quest()
                 elif not player.seeks_quest(self.quest_id):
@@ -396,11 +404,10 @@ class Player(AnimalBase):
                 if self.hp > 100:
                     self.hp = 100
                 self.carrying = None
+                self.msg(random.choice(("Yum!", "*munch munch*", "*gulp*", "*chomp chomp*")))
                 if self.weak:
                     self.weak = False
-                    self.msg("You feel better.")
-                else:
-                    self.msg("Yum!")
+                    self.msg("You don't feel weak anymore.")
             else:
                 self.msg("You chew on the %s" % (self.carrying.name))
 
@@ -415,7 +422,7 @@ class Player(AnimalBase):
         # set new inventory
         self.carrying = item
         self.carrying.x = 0
-        self.msg("got a %s" % (item.name))
+#        self.msg("got a %s" % (item.name))
     
     def give_quest(self, quest):
         self.quests.append(quest)
@@ -496,7 +503,7 @@ class Player(AnimalBase):
             self.y = 1
         if self.level > 1:
             self.messages = [
-                        "You %center%c the yard..." % 
+                        "You %cemerge%c from the other yard..." % 
                         (C.COL4, C.COLS)]
 
     def msg(self, message, allow_duplicates=True):
@@ -509,7 +516,7 @@ class Player(AnimalBase):
             else:
                 if self.messages.count(message) == 0:
                     self.messages.append(message)
-        self.messages = self.messages[-5:]
+        self.messages = self.messages[-4:]
         self.message_trim_idx = 1
     
     def trim_message(self):

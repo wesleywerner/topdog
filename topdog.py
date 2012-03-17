@@ -48,7 +48,7 @@ def setup_keyhandler():
             ,libtcod.KEY_DOWN: "game_turn(0, 1)"
             ,libtcod.KEY_LEFT: "game_turn(-1, 0)"
             ,libtcod.KEY_RIGHT: "game_turn(1, 0)"
-
+            ,libtcod.KEY_F11: "player.wizard = True"
             ,"d": "player.quench_thirst(game_map)"
             ,libtcod.KEY_KPDIV: "player.quench_thirst(game_map)"
             ,"e": "player.eat_item()"
@@ -211,7 +211,7 @@ def blit_help():
                             
 
 #    helptext = ["%c%s%s" % (C.COL5, C.COLS, C.VERSION)]
-    helptext = ["The %cPuppy%c has been kidnapped by the %cFat Cat Mafioso%c. You travel from yard to yard, searching for the crafty Cats..." % (C.COL4, C.COLS, C.COL1, C.COLS)]
+    helptext = ["The %cPuppy%c has been kidnapped by the %cFat Cat Mafioso%c. You travel from yard to yard, searching for the crafty Cats..99." % (C.COL4, C.COLS, C.COL1, C.COLS)]
     
     helptext.append("Walk into other animals to interact with them.")
     helptext.append("\n%cKEYPAD%c" % (C.COL5, C.COLS))
@@ -250,7 +250,7 @@ def draw_map():
     for y in range(C.MAP_HEIGHT - 0):
         for x in range(C.MAP_WIDTH - 0):
             tile = game_map[x][y]
-            if libtcod.map_is_in_fov(fov_map, x, y) or player.wizard:
+            if player.wizard or libtcod.map_is_in_fov(fov_map, x, y):
                 tile.seen = True
                 libtcod.console_put_char_ex(canvas, x, y, 
                                             tile.char, tile.fgcolor, tile.bgcolor)
@@ -263,12 +263,12 @@ def draw_objects():
         Place all map objects on the canvas.
     """
     for obj in game_objects:
-        if not obj is player.carrying:
-            if libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
+        if obj.x > 0:
+            if player.wizard or libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
                 if not obj.seen:
 #                    obj.seen = True
                     if isinstance(obj, cls.AnimalBase):
-                        player.msg("You see a %c%s%c" % \
+                        player.msg("You see %c%s%c" % \
                                         (C.COL4, obj.name, C.COLS)
                                         , allow_duplicates=False)
                         if obj.see_message:
@@ -276,7 +276,7 @@ def draw_objects():
                                     (C.COL2, obj.see_message, C.COLS)
                                     ,allow_duplicates=False)
                     else:
-                        player.msg("You see a %c%s%c" % \
+                        player.msg("You see %c%s%c" % \
                                             (C.COL3, obj.name, C.COLS)
                                             , allow_duplicates=False)
                 libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
@@ -342,7 +342,7 @@ def draw_messages():
     """
         Display the last x messages in-game.
     """
-    messages = list(player.messages)[-4:]
+    messages = list(player.messages)[-5:]
     if messages:
         libtcod.console_print_ex(0
                                 ,C.MAP_WIDTH
@@ -367,7 +367,8 @@ def warp_level():
     game_map, fov_map, path_map = factory.generate_map(maps_avail)
     # add player, NPC's, foliage, food
     game_objects = [player]
-    factory.place_on_map(game_map, game_objects, player)
+    if player.level == 1:
+        factory.place_on_map(game_map, game_objects, player)
     # compute field of vision
     libtcod.map_compute_fov(fov_map, player.x, player.y
                             ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)

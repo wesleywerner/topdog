@@ -25,19 +25,31 @@ SUB piddle
 
 quickstart characters
 + a FRIENDLY bird called Shona starts near you, she calls you closer and says:
-    "Hi Top Dog!\nI'm here to help you start playing..."
-    "Always watch your health hearts, and messages, at the top of the screen."
-    "Walk over items to pick them up in your mouth.\nYou can only carry one item at a time."
+    "Hi Top Dog!\nI'm here to help you start...\n\n watch your health hearts, and messages, at the top of the screen.\n\n Walk over items to pick them up in your mouth.\nYou can only carry one item at a time.\n\nWalk into other animals to talk, or fight, depending if they are hostile."
     "If you get thirsty running around, stand on some water to [d]rink (keypad DIV).\nIf you get hungry, pick up some food and [e]at it (keypad MUL).\nOnce you have to [p]iddle, stand next to something interesting for extra points ;)"
-    
+    "Now go find the mouse, to learn how to quests work... Good luck!\n^_^"
 
+the bird hands you a quest to find the mouse.
+
++ the mouse welcomes you:
+"Hi Top Dog, I am Julie the mouse. Can you help me?"
+"The monkeys stole my piece of cheese just now!\n Can you go get it back for me, pleeeeeease? :)"
+Julie's Cheese is not edible.
+
+mouse hands you a quest to recover cheese from monkey.
+the monkey is hostile, and wont let go without a fight.
+returning the cheese, Julie tells you more:
+
+"Oh thank you Top Dog! Those monkeys are always trouble...\n\nOh, by the way..."
+"I just got a birdy-gram the dog next door, Girly, is asking for you.\nIt is *important*.\nJust Crawl into the hole in the fence, and go find him."
 
 ## level 2 - the neighbours
 
-+ a friendly dog called Girly
-    "Hi Top Dog, we have a problem!"
-    "The parrot told me Puppy was stolen..."
-    "Go find the parrot,\nhe can tell you more."
++ a friendly dog named Girly
+    "Hi Top Dog, we have a problem, the \nPuppy was stolen!"
+    "I saw some really Fat Cats hanging around yesterday... mischievious they are, I bet they are behind this."
+    "That's all I know. You must find the Puppy, please help us!"
+
 
 
 ## level ?
@@ -50,6 +62,7 @@ meet a fat cat who dont like the mafioso
 - holding an inventory item while a NPC gives you a quest item
     will drop the quest item onto the tile you are standing on.
     move off and on again to switch you inventory with the quest item.
+- npc's and objects draw together, sometimes a npc goes behind an item.
 
 ========================================================[[ Tweaks ]]
 player.eat_item() adjusts hp
