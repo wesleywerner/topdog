@@ -145,7 +145,7 @@ def blit_player_stats():
         ,"%cinventory%c:" % (C.COL5, C.COLS)
         )
     values = [
-        "%cTop Dog Stats%c" % (C.COL5, C.COLS)
+        "%cTop Dog%c" % (C.COL5, C.COLS)
         ,""
         ,str(player.level)
         ,str(player.score)
@@ -165,7 +165,7 @@ def blit_player_stats():
     # quests
     values = []
     if len(player.quests) > 0:
-        values = ["%cQUESTS%c" % (C.COL5, C.COLS)]
+        values = ["%cQUESTS%c\n" % (C.COL5, C.COLS)]
     for q in player.quests:
         values.append("+ %s" % (q.title))
     
