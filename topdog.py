@@ -346,9 +346,9 @@ def draw_messages():
     messages = list(player.messages)[-5:]
     if messages:
         # move messages with our player
-        y = player.y - 4
-        if y < C.MESSAGES_TOP:
-            y = C.MESSAGES_TOP
+        y = player.y - 3
+        if y <= 20:
+            y = player.y + 16
         libtcod.console_print_ex(0
                                 ,C.MAP_WIDTH / 2, y
                                 ,libtcod.BKGND_NONE, libtcod.CENTER
