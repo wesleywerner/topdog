@@ -22,7 +22,14 @@ def setup_keyhandler():
             ,libtcod.KEY_ESCAPE: "player.dialogues.pop()"
             ,libtcod.KEY_KPENTER: "player.dialogues.pop()"
             })
-    handler.add_actions(C.STATE_STATS or C.STATE_HELP,
+    handler.add_actions(C.STATE_STATS,
+            {
+            libtcod.KEY_SPACE: "gamestate.pop()"
+            ,libtcod.KEY_ESCAPE: "gamestate.pop()"
+            ,libtcod.KEY_KPENTER: "gamestate.pop()"
+            ,libtcod.KEY_KP5: "gamestate.pop()"
+            })
+    handler.add_actions(C.STATE_HELP,
             {
             libtcod.KEY_SPACE: "gamestate.pop()"
             ,libtcod.KEY_ESCAPE: "gamestate.pop()"
@@ -49,6 +56,7 @@ def setup_keyhandler():
             ,libtcod.KEY_LEFT: "game_turn(-1, 0)"
             ,libtcod.KEY_RIGHT: "game_turn(1, 0)"
             ,libtcod.KEY_F11: "player.wizard = True"
+            ,libtcod.KEY_F12: "if player.wizard: warp_level()"
             ,"d": "player.quench_thirst(game_map)"
             ,libtcod.KEY_KPDIV: "player.quench_thirst(game_map)"
             ,"e": "player.eat_item()"
@@ -56,7 +64,7 @@ def setup_keyhandler():
             ,"p": "player.piddle(game_map)"
             ,libtcod.KEY_KPSUB: "player.piddle(game_map)"
             ,"i": "gamestate.push(C.STATE_STATS)"
-            ,"?": "blit_help()"
+            ,"?": "gamestate.push(C.STATE_HELP)"
             })
     return handler
 
@@ -193,7 +201,6 @@ def blit_player_stats():
         libtcod.console_put_char_ex(
                         0, heart + C.STAT_HEART_LEFT, C.STAT_HEART_TOP
                         ,chr(3), heart_colors[heart], None)
-                        
 
 
 
@@ -235,13 +242,16 @@ diagonals are the dog's bark. Keypad 5 shows your stats, as does [i]nfo. The %cA
 
     libtcod.console_print_rect(0, 4, 10, C.MAP_WIDTH - 4, C.MAP_HEIGHT - 2,
                         "\n".join(helptext))
-    libtcod.console_flush()
-    
-    # wait for key press, ignore key-ups
-    while True:
-        key = libtcod.console_wait_for_keypress(True)
-        if key.pressed:
-            break
+#    libtcod.console_flush()
+#    
+#    # wait for key press, ignore key-ups
+#    while True:
+#        key = libtcod.console_wait_for_keypress(True)
+#        if key.pressed:
+#            break
+
+def blit_victory():
+    pass
 
 
 def draw_map():
@@ -365,26 +375,36 @@ def warp_level():
     global game_objects
     global player
     global maps_avail
-    
+
     #prepare ftl
     player.warp_prep()
-    # init new maps
-    game_map, fov_map, path_map = factory.generate_map(maps_avail)
-    # add player, NPC's, foliage, food
-    game_objects = [player]
-    # add level npcs, food, items
-    game_objects.extend(factory.spawn_level_objects(game_map, player.level))
-    # add level quests and story
-    factory.spawn_level_quests(game_map, game_objects, player.level)
-    factory.spawn_level_storyline(game_map, game_objects, player)
+    player.wizard = False
+    if player.level == 1:
+        player.msg("Press %c'?'%c for help" % (C.COL1, C.COLS))
+    if player.level == 9:
+        player.add_dialogue(cls.Dialogue("Puppy", "icon-puppy.png", "Thank you, " \
+        "Top Dog for rescuing me!\n\nI'm sorry our adventure ends here, " \
+        "but look forward to the future when we can fight the Fat Cat Mafioso!"))
+        gamestate.pop()
+        gamestate.push(C.STATE_STATS)
+        gamestate.push(C.STATE_DIALOGUE)
+    else:
+        # init new maps
+        game_map, fov_map, path_map = factory.generate_map(maps_avail)
+        # add player, NPC's, foliage, food
+        game_objects = [player]
+        # add level npcs, food, items
+        game_objects.extend(factory.spawn_level_objects(game_map, player.level))
+        # add level quests and story
+        factory.spawn_level_quests(game_map, game_objects, player.level)
+        factory.spawn_level_storyline(game_map, game_objects, player)
 
-    # compute field of vision
-    libtcod.map_compute_fov(fov_map, player.x, player.y
-                            ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
-    # carry our inventory item into this new level
-    if player.carrying:
-        game_objects.append(player.carrying)
-
+        # compute field of vision
+        libtcod.map_compute_fov(fov_map, player.x, player.y
+                                ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
+        # carry our inventory item into this new level
+        if player.carrying:
+            game_objects.append(player.carrying)
 
 
 if __name__ == "__main__":
@@ -432,6 +452,8 @@ if __name__ == "__main__":
             blit_player_stats()
         elif state == C.STATE_HELP:
             blit_help()
+        elif state == C.STATE_VICTORY:
+            blit_victory()
         if gamestate.is_empty():
             break
         libtcod.console_flush()

@@ -385,7 +385,7 @@ def add_random_quest(game_map, game_objects):
 
 #=================================================================[[ NPC's ]]
 
-def get_random_npc(npc_char=None, attack_rating=None):
+def get_random_npc(npc_char=None, attack_rating=None, dialogue_text=None):
     """
         get a randomly generated npc.
     """
@@ -395,7 +395,6 @@ def get_random_npc(npc_char=None, attack_rating=None):
         ,"d": "dog"
         ,"D": "big dog"
         ,"c": "cat"
-        ,"C": "Fat Cat"
         ,"s": "squirrel"
         ,"b": "bird"
         ,"p": "parrot"
@@ -405,11 +404,11 @@ def get_random_npc(npc_char=None, attack_rating=None):
     # NPC
     npc = cls.AnimalBase()
     npc.blocking = True
-    npc.fgcolor = libtcod.cyan
     npc.char = npc_char
+    npc.fgcolor = libtcod.azure
     npc.name = dna_bank[npc_char]
     npc.move_step = random.randint(1, 3)
-    npc.dialogue_text = "hello world"
+    npc.dialogue_text = dialogue_text
     # move AI
     mov = cls.MoveAI(npc)
     npc.move_ai = mov
@@ -480,12 +479,74 @@ def spawn_level_objects(game_map, game_level):
     return objects
 
 
+def get_random_dialogue():
+    dlgs = ("Nice day today, isn't it?'")
+    return random.choice(dlgs)
+    
+
+def add_random_npc(game_map, game_objects, npc_char=None, attack_rating=None, dialogue_text=None):
+    npc = get_random_npc()
+    npc.action_ai.dialogue_text = dialogue_text
+    place_on_map(game_map, game_objects, npc)
+    game_objects.append(npc)
+    
+
 def spawn_level_quests(game_map, game_objects, game_level):
     """
         create quests based on the level.
     """
     if game_level == 2:
         add_random_quest(game_map, game_objects)
+        add_random_npc(game_map, game_objects
+                , npc_char="s", attack_rating=None
+                , dialogue_text="Ye, I know of the Fat Cats... " \
+                "the Mafioso they call themselves." \
+                "I'd watch your back if I were you, those guys can scratch!.")
+        
+    elif game_level == 3:
+        add_random_quest(game_map, game_objects)
+        add_random_npc(game_map, game_objects, npc_char=None
+                , attack_rating=None, dialogue_text=get_random_dialogue())
+        add_random_npc(game_map, game_objects
+                , npc_char=None, attack_rating=None
+                , dialogue_text="Ever had stitches in your snout?\n\n" \
+                "I had 3 stiches where " \
+                "the Mafioso scratched me. I refused to give them my dinner.")
+
+    elif game_level == 4:
+        add_random_quest(game_map, game_objects)
+        add_random_npc(game_map, game_objects, npc_char=None
+                , attack_rating=None, dialogue_text=get_random_dialogue())
+        add_random_npc(game_map, game_objects, npc_char=None
+                , attack_rating=None, dialogue_text=get_random_dialogue())
+        
+    elif game_level == 5:
+        add_random_quest(game_map, game_objects)
+        add_random_quest(game_map, game_objects)
+        add_random_npc(game_map, game_objects, npc_char=None
+                , attack_rating=None, dialogue_text=get_random_dialogue())
+        
+    elif game_level == 6:
+        add_random_quest(game_map, game_objects)
+        add_random_quest(game_map, game_objects)
+        add_random_quest(game_map, game_objects)
+        add_random_npc(game_map, game_objects, npc_char=None
+                , attack_rating=None, dialogue_text=get_random_dialogue())
+        add_random_npc(game_map, game_objects, npc_char=None
+                , attack_rating=None, dialogue_text=get_random_dialogue())
+        
+    elif game_level == 7:
+        add_random_quest(game_map, game_objects)
+        add_random_quest(game_map, game_objects)
+        add_random_quest(game_map, game_objects)
+        add_random_npc(game_map, game_objects, npc_char=None
+                , attack_rating=None, dialogue_text=get_random_dialogue())
+        
+#    elif game_level == 8:
+#        
+#    elif game_level == 9:
+#        
+#    
 
 
 def spawn_level_storyline(game_map, game_objects, player):
@@ -499,16 +560,27 @@ def spawn_level_storyline(game_map, game_objects, player):
         npc.picture = "icon-bird.png"
         npc.see_message = "Shona (b) chirps you closer..."
         npc.action_ai.dialogue_text = [
-            "Go to the %cright%c, find %cJulie the mouse%c to learn about quests... Good luck!\n^_^" % (C.COL2, C.COLS, C.COL2, C.COLS)
-            ,"If you get thirsty running around, stand on some water to [d]rink (keypad DIV).\n\nIf you get hungry, pick up some food and [e]at it (keypad MUL).\n\nIf you have to [p]iddle (keypad SUB), stand next to something interesting for extra points ;)"
-            ,"Hi Top Dog! I'm here to help you start...\n\nWatch your health hearts, and messages, at the top of the screen.\n\n Walk over items to pick them up in your mouth.\n\nYou can only carry one item at a time.\n\nWalk into other animals to talk, or fight, depending if they are hostile."
+            "Go to the %cright%c, find %cJulie the mouse%c to learn about " \
+                "quests... Good luck!\n^_^" % (C.COL2, C.COLS, C.COL2, C.COLS)
+            ,"If you get thirsty running around, stand on some water to " \
+                "[d]rink (keypad DIV).\n\nIf you get hungry, pick up some " \
+                "food and [e]at it (keypad MUL).\n\nIf you have to [p]iddle" \
+                " (keypad SUB), stand next to something interesting for " \
+                "extra points ;)"
+            ,"Hi Top Dog! I'm here to help you start..." \
+            "\n\nWatch your health hearts, and messages, at the top of the screen." \
+            "\n\n Walk over items to pick them up in your mouth." \
+            "\n\nYou can only carry one item at a time.\n\nWalk into other" \
+            " animals to talk, or fight, depending if they are hostile."
         ]
 
         npc_b = get_random_npc(npc_char="m", attack_rating=None)
         npc_b.name = "Julie the mouse"
         npc_b.picture = "icon-mouse.png"
         npc_b.action_ai.dialogue_text = [
-        "The monkey stole my piece of cheese just now!\n Can you go get it back for me, pleeeeeease? :)\n\n The monkey ran down South, laughing like a maniac..."
+        "The monkey stole my piece of cheese just now!" \
+            "\n Can you go get it back for me, pleeeeeease? :)" \
+            "\n\n The monkey ran down South, laughing like a maniac..."
         ,"Hi Top Dog, I am Julie the mouse. Can you help me?"
         ]
 
@@ -522,8 +594,11 @@ def spawn_level_storyline(game_map, game_objects, player):
         "You want %c*this*%c cheese? Ha! Not without a fight!" % (C.COL5, C.COLS)]
         
         dlg_b = [
-            "I just got a birdy-gram...\n\nThe dog next door, Girly, is asking for you.\n\nIt is %c*important*%c.\n\nCrawl into the hole along the fence... go find her..." % (C.COL2, C.COLS)
-            ,"Oh thank you Top Dog! Those monkeys are always trouble...\n\nOh, by the way..."
+            "I just got a birdy-gram...\n\nThe dog next door, Girly, is" \
+                " asking for you.\n\nIt is %c*important*%c.\n\nCrawl into " \
+                "the hole along the fence... go find her..." % (C.COL2, C.COLS)
+            ,"Oh thank you Top Dog! Those monkeys are always trouble..." \
+                "\n\nOh, by the way..."
         ]
         
         link_quest(game_map, game_objects 
@@ -537,6 +612,204 @@ def spawn_level_storyline(game_map, game_objects, player):
         place_on_map(game_map, game_objects, npc_a, near_xy=(2, C.MAP_HEIGHT))
         game_objects.extend((npc, npc_b, npc_a))
 
+
+    elif player.level == 2:
+        
+        npc_a = get_random_npc(npc_char="d", attack_rating=None)
+        npc_a.name = "Girly the dog"
+        npc_a.picture = "icon-dog.png"
+        npc_a.action_ai.dialogue_text = [
+            "I don't know more, talk to other animals, they may know..."
+            ,"I saw some really Fat Cats hanging around yesterday... " \
+                "mischievious they are, I bet they are behind this.\n\n" \
+                "Please help us find Puppy! Who knows what they will do to her..."
+            ,"Hi Top Dog, Puppy was taken!"
+        ]
+        
+        # this quest will just give us a biscuit when we talk to Girly
+        q = cls.QuestAI()
+        q.owner = npc_a
+        q.item = get_food()
+        q.item.name = "Bone shaped Biscuit"
+        npc_a.quest_ai = q
+        # link the quest to the player. they will see it in their quest list
+        qdata = cls.QuestData(q.quest_id)
+        qdata.quest_id = q.quest_id
+        qdata.npc_name = npc_name = "Girly"
+        qdata.title = "Find Girly, she has *news*"
+        player.give_quest(qdata, silent=False)
+        player.msg("press keypad 5 or i to view)")
+        place_on_map(game_map, game_objects, npc_a)
+        game_objects.append(npc_a)
+        
+    elif player.level == 3:
+        npc_b = get_random_npc(npc_char="s", attack_rating=None)
+        npc_b.see_message = "The Squirrel forages for nuts"
+        npc_b.action_ai.dialogue_text = [
+            "Ye, I know of the Fat Cats... the Mafioso they call themselves." \
+                "I'd watch your back if I were you, those guys can scratch!."]
+        place_on_map(game_map, game_objects, npc_b)
+        game_objects.append(npc_b)
+        
+    elif player.level == 4:
+        npc_b = get_random_npc(npc_char=None, attack_rating=None)
+        npc_b.npc_char="C"
+        npc_b.name = "Fat Cat Charles"
+        npc_b.move_ai.behavior = cls.MoveAI.NEUTRAL
+        npc_b.picture = "icon-fat cat.png"
+        npc_b.action_ai.dialogue_text = [
+            "Find my nephew, Jinx, in the next yard. He can tell you how " \
+                "to find them..."
+            ,"I don't like them for taking Puppy, they chased me away when " \
+                "I tried to stop them."
+            ,"Yes I'm a Fat Cat Mafioso, we aren't all bad, just that..." \
+                "\n\nwell, a couple of the other Cats are naughty, like mischief too much."
+            ,"*hiss and sputters*\n\nHey hey take it easy, rover!"
+            ]
+        place_on_map(game_map, game_objects, npc_b)
+        game_objects.append(npc_b)
+        
+    elif player.level == 5:
+        npc_a = get_random_npc(npc_char="c", attack_rating=None)
+        npc_a.name = "Jinx the cat"
+        npc_a.picture = "icon-cat.png"
+        npc_a.action_ai.dialogue_text = [
+            "That should get their attention..."
+            ,"The Mafioso cannot be found, but if you get their attention, " \
+                "they will find you.\n\nHere, take this Jingly Ball lying " \
+                "here, take it next door and go brag to the Monkey " \
+                "how you took it from me..."
+            ,"My uncle Charlie sent you, huh? Well fine..." \
+                "\n\n*Jinx shoves a toy mouse to and fro*"]
+        place_on_map(game_map, game_objects, npc_a)
+        game_objects.append(npc_a)
+        
+        # spawn a jingly ball toy nearby
+        toy = get_toy()
+        toy.name = "Jinx's Jingly Ball"
+        place_on_map(game_map, game_objects, toy, near_xy=(npc_a.x, npc_a.y))
+        game_objects.append(toy)
+
+    elif player.level == 6:
+        npc_a = get_random_npc(npc_char="p", attack_rating=None)
+        npc_a.name = "Shorty the Parrot"
+        npc_a.picture = "icon-parrot.png"
+        npc_a.action_ai.dialogue_text = [
+            "*squawk* I've been keeping an eye on those Monkeys. *creeek*" \
+                " I don't trust them." \
+                "\n\nI bet they work with those Fat Cats, and they steal my seed!"
+            ]
+        place_on_map(game_map, game_objects, npc_a)
+        game_objects.append(npc_a)
+        
+        npc_b = get_random_npc(npc_char="m", attack_rating=None)
+        npc_b.name = "Crazy the Monkey"
+        npc_b.picture = "icon-monkey.png"
+        npc_b.action_ai.dialogue_text = [
+            "You're a pretty crafty hound, taking that cat's Jingly Ball.\n\n" \
+                "I have some friends who need animals like you.\n\n" \
+                "Let me go talk to some friends..."
+            ]
+        place_on_map(game_map, game_objects, npc_b)
+        game_objects.append(npc_b)
+
+    elif player.level == 7:
+        npc_b = get_random_npc(npc_char=None, attack_rating=None)
+        npc_b.char="C"
+        npc_b.name = "Fat Cat Tiny"
+        npc_b.move_ai.behavior = cls.MoveAI.NEUTRAL
+        npc_b.picture = "icon-fat cat.png"
+        npc_b.action_ai.dialogue_text = [
+            "We still like your style, come on next door, maybe you can help us..."
+            ,"Listen pal, it will take more than Jingly Balls to play with us, " \
+                "some advice: Stay clear of Jinx, or else..."
+            ,"*grimmaces* So you're the Jingly Ball con? *purrrs*"
+            ]
+        place_on_map(game_map, game_objects, npc_b)
+        game_objects.append(npc_b)
+        
+    elif player.level == 8:
+        npc_a = get_random_npc(npc_char="p", attack_rating=None)
+        npc_a.name = "Tweety the Parrot"
+        npc_a.picture = "icon-parrot.png"
+        npc_a.action_ai.dialogue_text = [
+            "*squawks* Oh you gave me a fright!\n\nI'm watching all those Fat Cats " \
+                "across the other side of the yard. I wonder what they are up to..."
+            ]
+        place_on_map(game_map, game_objects, npc_a, near_xy=(player.x, player.y))
+        game_objects.append(npc_a)
+        
+        # make a gang of Fat Cats. place a lead in front to meet you with dialogue.
+        # determine the angle relative to the player
+        gang_xy = None
+        opp_x = C.MAP_WIDTH - player.x
+#        opp_y = C.MAP_HEIGHT - player.y
+#        mid_x = C.MAP_WIDTH / 2
+        mid_y = C.MAP_HEIGHT / 2
+        gang_xy = (opp_x, mid_y)
+        lead_xy = None
+        if player.x < 5:
+            # place lead to the left of the gant
+            lead_xy = (gang_xy[0] - 5, gang_xy[1])
+        else:
+            # place lead to the right of the gant
+            lead_xy = (gang_xy[0] + 5, gang_xy[1])
+        
+        # make thee Fat Cats
+        for i in range(3):
+            npc_b = get_random_npc(npc_char=None, attack_rating=1)
+            npc_b.char="C"
+            npc_b.name = "Mafioso %s" % (i)
+            npc_b.action_ai.hostile = True
+            npc_b.move_ai.behavior = cls.MoveAI.HUNTING
+            place_on_map(game_map, game_objects, npc_b, near_xy=gang_xy)
+            game_objects.append(npc_b)
+        # and the lead
+        npc_c = get_random_npc(npc_char=None, attack_rating=1)
+        npc_c.char="C"
+        npc_c.name = "Mafioso Boss"
+        npc_c.action_ai.hostile = True
+        npc_c.move_ai.behavior = cls.MoveAI.HUNTING
+        npc_c.picture = "icon-fat cat.png"
+        npc_c.action_ai.dialogue_text = [
+            "In fact, I setup this 'meeting' to trick you. If you want this Puppy " \
+                "you have to go through US first!"
+            ,"We hear you are looking for this Puppy. You probably thought we want " \
+                "your help...."
+        ]
+        place_on_map(game_map, game_objects, npc_c, near_xy=lead_xy)
+        game_objects.append(npc_c)
+            
+        # tutu the hostage bird
+        npc_d = get_random_npc(npc_char="b", attack_rating=None)
+        npc_d.name = "Tutu the bird"
+        npc_d.picture = "icon-bird.png"
+        npc_d.action_ai.dialogue_text = [
+            "They keep the Puppy in the next yard, go rescue him, quickly!"
+            ,"Thank you for chasing them away! I thought they were going to eat me alive!"
+            ]
+        place_on_map(game_map, game_objects, npc_d, near_xy=gang_xy)
+        game_objects.append(npc_d)
+
+    elif player.level == 9:
+        # carryable puppy npc
+        npc_a = get_random_npc(npc_char=None, attack_rating=None)
+        npc_a.char = "P"
+        npc_a.name = "Puppy"
+        npc_a.tag = "puppy"
+        npc_a.picture = "icon-puppy.png"
+        npc_a.move_ai.behavior = cls.MoveAI.NEUTRAL
+        npc_a.move_step = 1        
+        npc_a.action_ai.dialogue_text = [
+            "We better go, before they return..."
+            ,"Top Dog! I am so glad to see you!\n\nThose Fat Cats are nasty, " \
+                "but I bit a couple of them..."
+            ]
+        place_on_map(game_map, game_objects, npc_a, near_xy=None)
+        game_objects.append(npc_a)
+
+        
+    
 #===================================================================[[ Map ]]
 
 

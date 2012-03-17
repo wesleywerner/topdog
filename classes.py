@@ -36,6 +36,7 @@ class ItemBase(object):
         self.fov_limit = None
         self.message = None
         self.quest_id = None
+        self.tag = None
     
     def isblank(self):
         return not self.blocking and not self.drinkable
@@ -82,6 +83,9 @@ class ActionAI(object):
             if npc.see_message:
                 # now that we interacted, get rid of our see_message
                 npc.see_message = None
+            if npc.tag:
+                if npc.tag == "puppy":
+                    npc.move_ai.behaviour = MoveAI.FRIENDLY
 
 
 class ActionManual(ActionAI):
@@ -257,7 +261,7 @@ class QuestData(object):
     """
         quest data conainer kept by player.quests[]
     """
-    def __init__(self, quest_id, npc_name, title):
+    def __init__(self, quest_id, npc_name=None, title=None):
         self.quest_id = quest_id
         self.npc_name = npc_name
         self.title = title    
@@ -288,6 +292,7 @@ class AnimalBase(object):
         self.quest = None
         self.flying = False
         self.picture = None
+        self.tag = None     #HACK: last minute, to check if we exit the level with puppy :p
 
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
@@ -424,9 +429,10 @@ class Player(AnimalBase):
         self.carrying.x = 0
 #        self.msg("got a %s" % (item.name))
     
-    def give_quest(self, quest):
+    def give_quest(self, quest, silent=False):
         self.quests.append(quest)
-        self.msg("*%s gave you a %cquest%c" % (quest.npc_name, C.COL2, C.COLS))
+        if not silent:
+            self.msg("%s gave you a %cquest%c" % (quest.npc_name, C.COL2, C.COLS))
     
     def seeks_quest(self, quest_id):
         """ return if the player is seeking quest_id item """

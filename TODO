@@ -6,7 +6,9 @@
 
 ===================================================================[[ POLISH ]]
 
-fix: quest thankyou message npc name display bug
+lighten level preogression, around 8 you take too much damage
+
+fix: quest thankyou message npc name display bug (untracked)
 + intro screen using libtcod section 3.4
 + more toy names, bush names, tree names
 + colorized words. you enter the jones's yard. you smell baked muffins.
@@ -46,10 +48,9 @@ returning the cheese, Julie tells you more:
 ## level 2 - the neighbours
 
 + a friendly dog named Girly
-    "Hi Top Dog, we have a problem, the \nPuppy was stolen!"
-    "I saw some really Fat Cats hanging around yesterday... mischievious they are, I bet they are behind this."
-    "That's all I know. You must find the Puppy, please help us!"
-
+    "Hi Top Dog, Puppy was taken!"
+    "I saw some really Fat Cats hanging around yesterday... mischievious they are, I bet they are behind this. Please help us find Puppy! Who knows what they will do to her..."
+"I don't know more, talk to other animals, they may know..."
 
 
 ## level ?
