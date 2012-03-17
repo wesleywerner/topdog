@@ -499,7 +499,7 @@ def spawn_level_storyline(game_map, game_objects, player):
         npc.picture = "icon-bird.png"
         npc.see_message = "Shona (b) chirps you closer..."
         npc.action_ai.dialogue_text = [
-            "Now go find the %cJulie the mouse%c to learn about quests... Good luck!\n^_^" % (C.COL2, C.COLS)
+            "Go to the %cright%c, find %cJulie the mouse%c to learn about quests... Good luck!\n^_^" % (C.COL2, C.COLS, C.COL2, C.COLS)
             ,"If you get thirsty running around, stand on some water to [d]rink (keypad DIV).\n\nIf you get hungry, pick up some food and [e]at it (keypad MUL).\n\nIf you have to [p]iddle (keypad SUB), stand next to something interesting for extra points ;)"
             ,"Hi Top Dog! I'm here to help you start...\n\nWatch your health hearts, and messages, at the top of the screen.\n\n Walk over items to pick them up in your mouth.\n\nYou can only carry one item at a time.\n\nWalk into other animals to talk, or fight, depending if they are hostile."
         ]
@@ -508,7 +508,7 @@ def spawn_level_storyline(game_map, game_objects, player):
         npc_b.name = "Julie the mouse"
         npc_b.picture = "icon-mouse.png"
         npc_b.action_ai.dialogue_text = [
-        "The monkeys stole my piece of cheese just now!\n Can you go get it back for me, pleeeeeease? :)\n\n The monkey ran down south, laughing like a maniac..."
+        "The monkey stole my piece of cheese just now!\n Can you go get it back for me, pleeeeeease? :)\n\n The monkey ran down South, laughing like a maniac..."
         ,"Hi Top Dog, I am Julie the mouse. Can you help me?"
         ]
 
@@ -522,7 +522,7 @@ def spawn_level_storyline(game_map, game_objects, player):
         "You want %c*this*%c cheese? Ha! Not without a fight!" % (C.COL5, C.COLS)]
         
         dlg_b = [
-            "I just got a birdy-gram...\n\nThe dog next door, Girly, is asking for you.\nIt is %c*important*%c.\n\nJust Crawl into the hole in the fence, and go find her." % (C.COL2, C.COLS)
+            "I just got a birdy-gram...\n\nThe dog next door, Girly, is asking for you.\n\nIt is %c*important*%c.\n\nCrawl into the hole along the fence... go find her..." % (C.COL2, C.COLS)
             ,"Oh thank you Top Dog! Those monkeys are always trouble...\n\nOh, by the way..."
         ]
         

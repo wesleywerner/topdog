@@ -409,7 +409,7 @@ class Player(AnimalBase):
                     self.weak = False
                     self.msg("You don't feel weak anymore.")
             else:
-                self.msg("You chew on the %s" % (self.carrying.name))
+                self.msg("You chew on %s" % (self.carrying.name))
 
     def give_item(self, item):
         """
@@ -426,7 +426,7 @@ class Player(AnimalBase):
     
     def give_quest(self, quest):
         self.quests.append(quest)
-        self.msg("*%s gave you a %c*quest*%c!" % (quest.npc_name, C.COL2, C.COLS))
+        self.msg("*%s gave you a %cquest%c" % (quest.npc_name, C.COL2, C.COLS))
     
     def seeks_quest(self, quest_id):
         """ return if the player is seeking quest_id item """
@@ -469,7 +469,7 @@ class Player(AnimalBase):
         if super(Player, self).move(game_map, game_objects, x, y):
             self.message_trim_idx += 1
             self.pickup_item(game_objects)
-            if self.message_trim_idx % 6 == 0:
+            if self.message_trim_idx % 4 == 0:
                 self.trim_message()
             if self.moves % C.PLAYER_THIRST_INDEX == 0:
                 if self.thirsty:
