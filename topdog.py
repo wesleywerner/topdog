@@ -367,17 +367,15 @@ def warp_level():
     game_map, fov_map, path_map = factory.generate_map(maps_avail)
     # add player, NPC's, foliage, food
     game_objects = [player]
-    if player.level == 1:
-        factory.place_on_map(game_map, game_objects, player)
-    # compute field of vision
-    libtcod.map_compute_fov(fov_map, player.x, player.y
-                            ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
     # add level npcs, food, items
     game_objects.extend(factory.spawn_level_objects(game_map, player.level))
     # add level quests and story
     factory.spawn_level_quests(game_map, game_objects, player.level)
     factory.spawn_level_storyline(game_map, game_objects, player)
 
+    # compute field of vision
+    libtcod.map_compute_fov(fov_map, player.x, player.y
+                            ,player.fov_radius, C.FOV_LIGHT_WALLS, C.FOV_ALGO)
     # carry our inventory item into this new level
     if player.carrying:
         game_objects.append(player.carrying)

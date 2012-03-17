@@ -152,22 +152,33 @@ def place_on_map(game_map, game_objects, item, near_xy=None):
     """
         place item on a blank map tile. dont overlap existing objects either.
     """
+    tries = 0
+    radius = 4
     while True:
+        tries = tries + 1
+        if tries % 10 == 0:
+            radius = radius + 1
         if near_xy:
-            x = random.randint(near_xy[0] - 4, near_xy[0] + 4)
-            y = random.randint(near_xy[1] - 4, near_xy[1] + 4)
+            x = random.randint(near_xy[0] - radius, near_xy[0] + radius)
+            y = random.randint(near_xy[1] - radius, near_xy[1] + radius)
             if x > C.MAP_WIDTH - 3:
                 x = C.MAP_WIDTH - 3
             if y > C.MAP_HEIGHT - 3:
                 y = C.MAP_HEIGHT - 3
+            if x < 4:
+                x = 4
+            if y < 4:
+                y = 4
         else:
             x = random.randint(4, C.MAP_WIDTH - 4)
             y = random.randint(4, C.MAP_HEIGHT - 4)
+        # test against blocked map tiles
+        try_again = game_map[x][y].blocking
         # test against object collisions
-        try_again = False
-        for obj in game_objects:
-            if obj.x == x and obj.y == y:
-                try_again = True
+        if not try_again:
+            for obj in game_objects:
+                if obj.x == x and obj.y == y:
+                    try_again = True
         if game_map[x][y].isblank() and not try_again:
             item.x, item.y = (x, y)
             break
@@ -497,7 +508,7 @@ def spawn_level_storyline(game_map, game_objects, player):
         npc_b.name = "Julie the mouse"
         npc_b.picture = "icon-mouse.png"
         npc_b.action_ai.dialogue_text = [
-        "The monkeys stole my piece of cheese just now!\n Can you go get it back for me, pleeeeeease? :)"
+        "The monkeys stole my piece of cheese just now!\n Can you go get it back for me, pleeeeeease? :)\n\n The monkey ran down south, laughing like a maniac..."
         ,"Hi Top Dog, I am Julie the mouse. Can you help me?"
         ]
 
@@ -520,9 +531,10 @@ def spawn_level_storyline(game_map, game_objects, player):
             , quest_npc=npc_a, success_dialogue=dlg_b, success_command=None
             )
         
+        place_on_map(game_map, game_objects, player, near_xy=(2, 2))
         place_on_map(game_map, game_objects, npc, near_xy=(player.x, player.y))
-        place_on_map(game_map, game_objects, npc_b)
-        place_on_map(game_map, game_objects, npc_a)
+        place_on_map(game_map, game_objects, npc_b, near_xy=(C.MAP_WIDTH, 2))
+        place_on_map(game_map, game_objects, npc_a, near_xy=(2, C.MAP_HEIGHT))
         game_objects.extend((npc, npc_b, npc_a))
 
 #===================================================================[[ Map ]]
