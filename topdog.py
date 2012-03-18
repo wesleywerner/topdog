@@ -381,7 +381,7 @@ def warp_level():
     player.wizard = False
     if player.level == 1:
         player.msg("Press %c'?'%c for help" % (C.COL1, C.COLS))
-    if player.level == 9:
+    if player.level == 10:
         player.add_dialogue(cls.Dialogue("Puppy", "icon-puppy.png", "Thank you, " \
         "Top Dog for rescuing me!\n\nI'm sorry our adventure ends here, " \
         "but look forward to the future when we can fight the Fat Cat Mafioso!"))
