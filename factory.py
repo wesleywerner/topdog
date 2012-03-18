@@ -480,8 +480,9 @@ def spawn_level_objects(game_map, game_level):
 
 
 def get_random_dialogue():
-    dlgs = ("Nice day today, isn't it?'")
-    return random.choice(dlgs)
+#    dlgs = ("Nice day today, isn't it?'",)
+#    return random.choice(dlgs)
+    return None
     
 
 def add_random_npc(game_map, game_objects, npc_char=None, attack_rating=None, dialogue_text=None):
