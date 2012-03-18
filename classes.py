@@ -522,14 +522,15 @@ class Player(AnimalBase):
             else:
                 if self.messages.count(message) == 0:
                     self.messages.append(message)
-        self.messages = self.messages[-4:]
+        self.messages = self.messages[-12:]
         self.message_trim_idx = 1
     
     def trim_message(self):
-        if self.messages:
+        if len(self.messages) > 0:
             self.messages.reverse()
             self.messages.pop()
             self.messages.reverse()
+        pass
 
     def quench_thirst(self, game_map):
         messages = ("%c*laps water*%c, woof!", "%c*lap*lap*gulp*%c"

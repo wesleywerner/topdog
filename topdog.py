@@ -353,16 +353,15 @@ def draw_messages():
     """
         Display the last x messages in-game.
     """
-    messages = list(player.messages)[-5:]
-    if messages:
+    if player.messages:
         # move messages with our player
-        y = player.y - 3
-        if y <= 20:
-            y = player.y + 16
+        y = 9
+        if player.y <= 20:
+            y = C.MAP_HEIGHT - 6
         libtcod.console_print_ex(0
                                 ,C.MAP_WIDTH / 2, y
                                 ,libtcod.BKGND_NONE, libtcod.CENTER
-                                ,"\n".join(messages))
+                                ,"\n".join(player.messages))
     
 
 def warp_level():
