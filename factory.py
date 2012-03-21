@@ -29,8 +29,7 @@ def dice(sides):
 
 def get_tree():
     names = ('Tree', 'Oak Tree', 'Bark Tree', 'Big Tree')
-    colors = (libtcod.darkest_lime, libtcod.darker_amber
-            ,libtcod.darkest_amber, libtcod.darker_orange, libtcod.darkest_green)
+    colors = (libtcod.darkest_lime, libtcod.darkest_amber, libtcod.darkest_orange, libtcod.darkest_green)
     fol = cls.ItemBase()
     fol.char = CHAR_TREE
     fol.name = random.choice(names)
@@ -41,8 +40,8 @@ def get_tree():
 
 def get_bush():
     names = ('Shrubbery', 'Thicket', 'Thornbush', 'Rosebush')
-    colors = (libtcod.darker_chartreuse, libtcod.darkest_chartreuse
-            , libtcod.darker_green, libtcod.darkest_green, libtcod.darkest_lime)
+    colors = (libtcod.darkest_chartreuse
+            , libtcod.darkest_green, libtcod.darkest_lime)
     fol = cls.ItemBase()
     fol.char = CHAR_BUSH
     fol.name = random.choice(names)
@@ -179,18 +178,18 @@ def get_toy():
     """
         get a random toy artifact.
     """
-    toy_names = ("tennis ball", "bouncy ball", "rubber bone", "knotted rope"
-                ,"rubber chicken", "rubber ducky", "fluffy ball"
-                , "dog tag", "stick", "food bowl", "blanket", "bouncy ball"
+    toy_names = ("a tennis ball", "a bouncy ball", "a rubber bone", "a knotted rope"
+                ,"a rubber chicken", "a rubber ducky", "a fluffy ball"
+                , "a dog tag", "a stick", "a food bowl", "a blanket", "a bouncy ball"
                 )
-    toy_colors = (libtcod.lighter_green, libtcod.lighter_red
-                , libtcod.lighter_blue, libtcod.lighter_yellow
-                , libtcod.lighter_lime, libtcod.lighter_sea, libtcod.lighter_han
-                , libtcod.lighter_violet, libtcod.lighter_fuchsia)
+#    toy_colors = (libtcod.light_green, libtcod.lighter_red
+#                , libtcod.lighter_blue, libtcod.lighter_yellow
+#                , libtcod.lighter_lime, libtcod.lighter_sea, libtcod.lighter_han
+#                , libtcod.lighter_violet, libtcod.lighter_fuchsia)
     toy = cls.ItemBase()
     toy.name = random.choice(toy_names)
-    toy.char = CHAR_TOY
-    toy.fgcolor = random.choice(toy_colors)
+    toy.char = CHAR_FOOD
+    toy.fgcolor = libtcod.yellow
     toy.carryable = True
     return toy
 
@@ -199,7 +198,7 @@ def get_food():
     """
         get a food stuff.
     """
-    names = ("biscuit", "cherry pie", "bone", "banana", "salami", "peach", "pizze slice")
+    names = ("a biscuit", "a cherry pie", "a bone", "a banana", "a salami", "a peach", "a pizza slice")
     eat = cls.ItemBase()
     eat.name = random.choice(names)
     eat.char = CHAR_FOOD
@@ -397,7 +396,7 @@ def get_random_npc(npc_char=None, attack_rating=None, dialogue_text=None):
     npc = cls.AnimalBase()
     npc.blocking = True
     npc.char = npc_char
-    npc.fgcolor = libtcod.cyan
+    npc.fgcolor = libtcod.light_sky
     npc.name = dna_bank[npc_char]
     npc.move_step = random.randint(1, 3)
     npc.dialogue_text = dialogue_text
@@ -832,8 +831,8 @@ def get_fence():
 def get_hole():
     hole = cls.Hole()
     hole.name = "Spacebar to crawl through this hole..."
-    hole.bgcolor = libtcod.black
-    hole.fgcolor = libtcod.black
+    hole.bgcolor = libtcod.darker_sepia
+    hole.fgcolor = libtcod.lighter_sepia
     return hole
 
 def place_fence_holes(game_map):

@@ -389,14 +389,14 @@ class Player(AnimalBase):
         if selp.hp > 100:
             self.hp = 100
         
-    def inventory_name(self):
+    def inventory_name(self, prefix=""):
         if self.carrying:
             if self.carrying.quest_id:
-                return "%c*%s*%c" % (C.COL4, self.carrying.name, C.COLS)
+                return "%s%c%s%c" % (prefix, C.COL4, self.carrying.name, C.COLS)
             elif self.carrying.edible:
-                return "%c*%s*%c" % (C.COL5, self.carrying.name, C.COLS)
+                return "%s%c%s%c" % (prefix, C.COL5, self.carrying.name, C.COLS)
             else:
-                return self.carrying.name
+                return "%s%s" % (prefix, self.carrying.name)
         return ""
     
     def remove_inventory(self):

@@ -287,7 +287,7 @@ def draw_objects():
         not isinstance(e, cls.Player)]:
         if obj.x > 0:   #TODO replace with a visible property
             if player.wizard or libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
-                player.msg("You see %c%s%c" % (C.COL4, obj.name, C.COLS)
+                player.msg("You see a %c%s%c" % (C.COL4, obj.name, C.COLS)
                                                 , allow_duplicates=False)
                 if obj.see_message:
                     player.msg("%c%s%c" % (C.COL2, obj.see_message, C.COLS)
@@ -330,12 +330,22 @@ def draw_player_stats():
         libtcod.console_put_char_ex(
                         0, heart + C.STAT_HEART_LEFT, C.STAT_HEART_TOP
                         ,chr(3), heart_colors[heart], None)
-    texts = []
-    # player inventory
+    texts = [
+         "level: %s" % (player.level)
+        ,"score: %s" % (player.score)
+        ,player.inventory_name(prefix="carrying: ")
+    ]
+    
+    if len(player.quests) > 0:
+        texts.append("+ %s" % (player.quests[-1].title))
+        
+    # level, score, inventory
     libtcod.console_print_ex(
-                    0, C.MESSAGES_LEFT + 10, C.STAT_HEART_TOP
+                    0, C.STAT_HEART_LEFT, 1
                     ,libtcod.BKGND_NONE, libtcod.LEFT
-                    ,player.inventory_name())
+                    ,"\n".join(texts)
+                    )
+    # player health status
     if player.weak:
         libtcod.console_print_ex(0, C.MAP_WIDTH, C.STAT_HEART_TOP
                             ,libtcod.BKGND_NONE, libtcod.RIGHT
@@ -361,11 +371,11 @@ def draw_messages():
     if player.messages:
         # move messages with our player
         y = 9
-        if player.y <= 20:
+        if player.y <= 18:
             y = C.MAP_HEIGHT - 6
         libtcod.console_print_ex(0
-                                ,C.MAP_WIDTH / 2, y
-                                ,libtcod.BKGND_NONE, libtcod.CENTER
+                                , 3, y
+                                ,libtcod.BKGND_NONE, libtcod.LEFT
                                 ,"\n".join(player.messages))
     
 
