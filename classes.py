@@ -108,6 +108,7 @@ class ActionManual(ActionAI):
                         return False
                     else:
                         target.take_damage(player, self.attack_rating)
+                        player.bites_taken = player.bites_taken + 1
                         player.msg("you %c*bite*%c the %s" % \
                                  (C.COL1, C.COLS, target.name))
                 else:
@@ -379,7 +380,24 @@ class Player(AnimalBase):
         self.wizard = False
         self.dialogues = []
         self.quests = []
+        self.piddles_taken = 0
+        self.bites_taken = 0
+        self.treats_eaten = 0
     
+    def reset_game(self):
+        self.score = 0
+        self.weak = False
+        self.thirsty = False
+        self.hungry = False
+        self.mustpiddle = False
+        self.quenches = 0
+        self.level = 0
+        self.messages = []
+        self.quests = []
+        self.bites_taken = 0
+        self.treats_eaten = 0
+        self.piddles_taken = 0
+        
     def addscore(self, value):
         self.score = self.score + 10
         
@@ -409,6 +427,7 @@ class Player(AnimalBase):
                 if self.hp > 100:
                     self.hp = 100
                 self.carrying = None
+                self.treats_eaten = self.treats_eaten + 1
                 self.msg(random.choice(("Yum!", "*munch munch*", "*gulp*", "*chomp chomp*")))
                 if self.weak:
                     self.weak = False
@@ -499,6 +518,7 @@ class Player(AnimalBase):
     def warp_prep(self):
         self.level = self.level + 1
         self.moves = self.moves + 1
+        self.quests = []
         if self.x == 0:
             self.x = C.MAP_WIDTH - 2
         elif self.x == C.MAP_WIDTH - 1:
@@ -554,6 +574,7 @@ class Player(AnimalBase):
                     self.msg("You *piddle* on the %s, yey!" % (tile.name))
                     self.mustpiddle = False
                     self.addscore(10)
+                    self.piddles_taken = self.piddles_taken + 1
                     break
             if self.mustpiddle:
                 self.addscore(1)
@@ -570,7 +591,7 @@ class GameState():
         is_empty() returns True if all states are popped
     """
     def __init__(self):
-        self.stack = [C.STATE_PLAYING]
+        self.stack = [C.STATE_MENU]
     
     def push(self, state):
         self.stack.append(state)

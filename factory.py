@@ -198,7 +198,7 @@ def get_food():
     """
         get a food stuff.
     """
-    names = ("a biscuit", "a cherry pie", "a bone", "a banana", "a salami", "a peach", "a pizza slice")
+    names = ("a biscuit", "a cherry pie", "a bone", "a banana", "salami", "a peach", "a pizza slice")
     eat = cls.ItemBase()
     eat.name = random.choice(names)
     eat.char = CHAR_FOOD
@@ -308,19 +308,19 @@ def link_quest(game_map, game_objects
         ai_npc.owner = quest_npc
         ai_npc.item = quest_item
         quest_npc.quest_ai = ai_npc
-        title = title.replace("%a", quest_npc.name)
-        title = title.replace("%b", quest_master.name)
-        title = title.replace("%i", quest_item.name)
+        title = title.replace("%npca", quest_npc.name)
+        title = title.replace("%npcb", quest_master.name)
+        title = title.replace("%item", quest_item.name)
     else:
         # no npc carries this item, its placed on the map.
         ai_master.owner = quest_master
-    title = title.replace("%a", "the culprit")
-    title = title.replace("%b", quest_master.name)
-    title = title.replace("%i", quest_item.name)
+    title = title.replace("%npca", "the culprit")
+    title = title.replace("%npcb", quest_master.name)
+    title = title.replace("%item", quest_item.name)
     ai_master.title = title
     ai_master.owner = quest_master
     # replace dialogue placeholders
-    success_dialogue = [e.replace("%b", quest_master.name).replace("%i", quest_item.name) \
+    success_dialogue = [e.replace("%npcb", quest_master.name).replace("%item", quest_item.name) \
         for e in success_dialogue]
 #    success_dialogue = success_dialogue.replace("%b", quest_master.name)
 #    success_dialogue = success_dialogue.replace("%i", quest_item.name)
@@ -332,19 +332,19 @@ def add_random_quest(game_map, game_objects):
         give a quest using random characters.
     """
     dialogues = (
-        "I have lost my %i,\nPlease help me."
-        ,"I played in the garden and\nnow my %i is missing.\nHelp me find it, plz?"
-        ,"Lost my %i in the yard,\n bring it for me TopDog."
-        ,"%a took my %i.\nCan you bring it back for me?"
+        "I have lost my %item,\nPlease help me find it."
+        ,"I played in the garden and\nnow my %item is missing.\nHelp me find it?"
+        ,"I lost my %item,\n please find it for me Top Dog!"
+        ,"%npca took my %item.\nCan you bring it back for me?"
     )
     thankyous = (
-        ("You found my %i,\nThank you!")
-        ,("My %i!\nI hope %a was not\nmuch trouble.\nMy Hero!")
-        ,("My Hero!\nI will always remember\nthis moment!")
-        ,("Thank you TopDog!\nMy %i is safe again...")
+        ("You found my %item,\nThank you!")
+        ,("My %item!\nI hope %npca was not\nmuch trouble.\nMy Hero!")
+        ,("Thanks for returning my %item.\nI will remember this moment!")
+        ,("Thank you, my %item is safe again.")
     )
     
-    title = "%b: find %i"
+    title = "%npcb: find %item"
     dialogue = random.choice(dialogues)
     success = random.choice(thankyous)
     
@@ -359,13 +359,17 @@ def add_random_quest(game_map, game_objects):
             quest_npc = get_random_npc(attack_rating=1)
         else:
             quest_npc = get_random_npc()
+        dialogue = dialogue.replace("%npca", quest_npc.name)
         place_on_map(game_map, game_objects, quest_npc)
         game_objects.append(quest_npc)
         quest_item.x = 0
     else:
+        dialogue = dialogue.replace("%npca", "some thief")
         place_on_map(game_map, game_objects, quest_item)
         game_objects.append(quest_item)
-    
+    # set quest giver dialogue
+    dialogue = dialogue.replace("%item", quest_item.name)
+    quest_master.action_ai.dialogue_text = dialogue
     # place all on the map
     place_on_map(game_map, game_objects, quest_master)
     game_objects.append(quest_master)
@@ -490,10 +494,9 @@ def spawn_level_quests(game_map, game_objects, game_level):
     if game_level == 2:
         add_random_quest(game_map, game_objects)
         add_random_npc(game_map, game_objects
-                , npc_char="s", attack_rating=None
-                , dialogue_text="Ye, I know of the Fat Cats... " \
-                "the Mafioso they call themselves." \
-                "I'd watch your back if I were you, those guys can scratch!.")
+                , npc_char=None, attack_rating=None
+                , dialogue_text="Ye, I know of the Fat Cats, the Mafioso..." \
+                "\n\nI'd watch your back if I were you, those Cats scratch!")
         
     elif game_level == 3:
         add_random_quest(game_map, game_objects)
@@ -555,15 +558,15 @@ def spawn_level_storyline(game_map, game_objects, player):
             "Go to the %cright%c, find %cJulie the mouse%c to learn about " \
                 "quests... Good luck!\n^_^" % (C.COL2, C.COLS, C.COL2, C.COLS)
             ,"If you get thirsty running around, stand on some water to " \
-                "[d]rink (keypad DIV).\n\nIf you get hungry, pick up some " \
-                "food and [e]at it (keypad MUL).\n\nIf you have to [p]iddle" \
-                " (keypad SUB), stand next to something interesting for " \
+                "[d]rink.\n\nIf you get hungry, pick up some " \
+                "food and [e]at it.\n\nIf you have to [p]iddle" \
+                ", stand next to something interesting for " \
                 "extra points ;)"
-            ,"Hi Top Dog! I'm here to help you start..." \
-            "\n\nWatch your health hearts, and messages, at the top of the screen." \
-            "\n\n Walk over items to pick them up in your mouth." \
+            ,"Hi Top Dog!" \
+            "\n\nWatch your health hearts and messages." \
+            "\n\nWalk over items to pick them up in your mouth." \
             "\n\nYou can only carry one item at a time.\n\nWalk into other" \
-            " animals to talk, or fight, depending if they are hostile."
+            " animals to talk or fight, depending if they are hostile."
         ]
 
         npc_b = get_random_npc(npc_char="m", attack_rating=None)
@@ -571,8 +574,8 @@ def spawn_level_storyline(game_map, game_objects, player):
         npc_b.picture = "icon-mouse.png"
         npc_b.action_ai.dialogue_text = [
         "The monkey stole my piece of cheese just now!" \
-            "\n Can you go get it back for me, pleeeeeease? :)" \
-            "\n\n The monkey ran down South, laughing like a maniac..."
+            "\n\nCan you go get it back for me, pleeeeeease?" \
+            "\n\nThe monkey ran South, laughing like a maniac..."
         ,"Hi Top Dog, I am Julie the mouse. Can you help me?"
         ]
 
@@ -628,24 +631,23 @@ def spawn_level_storyline(game_map, game_objects, player):
         qdata = cls.QuestData(q.quest_id)
         qdata.quest_id = q.quest_id
         qdata.npc_name = npc_name = "Girly"
-        qdata.title = "Find Girly, she has *news*"
+        qdata.title = "Talk to Girly the dog"
         player.give_quest(qdata, silent=False)
-        player.msg("press keypad 5 or i to view)")
         place_on_map(game_map, game_objects, npc_a)
         game_objects.append(npc_a)
         
     elif player.level == 3:
         npc_b = get_random_npc(npc_char="s", attack_rating=None)
         npc_b.see_message = "The Squirrel forages for nuts"
-        npc_b.action_ai.dialogue_text = [
+        npc_b.action_ai.dialogue_text = (
             "Ye, I know of the Fat Cats... the Mafioso they call themselves." \
-                "I'd watch your back if I were you, those guys can scratch!."]
+                "\n\nI'd watch your back if I were you, those Cats scratch!")
         place_on_map(game_map, game_objects, npc_b)
         game_objects.append(npc_b)
         
     elif player.level == 4:
         npc_b = get_random_npc(npc_char=None, attack_rating=None)
-        npc_b.npc_char="C"
+        npc_b.char="C"
         npc_b.name = "Fat Cat Charles"
         npc_b.move_ai.behavior = cls.MoveAI.NEUTRAL
         npc_b.picture = "icon-fat cat.png"
@@ -694,7 +696,7 @@ def spawn_level_storyline(game_map, game_objects, player):
         place_on_map(game_map, game_objects, npc_a)
         game_objects.append(npc_a)
         
-        npc_b = get_random_npc(npc_char="m", attack_rating=None)
+        npc_b = get_random_npc(npc_char="j", attack_rating=None)
         npc_b.name = "Crazy the Monkey"
         npc_b.picture = "icon-monkey.png"
         npc_b.action_ai.dialogue_text = [
@@ -830,7 +832,7 @@ def get_fence():
 
 def get_hole():
     hole = cls.Hole()
-    hole.name = "Spacebar to crawl through this hole..."
+    hole.name = "Space/Enter crawls through this hole..."
     hole.bgcolor = libtcod.darker_sepia
     hole.fgcolor = libtcod.lighter_sepia
     return hole
@@ -1028,14 +1030,15 @@ def generate_map(maps_avail):
 #===============================================================[[ Libtcod ]]
 
 def init_libtcod():
-    print('loading font.')
+    startup_msg = ("analyzing air quality...", "calculating primordial soup..."
+        ,"reading the future...", "carbon dating your hard drive..."
+        ,"finding prime numbers...")
+    print(random.choice(startup_msg))
     libtcod.console_set_custom_font('data/fonts/terminal12x12_gs_ro.png', 
                                     libtcod.FONT_TYPE_GREYSCALE |
                                     libtcod.FONT_LAYOUT_ASCII_INROW)
-    print('creating screen.')
     libtcod.console_init_root(C.SCREEN_WIDTH, C.SCREEN_HEIGHT, 
                               'top dog -- v%s' % (C.VERSION), C.FULLSCREEN)
-    print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
     # default font color
     libtcod.console_set_default_foreground(0, libtcod.white)

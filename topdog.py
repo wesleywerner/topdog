@@ -12,21 +12,34 @@ def setup_keyhandler():
     handler = cls.KeyHandler()
     handler.add_actions(C.STATE_MENU,
             {
-            "q": "gamestate.pop()"
+            "a": "gamestate.push(C.STATE_ABOUT)"
             ,libtcod.KEY_SPACE: "gamestate.push(C.STATE_PLAYING)"
             ,libtcod.KEY_ESCAPE: "gamestate.pop()"
+            })
+    handler.add_actions(C.STATE_VICTORY,
+            {
+            libtcod.KEY_SPACE: "player = None; gamestate.pop()"
+            })
+    handler.add_actions(C.STATE_ABOUT,
+            {
+            libtcod.KEY_SPACE: "gamestate.pop()"
+            ,libtcod.KEY_ESCAPE: "gamestate.pop()"
+            ,libtcod.KEY_KPENTER: "gamestate.pop()"
+            ,libtcod.KEY_ENTER: "gamestate.pop()"
             })
     handler.add_actions(C.STATE_DIALOGUE,
             {
             libtcod.KEY_SPACE: "player.dialogues.pop()"
             ,libtcod.KEY_ESCAPE: "player.dialogues.pop()"
             ,libtcod.KEY_KPENTER: "player.dialogues.pop()"
+            ,libtcod.KEY_ENTER: "player.dialogues.pop()"
             })
     handler.add_actions(C.STATE_STATS,
             {
             libtcod.KEY_SPACE: "gamestate.pop()"
             ,libtcod.KEY_ESCAPE: "gamestate.pop()"
             ,libtcod.KEY_KPENTER: "gamestate.pop()"
+            ,libtcod.KEY_ENTER: "gamestate.pop()"
             ,libtcod.KEY_KP5: "gamestate.pop()"
             })
     handler.add_actions(C.STATE_HELP,
@@ -50,6 +63,7 @@ def setup_keyhandler():
             ,libtcod.KEY_KP8: "game_turn(0, -1)"
             ,libtcod.KEY_KP9: "game_turn(1, -1)"
             ,libtcod.KEY_SPACE: "if player.can_warp(game_map): warp_level()"
+            ,libtcod.KEY_KPENTER: "if player.can_warp(game_map): warp_level()"
             ,'b': "game_turn(-1, 1)"
             ,'j': "game_turn(0, 1)"
             ,'n': "game_turn(1, 1)"
@@ -115,6 +129,8 @@ def blit_dialogues():
             icon = libtcod.image_load(os.path.join('data', 'images', dlg.npc_picture))
         else:
             icon = libtcod.image_load(os.path.join('data', 'images', 'icon-%s.png' % (dlg.npc_name)))
+        frame = libtcod.image_load(os.path.join('data', 'images', 'dialogue-frame.png'))
+        libtcod.image_blit_rect(frame, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
         libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
         # title
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 2,
@@ -130,7 +146,7 @@ def blit_dialogues():
 
         # press space
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
-                            C.SCREEN_HEIGHT - 2, 
+                            C.SCREEN_HEIGHT - 1, 
                             libtcod.BKGND_NONE, libtcod.CENTER, 
                             "(spacebar or enter...)")
 
@@ -237,7 +253,7 @@ diagonals are the dog's bark. Keypad 5 shows your stats, as does [i]nfo. The %cA
     helptext.append("\n%cACTIONS%c" % (C.COL5, C.COLS))
     helptext.append("\n[%cd%c]rink water" % (C.COL5, C.COLS))
     helptext.append("[%ce%c]at food" % (C.COL5, C.COLS))
-    helptext.append("[%cp%c]piddle to find reflief" % (C.COL5, C.COLS))
+    helptext.append("[%cp%c]piddle to relieve yourself" % (C.COL5, C.COLS))
     helptext.append("[%ci%c]nfo screen: stats and quests" % (C.COL5, C.COLS))
 
     helptext.append("\nThe keypad also map to actions, use this mnemonic to remember:")
@@ -259,7 +275,56 @@ diagonals are the dog's bark. Keypad 5 shows your stats, as does [i]nfo. The %cA
 #            break
 
 def blit_victory():
-    pass
+    libtcod.console_clear(0)
+    frame = libtcod.image_load(os.path.join('data', 'images', 'about-frame.png'))
+    libtcod.image_blit_rect(frame, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
+    results = ["You won, Top Dog!"]
+    results.append("You moved %s times." % (player.moves))
+    results.append("You drank %s puddles." % (player.quenches))
+    results.append("You took %s bites." % (player.bites_taken))
+    results.append("You ate %s treats." % (player.treats_eaten))
+    results.append("You piddled %s times." % (player.piddles_taken))
+    results.append("Your score is %s!" % (player.score))
+    results.append("Well Done ^_^")
+    libtcod.console_print_ex(0, C.SCREEN_WIDTH / 2, 4,
+                        libtcod.BKGND_NONE, libtcod.CENTER, "\n\n".join(results))
+
+
+def blit_menu():
+    libtcod.console_clear(0)
+    icon = libtcod.image_load(os.path.join('data', 'images', 'intro.png'))
+    libtcod.image_blit_rect(icon, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
+    text = [
+        "version %s" % (C.VERSION)
+        ,"%cA%cbout" % (C.COL1, C.COLS)
+        ,"%cspace%c to continue"  % (C.COL4, C.COLS)
+        ]
+    libtcod.console_print_ex(0, 2, 45,
+                        libtcod.BKGND_NONE, libtcod.LEFT, 
+                        "\n".join(text))
+    libtcod.console_print_ex(0, C.SCREEN_WIDTH / 2, 24,
+                        libtcod.BKGND_NONE, libtcod.CENTER, 
+                        "in 'The Lost Puppy'")
+
+def blit_about():
+    libtcod.console_clear(0)
+    icon = libtcod.image_load(os.path.join('data', 'images', 'about-frame.png'))
+    libtcod.image_blit_rect(icon, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
+    try:
+        readme = file('README', 'r')
+    except IOError, e:
+        libtcod.console_print_ex(0, 2, 2,
+                        libtcod.BKGND_NONE, libtcod.LEFT, 
+                        "Error: about file not found :'(")
+        return None
+    readme_text = readme.read()
+    readme.close()
+    libtcod.console_print_rect(0, 2, 2, C.MAP_WIDTH - 3, C.MAP_HEIGHT - 4,
+                        readme_text)
+
+    libtcod.console_print_ex(0, 2, 47,
+                        libtcod.BKGND_NONE, libtcod.LEFT, 
+                        "%cspace%c to return"  % (C.COL4, C.COLS))
 
 
 def draw_map():
@@ -275,7 +340,7 @@ def draw_map():
                                             tile.char, tile.fgcolor, tile.bgcolor)
             elif tile.seen:
                 libtcod.console_put_char_ex(canvas, x, y, tile.char
-                                        ,libtcod.darker_grey, libtcod.darkest_grey)
+                                        ,libtcod.black, libtcod.darkest_grey)
 
 def draw_objects():
     """
@@ -295,7 +360,7 @@ def draw_objects():
         not isinstance(e, cls.Player)]:
         if obj.x > 0:   #TODO replace with a visible property
             if player.wizard or libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
-                player.msg("You see a %c%s%c" % (C.COL4, obj.name, C.COLS)
+                player.msg("You see %c%s%c" % (C.COL4, obj.name, C.COLS)
                                                 , allow_duplicates=False)
                 if obj.see_message:
                     player.msg("%c%s%c" % (C.COL2, obj.see_message, C.COLS)
@@ -397,6 +462,7 @@ def warp_level():
     global game_objects
     global player
     global maps_avail
+    global save_screenshot
 
     #prepare ftl
     player.warp_prep()
@@ -404,12 +470,17 @@ def warp_level():
     if player.level == 1:
         player.msg("Press %c'?'%c for help" % (C.COL1, C.COLS))
     if player.level == 10:
-        player.add_dialogue(cls.Dialogue("Puppy", "icon-puppy.png", "Thank you, " \
-        "Top Dog for rescuing me!\n\nI'm sorry our adventure ends here, " \
-        "but look forward to the future when we can fight the Fat Cat Mafioso!"))
+        player.add_dialogue(cls.Dialogue("Puppy", "icon-puppy.png", "Thank you " \
+        "for rescuing me Top Dog! Those Mafiosos sure got taught a lesson." \
+        "\n\nLet us go home now, and play some ball...\n\n*Woof!*"))
+        player.add_dialogue(cls.Dialogue("Wez", "icon-paw.png", \
+        "Thanks for playing! Our adventure ends here, as this short game was " \
+        "made in a couple of days.\n\nBut you never know when Top Dog will find " \
+        "more adventure and doggy treats..."))
         gamestate.pop()
-        gamestate.push(C.STATE_STATS)
+        gamestate.push(C.STATE_VICTORY)
         gamestate.push(C.STATE_DIALOGUE)
+        save_screenshot = True
     else:
         # init new maps
         game_map, fov_map, path_map = factory.generate_map(maps_avail)
@@ -443,11 +514,14 @@ if __name__ == "__main__":
     fov_map = None
     game_objects = None
     player = None
+    save_screenshot = False
     
     while not libtcod.console_is_window_closed():
         state = gamestate.peek()
         if state == C.STATE_MENU:
-            pass
+            blit_menu()
+        elif state == C.STATE_ABOUT:
+            blit_about()
         elif state == C.STATE_PLAYING:
             if not player:
                 player = cls.Player()
@@ -476,6 +550,12 @@ if __name__ == "__main__":
             blit_help()
         elif state == C.STATE_VICTORY:
             blit_victory()
+            if save_screenshot:
+                save_screenshot = False
+                libtcod.console_flush()
+                libtcod.sys_save_screenshot(None)
+                libtcod.console_print_ex(0, 4, 40,
+                                libtcod.BKGND_NONE, libtcod.LEFT, "(screenshot saved)")
         if gamestate.is_empty():
             break
         libtcod.console_flush()
@@ -483,6 +563,8 @@ if __name__ == "__main__":
         if cmd:
             exec cmd
     # shut down
-    libtcod.dijkstra_delete(path_map)
-    libtcod.console_delete(canvas)
+    if path_map:
+        libtcod.dijkstra_delete(path_map)
+    if canvas:
+        libtcod.console_delete(canvas)
     libtcod.console_clear(0)

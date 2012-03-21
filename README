@@ -1,18 +1,22 @@
-Top Dog is a Roguelike style game. The Puppy has been kidnapped by the 
-Fat Cat Mafioso. You travel from yard to yard, searching for the 
-crafty Cats holding her hostage. Along the way you meet other animals, 
-and perhaps a bone or two on the way.
+Top Dog is a game entry for the 2012 7-Day RogueLike comp. The game is written in Python 2.6 and the Doryen library.
 
-The game is written in Python 2.6, to run:
+The Story:
 
-    python topdog.py
+The Puppy has been kidnapped by the Fat Cat Mafioso. You travel from yard to yard, searching for the crafty Cats holding her hostage, meeting other animals along the way.
 
+Keys:
 
-# Known Issues
-- holding an inventory item while a NPC gives you a quest item
-    will drop the quest item onto the tile you are standing on.
-    move off and on again to switch you inventory with the quest item.
-- npc's and objects draw together, sometimes a npc draws behind an item
-- there is no player death.
+The number keypad moves you up, down, sideways and diagonally.
+VI-like movement is also supported.
 
-url: http://7drl.darknet.co.za/2012/
+7   8   9       y   k   u
+4       6       h       l
+1   2   3       b   j   n
+    
+press ? any time to see in-game help.
+
+This game lives at:
+
+    7drl.darknet.co.za
+
+Woof! ^.^

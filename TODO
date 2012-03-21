@@ -1,25 +1,19 @@
 ===================================================================[[ TODO ]]
 
-
-random npc dialog only shows "n" :p
+main screen
+clear quests on level warp
+player death means a sad puppy face, restart the level
 
 
 ===================================================================[[ POLISH ]]
 
-lighten level preogression, around 8 you take too much damage
+lighten level progression, around 8 you take too much damage
 
-fix: quest thankyou message npc name display bug (untracked)
-+ intro screen using libtcod section 3.4
 + more toy names, bush names, tree names
 + colorized words. you enter the jones's yard. you smell baked muffins.
 + level entry messages: your tongue wags. woof woof.
 
 
-KEYS
-DIV drink
-MUL eat
-SUB piddle
-5 stats
 
 ===========================================================[[ Storyline ]]
 
