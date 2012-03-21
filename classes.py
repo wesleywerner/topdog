@@ -383,21 +383,7 @@ class Player(AnimalBase):
         self.piddles_taken = 0
         self.bites_taken = 0
         self.treats_eaten = 0
-    
-    def reset_game(self):
-        self.score = 0
-        self.weak = False
-        self.thirsty = False
-        self.hungry = False
-        self.mustpiddle = False
-        self.quenches = 0
-        self.level = 0
-        self.messages = []
-        self.quests = []
-        self.bites_taken = 0
-        self.treats_eaten = 0
-        self.piddles_taken = 0
-        
+
     def addscore(self, value):
         self.score = self.score + 10
         
@@ -461,7 +447,10 @@ class Player(AnimalBase):
         """ return if player has quest_id item in posession """
         if self.carrying:
             if self.carrying.quest_id:
-                return self.carrying.quest_id == quest_id
+                if self.carrying.quest_id == quest_id:
+                    return True
+                else:
+                    return False
     
     def remove_quest(self, quest_id):
         """ remove the given quest """
@@ -472,7 +461,7 @@ class Player(AnimalBase):
         
     def take_damage(self, attacker, damage):
         self.hp = self.hp - damage
-        if self.hp < 0:
+        if self.hp <= 0:
             self.hp = 0
 
     def get_hearts(self):
@@ -516,21 +505,32 @@ class Player(AnimalBase):
         return isinstance(game_map[self.x][self.y], Hole)
     
     def warp_prep(self):
-        self.level = self.level + 1
-        self.moves = self.moves + 1
+        # don't shift progression for death states
+        if self.hp == 0:
+            self.x, self.y = self.entryxy
+            self.hp = 100
+        else:
+            self.level = self.level + 1
+            self.moves = self.moves + 1
+            if self.x == 0:
+                self.x = C.MAP_WIDTH - 2
+            elif self.x == C.MAP_WIDTH - 1:
+                self.x = 1
+            if self.y == 0:
+                self.y = C.MAP_HEIGHT - 2
+            elif self.y == C.MAP_HEIGHT - 1:
+                self.y = 1
+            self.entryxy = (self.x, self.y)
+        # reset quests each level
         self.quests = []
-        if self.x == 0:
-            self.x = C.MAP_WIDTH - 2
-        elif self.x == C.MAP_WIDTH - 1:
-            self.x = 1
-        if self.y == 0:
-            self.y = C.MAP_HEIGHT - 2
-        elif self.y == C.MAP_HEIGHT - 1:
-            self.y = 1
         if self.level > 1:
-            self.messages = [
-                        "You %cemerge%c from the other yard..." % 
-                        (C.COL4, C.COLS)]
+            self.messages = [random.choice(( 
+                "You crawl through the fence..." \
+                ,"You smell biscuits..." \
+                ,"You enter this yard..." \
+                ,"You sense doggy treats..." \
+                ,"The smell of pies floats over you..." \
+                ,"You wag your tail..."))]
 
     def msg(self, message, allow_duplicates=True):
         if not self.messages: 

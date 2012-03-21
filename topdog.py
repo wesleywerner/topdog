@@ -20,6 +20,10 @@ def setup_keyhandler():
             {
             libtcod.KEY_SPACE: "player = None; gamestate.pop()"
             })
+    handler.add_actions(C.STATE_LOST,
+            {
+            libtcod.KEY_SPACE: "gamestate.pop(); warp_level()"
+            })
     handler.add_actions(C.STATE_ABOUT,
             {
             libtcod.KEY_SPACE: "gamestate.pop()"
@@ -106,9 +110,13 @@ def game_turn(player_move_x, player_move_y):
         libtcod.map_compute_fov(fov_map, player.x, player.y
                                 ,player.fov_radius
                                 ,C.FOV_LIGHT_WALLS, C.FOV_ALGO)
-    # check game state for NPC dialogues
-    if len(player.dialogues) > 0:
-        gamestate.push(C.STATE_DIALOGUE)
+    # are we still alive?
+    if player.hp == 0:
+        gamestate.push(C.STATE_LOST)
+    else:
+        # check game state for NPC dialogues
+        if len(player.dialogues) > 0:
+            gamestate.push(C.STATE_DIALOGUE)
 
 def blit_playtime():
     """
@@ -288,6 +296,18 @@ def blit_victory():
     results.append("Well Done ^_^")
     libtcod.console_print_ex(0, C.SCREEN_WIDTH / 2, 4,
                         libtcod.BKGND_NONE, libtcod.CENTER, "\n\n".join(results))
+
+def blit_lost():
+    libtcod.console_clear(0)
+    frame = libtcod.image_load(os.path.join('data', 'images', 'dialogue-frame.png'))
+    libtcod.image_blit_rect(frame, 0, 0, 0, -1, -1, libtcod.BKGND_SET)
+    icon = libtcod.image_load(os.path.join('data', 'images', 'icon-paw.png'))
+    libtcod.image_blit_rect(icon, 0, C.MAP_LEFT, C.MAP_TOP, -1, -1, libtcod.BKGND_SET)
+    libtcod.console_print_ex(0, C.SCREEN_WIDTH / 2, 4,
+                        libtcod.BKGND_NONE, libtcod.CENTER, \
+                        "Ouch! You lost all your health.\n\n" \
+                        "You rest to retry this level.\n\n" \
+                        "(press space to try again)")
 
 
 def blit_menu():
@@ -556,6 +576,8 @@ if __name__ == "__main__":
                 libtcod.sys_save_screenshot(None)
                 libtcod.console_print_ex(0, 4, 40,
                                 libtcod.BKGND_NONE, libtcod.LEFT, "(screenshot saved)")
+        elif state == C.STATE_LOST:
+            blit_lost()
         if gamestate.is_empty():
             break
         libtcod.console_flush()

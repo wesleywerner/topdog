@@ -1,5 +1,5 @@
 import lib.libtcodpy as libtcod
-VERSION = "0.1"
+VERSION = "0.2"
 
 # engine
 SCREEN_WIDTH = 44
@@ -30,9 +30,10 @@ STATE_DIALOGUE = 0x3
 STATE_STATS = 0x4
 STATE_HELP = 0x5
 STATE_VICTORY = 0x6
+STATE_LOST = 0x7
 
 # player tweaks
-FOV_RADIUS_DEFAULT = 6         # default player fov. gets reduces under shrubbery.
+FOV_RADIUS_DEFAULT = 8         # default player fov. gets reduces under shrubbery.
 PLAYER_THIRST_INDEX = 400       # amount of moves before we get thirsty
 PLAYER_PIDDLE_INDEX = 3         # amount ofquesnches before we need to piddle
 PLAYER_WEAK_HP_DICE = 12        # if weak, the dice roll that reduces hp each move
