@@ -58,6 +58,7 @@ def get_flower():
     fol = cls.ItemBase()
     fol.char = CHAR_FLOWERS
     fol.name = random.choice(names)
+#    fol.bgcolor = libtcod.dark_green
     fol.fgcolor = random.choice(colors)
     fol.blocking = False
     fol.fov_limit = random.randint(1, 3)
@@ -90,22 +91,13 @@ def spawn_foliage(currentmap, amount, thicket_size=4, density=10):
 
 #=================================================================[[ Water ]]
 
-def get_puddle():
-    colors = (libtcod.sky, libtcod.azure, libtcod.darker_sky, libtcod.darkest_azure)
-    puddle = cls.ItemBase()
-    puddle.drinkable = True
-    puddle.char = CHAR_WATER
-    puddle.name = "puddle"
-    puddle.fgcolor = random.choice(colors)
-    puddle.message = "*splash*"
-    return puddle
-
 def get_pool_tile():
+    colors = (libtcod.sky, libtcod.azure, libtcod.dark_cyan, libtcod.dark_azure)
     puddle = cls.ItemBase()
     puddle.drinkable = True
     puddle.char = CHAR_WATER
     puddle.name = "pool"
-    puddle.fgcolor = libtcod.sky
+    puddle.fgcolor = random.choice(colors)
     puddle.bgcolor = libtcod.darker_sky
     puddle.message = "*splash*"
     return puddle
@@ -127,7 +119,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                     for tx in range(pond_size):
                         tile = currentmap[x + tx][y + ty]
                         if tile.isblank():
-                            wetness = get_puddle()
+                            wetness = get_pool_tile()
                             wetness.char = CHAR_WATER
                             wetness.fgcolor = POOL_FG
                             wetness.bgcolor = POOL_BG
@@ -142,7 +134,7 @@ def spawn_pond(currentmap, amount, pond_size=4, density=6):
                     if currentmap[tx][ty].isblank():
                         # transfer the current cell bgcolor
                         bgcolor = currentmap[tx][ty].bgcolor
-                        puddle = get_puddle()
+                        puddle = get_pool_tile()
                         currentmap[tx][ty] = puddle
             break
 
@@ -211,7 +203,7 @@ def get_food():
     eat = cls.ItemBase()
     eat.name = random.choice(names)
     eat.char = CHAR_FOOD
-    eat.fgcolor = libtcod.red
+    eat.fgcolor = libtcod.light_magenta
     eat.carryable = True
     eat.edible = True
     return eat
@@ -405,7 +397,7 @@ def get_random_npc(npc_char=None, attack_rating=None, dialogue_text=None):
     npc = cls.AnimalBase()
     npc.blocking = True
     npc.char = npc_char
-    npc.fgcolor = libtcod.azure
+    npc.fgcolor = libtcod.cyan
     npc.name = dna_bank[npc_char]
     npc.move_step = random.randint(1, 3)
     npc.dialogue_text = dialogue_text
@@ -631,7 +623,7 @@ def spawn_level_storyline(game_map, game_objects, player):
         q = cls.QuestAI()
         q.owner = npc_a
         q.item = get_food()
-        q.item.name = "Bone shaped Biscuit"
+        q.item.name = "Biscuit"
         npc_a.quest_ai = q
         # link the quest to the player. they will see it in their quest list
         qdata = cls.QuestData(q.quest_id)
@@ -818,11 +810,11 @@ def blank_map():
     """
         Return a new, blank map array.
     """
-    colors = (libtcod.darkest_lime, libtcod.darkest_green
-            , libtcod.darkest_sea, libtcod.darkest_chartreuse)
+#    colors = (libtcod.darkest_lime, libtcod.darkest_green
+#            , libtcod.darkest_sea, libtcod.darkest_chartreuse)
     newmap = [[ cls.ItemBase(
-                fgcolor=random.choice(colors)
-                ,bgcolor=libtcod.black) 
+                fgcolor=libtcod.darker_green
+                ,bgcolor=libtcod.darker_green) 
     for y in range(C.MAP_HEIGHT)]
         for x in range(C.MAP_WIDTH)]
     return newmap
@@ -831,6 +823,7 @@ def get_fence():
     panel = cls.ItemBase()
     panel.name = "Fence"
     panel.char = CHAR_FENCE
+    panel.bgcolor = libtcod.dark_sepia
     panel.fgcolor = libtcod.dark_sepia
     panel.blocking = True
     panel.seethrough = False
@@ -839,7 +832,8 @@ def get_fence():
 def get_hole():
     hole = cls.Hole()
     hole.name = "Spacebar to crawl through this hole..."
-    hole.fgcolor = libtcod.sepia
+    hole.bgcolor = libtcod.black
+    hole.fgcolor = libtcod.black
     return hole
 
 def place_fence_holes(game_map):
@@ -917,7 +911,8 @@ def get_brick(color=libtcod.dark_grey):
     brick.seethrough = False
     brick.name = "wall"
     brick.char = CHAR_BRICK
-    brick.fgcolor = color
+    brick.fgcolor = libtcod.darker_grey
+    brick.bgcolor = color
     return brick
 
 def get_path():
@@ -927,20 +922,21 @@ def get_path():
     t = cls.ItemBase()
     t.blocking = False
     t.seethrough = True
-    t.fgcolor = random.choice((libtcod.darker_grey, libtcod.darkest_gray, libtcod.darkest_sepia))
+    t.fgcolor = random.choice((libtcod.darkest_green, libtcod.darkest_sea, libtcod.darkest_chartreuse))
     t.char = CHAR_GRAVEL
     t.name = ""
     return t
 
-def get_tile(char="?", color=libtcod.white, blocks=False
-            , seethrough=True, name="", msg=None):
+def get_tile(char="?", fgcolor=libtcod.white, bgcolor=libtcod.red
+            , blocks=False, seethrough=True, name="", msg=None):
     """
         Make a stone tile.
     """
     t = cls.ItemBase()
     t.blocking = blocks
     t.seethrough = seethrough
-    t.fgcolor = color
+    t.bgcolor = bgcolor
+    t.fgcolor = fgcolor
     t.char = char
     t.name = name
     t.message = msg
@@ -975,12 +971,12 @@ def map_from_ascii(game_map, maps_available):
     # here we can map ascii values to our tile objects
     # since the ascii maps can't contain special chars
     tile_lookup = {
-                    "B": "get_brick(libtcod.dark_grey)"
-                    ,"R": "get_brick(libtcod.darkest_red)"
-                    ,"=": "get_tile(CHAR_STONE, libtcod.darkest_grey)"
-                    ,"-": "get_tile('-', libtcod.light_green)"
-                    ,"&": "get_tile('&', random.choice((libtcod.darkest_yellow, libtcod.darkest_lime, libtcod.darker_gray)), blocks=True, name='compost', msg='the compost stinks good!')"
-                    ,"[": "get_tile('[', libtcod.light_grey, True, False, 'car')"
+                    "B": "get_brick(libtcod.darker_grey)"
+                    ,"R": "get_brick(libtcod.darker_flame)"
+                    ,"=": "get_tile(CHAR_STONE, fgcolor=libtcod.darkest_grey, bgcolor=libtcod.darker_green)"
+                    ,"-": "get_tile('-', fgcolor=libtcod.dark_green, bgcolor=libtcod.dark_green)"
+                    ,"&": "get_tile('&', bgcolor=libtcod.darkest_yellow, fgcolor=random.choice((libtcod.darkest_yellow, libtcod.darkest_lime, libtcod.darker_gray)), blocks=True, name='compost', msg='the compost stinks good!')"
+                    ,"[": "get_tile('[', bgcolor=libtcod.dark_grey, fgcolor=libtcod.light_grey, blocks=True, seethrough=False, name='car')"
                     ,"#": "get_fence()"
                     ,CHAR_GRAVEL: "get_path()"
                     ,";": "get_path()"
@@ -990,6 +986,9 @@ def map_from_ascii(game_map, maps_available):
                     ,'b': "get_bush()"
                 }
 #                get_tile(char="?", color=libtcod.white, blocks=False, seethrough=True, name="")
+#char="?", fgcolor=libtcod.white, bgcolor=libtcod.red
+#            , blocks=False, seethrough=True, name="", msg=None
+
     map_data = read_map_file(random.randint(1, maps_available))
     for y in range(C.MAP_HEIGHT - 1 - 3):
         for x in range(C.MAP_WIDTH - 1 - 3):
@@ -1040,7 +1039,7 @@ def init_libtcod():
     print('running at %s fps.' % (C.LIMIT_FPS))
     libtcod.sys_set_fps(C.LIMIT_FPS)
     # default font color
-    libtcod.console_set_default_foreground(0, libtcod.grey)
+    libtcod.console_set_default_foreground(0, libtcod.white)
     # set color control codes for inline string formatting
     # listed by priority: think defcon levels
     # high alert, priority one

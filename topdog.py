@@ -267,34 +267,39 @@ def draw_map():
                                             tile.char, tile.fgcolor, tile.bgcolor)
             elif tile.seen:
                 libtcod.console_put_char_ex(canvas, x, y, tile.char
-                                        ,libtcod.darkest_grey, libtcod.black)
+                                        ,libtcod.darker_grey, libtcod.darkest_grey)
 
 def draw_objects():
     """
         Place all map objects on the canvas.
     """
-    for obj in game_objects:
-        if obj.x > 0:
+    # items and non-NPC's
+    for obj in [e for e in game_objects if not isinstance(e, cls.AnimalBase)]:
+        if obj.x > 0:   #TODO replace with a visible property
             if player.wizard or libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
-                if not obj.seen:
-#                    obj.seen = True
-                    if isinstance(obj, cls.AnimalBase):
-                        player.msg("You see %c%s%c" % \
-                                        (C.COL4, obj.name, C.COLS)
-                                        , allow_duplicates=False)
-                        if obj.see_message:
-                            player.msg("%c%s%c" % \
-                                    (C.COL2, obj.see_message, C.COLS)
-                                    ,allow_duplicates=False)
-                    else:
-                        player.msg("You see %c%s%c" % \
-                                            (C.COL3, obj.name, C.COLS)
-                                            , allow_duplicates=False)
+                player.msg("You see %c%s%c" % (C.COL3, obj.name, C.COLS)
+                                                , allow_duplicates=False)
                 libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
-                                        obj.char, obj.fgcolor, None)
-    # draw player
+                                            obj.char, obj.fgcolor, obj.bgcolor)
+    
+    # NPC's
+    for obj in [e for e in game_objects if isinstance(e, cls.AnimalBase) and 
+        not isinstance(e, cls.Player)]:
+        if obj.x > 0:   #TODO replace with a visible property
+            if player.wizard or libtcod.map_is_in_fov(fov_map, obj.x, obj.y):
+                player.msg("You see %c%s%c" % (C.COL4, obj.name, C.COLS)
+                                                , allow_duplicates=False)
+                if obj.see_message:
+                    player.msg("%c%s%c" % (C.COL2, obj.see_message, C.COLS)
+                                                ,allow_duplicates=False)
+                # draw the NPC background color to match the map
+                libtcod.console_put_char_ex(canvas, obj.x, obj.y, 
+                                            obj.char, obj.fgcolor
+                                            , game_map[obj.x][obj.y].bgcolor)
+    # draw player to match the map background
     libtcod.console_put_char_ex(canvas, player.x, player.y, 
-                                player.char, player.fgcolor, None)
+                                player.char, player.fgcolor
+                                , game_map[player.x][player.y].bgcolor)
 
 def object_at(x, y):
     for obj in game_objects:

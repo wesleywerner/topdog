@@ -18,9 +18,9 @@ class ItemBase(object):
         Inanimate items (foliage, water, walls) and map tiles.
     """
     def __init__(self
-                ,char=".", name=""
+                ,char=" ", name=""
                 ,fgcolor=libtcod.white
-                ,bgcolor=libtcod.black):
+                ,bgcolor=libtcod.darker_green):
         self.x = 0
         self.y = 0
         self.char = char
