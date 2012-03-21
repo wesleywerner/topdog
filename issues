@@ -1,0 +1,3 @@
+# Known Issues
+
+holding an inventory item while a NPC gives you a quest item will drop the quest item onto the tile you are standing on. move off and on again to switch you inventory with the quest item
