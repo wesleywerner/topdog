@@ -148,9 +148,12 @@ def blit_dialogues():
 #        libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), C.MAP_TOP + 4,
 #                            libtcod.BKGND_NONE, libtcod.CENTER, 
 #                            "\"%c%s%c\"" % (C.COL5, dlg.dialogue, C.COLS))
-
-        libtcod.console_print_rect(0, 4, 6, C.MAP_WIDTH - 4, C.MAP_HEIGHT - 2,
-                        "\"%s\"" % (dlg.dialogue))
+        try:
+            libtcod.console_print_rect(
+                    0, 4, 6, C.MAP_WIDTH - 4, C.MAP_HEIGHT - 2,
+                    "%s" % (dlg.dialogue))
+        except e:
+            print('dialogue string format error: %s' % (e))
 
         # press space
         libtcod.console_print_ex(0, 2 + (C.MAP_WIDTH / 2), 
